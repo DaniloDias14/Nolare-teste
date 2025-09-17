@@ -2,53 +2,63 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  z-index: 9999; /* Sempre em primeiro plano */
 }
 
-.floating-button {
-  background-color: #007bff;
+.floating-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #191970;
   color: white;
   border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, background 0.3s ease;
 }
 
-.floating-button:hover {
-  transform: rotate(90deg);
+.floating-btn:hover {
+  background-color: #4169e1;
+  transform: rotate(20deg);
 }
 
+/* Container das opções administrativas */
 .config-options {
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  align-items: flex-end;
+  position: absolute;
+  bottom: 70px; /* distancia do botão */
+  right: 0;
   opacity: 0;
-  visibility: hidden;
   transform: translateY(20px);
-  transition: all 0.3s ease;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10000; /* Sempre acima de outros elementos */
 }
 
+/* Mostra opções quando clicado */
 .config-options.show {
   opacity: 1;
-  visibility: visible;
   transform: translateY(0);
+  pointer-events: auto;
 }
 
+/* Links das opções */
 .config-link {
-  background-color: #007bff;
+  background-color: #191970;
   color: white;
   text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  margin-top: 5px;
-  transition: background 0.3s ease;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  transition: background 0.2s ease;
 }
 
 .config-link:hover {
-  background-color: #0056b3;
+  background-color: #4169e1;
 }

@@ -16,30 +16,70 @@
   padding: 2rem;
   border-radius: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   position: relative;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+/* Botão Fechar */
 .close-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
+  top: 10px;
+  right: 10px;
+  font-size: 2rem;
+  background: #191970;
+  color: white;
   border: none;
-  font-size: 1.5rem;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.close-btn:hover {
+  background: #4169e1;
 }
 
-.modal input {
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1rem;
+}
+.tabs button {
+  flex: 1;
+  padding: 0.75rem 0;
+  background: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 8px 8px 0 0;
+  transition: background 0.2s ease;
+}
+.tabs button.active {
+  background: #191970;
+  color: white;
+}
+
+/* Form inputs */
+.modal label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+.modal input,
+.modal select {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin-top: 6px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 0.95rem;
 }
-
-.modal button {
+.modal button[type="submit"] {
   width: 100%;
   padding: 12px;
   background: #191970;
@@ -48,15 +88,16 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  margin-top: 8px;
+  margin-top: 12px;
+  transition: background 0.2s ease;
 }
-
-.modal button:hover {
+.modal button[type="submit"]:hover {
   background: #4169e1;
 }
 
-.toggle-link {
-  color: #191970;
-  cursor: pointer;
-  text-decoration: underline;
+.error {
+  margin-top: 1rem;
+  color: red;
+  font-weight: bold;
+  text-align: center;
 }
