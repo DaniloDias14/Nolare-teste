@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 import "./FloatingButton.css";
-import Config from "../Config/Config";
 
-const FloatingButton = () => {
-  const [open, setOpen] = useState(false);
-
+const FloatingButton = ({ showConfigOptions, setShowConfigOptions }) => {
   return (
-    <>
-      <button className="floating-btn" onClick={() => setOpen(!open)}>
+    <div className="floating-container">
+      <button
+        className="floating-button"
+        onClick={() => setShowConfigOptions(!showConfigOptions)}
+      >
         ⚙️
       </button>
-      {open && <Config onClose={() => setOpen(false)} />}
-    </>
+
+      <div className={`config-options ${showConfigOptions ? "show" : ""}`}>
+        <Link to="/config/dashboard" className="config-link">
+          Dashboard
+        </Link>
+        <Link to="/config/crud" className="config-link">
+          CRUD
+        </Link>
+      </div>
+    </div>
   );
 };
 

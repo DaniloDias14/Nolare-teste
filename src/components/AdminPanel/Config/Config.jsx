@@ -1,13 +1,18 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Config.css";
 
-const Config = ({ onClose }) => {
+const Config = () => {
   return (
-    <div className="config-overlay">
-      <div className="config-panel">
-        <h2>Painel Administrativo</h2>
-        <p>Aqui você poderá gerenciar os imóveis futuramente.</p>
-        <button onClick={onClose}>Fechar</button>
+    <div className="config-container">
+      <h1>Painel Administrativo</h1>
+      <div className="config-options">
+        <Link to="/config/dashboard" className="config-button">
+          Dashboard
+        </Link>
+        <Link to="/config/crud" className="config-button">
+          Gerenciar Imóveis (CRUD)
+        </Link>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
-import { useState } from "react";
+// Header.jsx
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { TiUserOutline } from "react-icons/ti";
 import LoginModal from "./LoginModal";
 import "./Header.css";
@@ -7,47 +9,57 @@ const Header = ({ setAdmLogged }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const handleLogoClick = (e) => {
+    e.preventDefault(); // previne comportamento padrão do Link
+    window.scrollTo({ top: 0, behavior: "smooth" }); // volta para o topo
+  };
+
   return (
     <header className="header">
-      <nav className="nav container">
-        <a href="#top" className="logo">
+      <nav className="nav">
+        {/* Logo */}
+        <a href="/" className="logo" onClick={handleLogoClick}>
           <img
             src="/nolare-real-estate-logo-elegant.png"
-            alt="NOLARE"
+            alt="Nolare"
             className="logo-img"
           />
         </a>
 
+        {/* Hamburger para mobile */}
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
           <span className="hamburger-line"></span>
           <span className="hamburger-line"></span>
           <span className="hamburger-line"></span>
         </button>
 
+        {/* Links do menu */}
         <ul className={`menu ${menuOpen ? "menu-open" : ""}`}>
           <li>
-            <a href="/comprar">Comprar</a>
+            <Link to="/comprar">Comprar</Link>
           </li>
           <li>
-            <a href="/alugar">Alugar</a>
+            <Link to="/alugar">Alugar</Link>
           </li>
           <li>
-            <a href="/anunciar">Anunciar</a>
+            <Link to="/anunciar">Anunciar</Link>
           </li>
           <li>
-            <a href="/sobre">Sobre Nós</a>
+            <Link to="/sobre-nos">Sobre Nós</Link>
           </li>
         </ul>
 
-        <a href="#" className="perfil-icon" onClick={() => setModalOpen(true)}>
+        {/* Ícone de perfil para abrir login modal */}
+        <button className="perfil-icon" onClick={() => setModalOpen(true)}>
           <TiUserOutline size={28} />
-        </a>
+        </button>
       </nav>
 
+      {/* Modal de login */}
       {modalOpen && (
         <LoginModal
           onClose={() => setModalOpen(false)}
-          setAdmLogged={setAdmLogged} // Passa função para LoginModal
+          setAdmLogged={setAdmLogged}
         />
       )}
     </header>
