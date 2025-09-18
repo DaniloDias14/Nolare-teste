@@ -1,68 +1,66 @@
+import React, { useState } from "react";
 import "./ImovelModal.css";
 
-const ImovelModal = ({ imovel, imagemAtual, setImagemAtual, onClose }) => {
+const ImovelModal = ({ imovel, onClose }) => {
+  const [fotoIndex, setFotoIndex] = useState(0);
+
   if (!imovel) return null;
 
-  const proximaImagem = () => {
-    setImagemAtual((prev) => ({
-      ...prev,
-      [imovel.id]: ((prev[imovel.id] || 0) + 1) % imovel.fotos.length,
-    }));
+  const fotos = imovel.fotos || [];
+
+  const handlePrev = () => {
+    setFotoIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
   };
 
-  const imagemAnterior = () => {
-    setImagemAtual((prev) => ({
-      ...prev,
-      [imovel.id]:
-        (prev[imovel.id] || 0) === 0
-          ? imovel.fotos.length - 1
-          : (prev[imovel.id] || 0) - 1,
-    }));
+  const handleNext = () => {
+    setFotoIndex((prev) => (prev === fotos.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleOverlayClick = (e) => {
+    if (e.target.className === "modal-overlay") {
+      onClose();
+    }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal">
         <button className="close-btn" onClick={onClose}>
           ✖
         </button>
 
-        {/* Carrossel grande */}
-        <div className="modal-carousel">
-          {imovel.fotos && imovel.fotos.length > 0 ? (
-            <>
-              <button className="carousel-btn prev" onClick={imagemAnterior}>
-                ◀
-              </button>
-              <img
-                src={imovel.fotos[imagemAtual[imovel.id] || 0]?.caminho_foto}
-                alt={imovel.titulo}
-                className="modal-image"
-              />
-              <button className="carousel-btn next" onClick={proximaImagem}>
-                ▶
-              </button>
-            </>
-          ) : (
-            <div className="no-image">Sem imagem</div>
-          )}
-        </div>
-
-        {/* Informações detalhadas */}
-        <div className="modal-details">
-          <h2>{imovel.titulo}</h2>
-          <p className="modal-price">R$ {imovel.preco}</p>
-          <p className="modal-location">📍 {imovel.endereco}</p>
-          <p className="modal-description">{imovel.descricao}</p>
-
-          <div className="modal-features">
-            {imovel.area && <p>🏠 {imovel.area}</p>}
-            {imovel.quartos && <p>🛏️ {imovel.quartos} quartos</p>}
-            {imovel.banheiros && <p>🚿 {imovel.banheiros} banheiros</p>}
-            {imovel.vagas && <p>🚗 {imovel.vagas} vagas</p>}
+        {fotos.length > 0 && (
+          <div className="modal-foto-container">
+            <button className="nav-btn prev" onClick={handlePrev}>
+              ◀
+            </button>
+            <img
+              src={fotos[fotoIndex].caminho_foto}
+              alt={`Foto ${fotoIndex + 1}`}
+              className="modal-foto"
+            />
+            <button className="nav-btn next" onClick={handleNext}>
+              ▶
+            </button>
           </div>
+        )}
 
-          <button className="contact-btn">Entrar em Contato</button>
+        <div className="modal-content">
+          <h2>{imovel.titulo}</h2>
+          <div className="property-detail">
+            <strong>Descrição:</strong> {imovel.descricao || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Preço:</strong> R$ {imovel.preco || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Endereço:</strong> {imovel.endereco || "-"}
+          </div>
+          {imovel.tipo_imovel && (
+            <div className="property-detail">
+              <strong>Tipo:</strong> {imovel.tipo_imovel}
+            </div>
+          )}
         </div>
       </div>
     </div>
