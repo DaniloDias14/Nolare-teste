@@ -1,8 +1,12 @@
+// server.js
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import pool from "./db.js"; // Usando db.js centralizado
+import pool from "./db.js"; // Conexão com o banco
+import multer from "multer";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -11,11 +15,41 @@ const PORT = process.env.BACKEND_PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use("/fotos_imoveis", express.static("public/fotos_imoveis")); // Serve imagens estáticas
+
+/* =========================
+   MULTER CONFIG PARA UPLOAD DE FOTOS
+========================= */
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "public/fotos_imoveis";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const dir = "public/fotos_imoveis";
+    const files = fs.readdirSync(dir);
+    let maxNumber = 0;
+
+    files.forEach((f) => {
+      const match = f.match(/^(\d+)-(\d+)\./);
+      if (match) {
+        const num = parseInt(match[2]);
+        if (num > maxNumber) maxNumber = num;
+      }
+    });
+
+    // Nome: ID do imóvel + número sequencial
+    const nextNumber = maxNumber + 1;
+    cb(null, `${Date.now()}-${nextNumber}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({ storage });
 
 /* =========================
    ROTAS DE AUTENTICAÇÃO
-   ========================= */
-
+========================= */
 // LOGIN
 app.post("/api/login", async (req, res) => {
   const { email, senha } = req.body;
@@ -79,13 +113,12 @@ app.post("/api/register", async (req, res) => {
 
 /* =========================
    ROTAS DE IMÓVEIS
-   ========================= */
-
+========================= */
 // LISTAR TODOS IMÓVEIS VISÍVEIS
 app.get("/api/imoveis", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM imoveis WHERE visivel = true ORDER BY data_criacao DESC"
+      "SELECT i.*, json_agg(f.*) AS fotos FROM imoveis i LEFT JOIN fotos_imoveis f ON i.id = f.imovel_id WHERE i.visivel = true GROUP BY i.id ORDER BY i.data_criacao DESC"
     );
     res.json(result.rows);
   } catch (err) {
@@ -98,9 +131,10 @@ app.get("/api/imoveis", async (req, res) => {
 app.get("/api/imoveis/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM imoveis WHERE id = $1", [
-      id,
-    ]);
+    const result = await pool.query(
+      "SELECT i.*, json_agg(f.*) AS fotos FROM imoveis i LEFT JOIN fotos_imoveis f ON i.id = f.imovel_id WHERE i.id = $1 GROUP BY i.id",
+      [id]
+    );
     if (result.rows.length === 0)
       return res.status(404).json({ error: "Imóvel não encontrado" });
     res.json(result.rows[0]);
@@ -129,103 +163,36 @@ app.post("/api/imoveis", async (req, res) => {
   }
 });
 
-// ATUALIZAR IMÓVEL (ADMIN)
-app.put("/api/imoveis/:id", async (req, res) => {
-  const { id } = req.params;
-  const { titulo, descricao, preco, endereco, atualizado_por, visivel } =
-    req.body;
+// UPLOAD DE FOTOS (várias)
+app.post(
+  "/api/imoveis/:id/upload",
+  upload.array("fotos", 10),
+  async (req, res) => {
+    const { id } = req.params;
+    if (!req.files || req.files.length === 0)
+      return res.status(400).json({ error: "Arquivos não enviados" });
 
-  try {
-    const result = await pool.query(
-      `UPDATE imoveis SET titulo=$1, descricao=$2, preco=$3, endereco=$4, atualizado_por=$5, visivel=$6, data_atualizacao=NOW()
-       WHERE id=$7 RETURNING *`,
-      [titulo, descricao, preco, endereco, atualizado_por, visivel, id]
-    );
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: "Imóvel não encontrado" });
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao atualizar imóvel" });
+    try {
+      const fotosInseridas = [];
+      for (let file of req.files) {
+        const caminho = `/fotos_imoveis/${file.filename}`;
+        const result = await pool.query(
+          "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
+          [id, caminho]
+        );
+        fotosInseridas.push(result.rows[0]);
+      }
+      res.status(201).json(fotosInseridas);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro ao salvar fotos no banco" });
+    }
   }
-});
-
-// DELETAR IMÓVEL (ADMIN)
-app.delete("/api/imoveis/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query(
-      "DELETE FROM imoveis WHERE id=$1 RETURNING *",
-      [id]
-    );
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: "Imóvel não encontrado" });
-    res.json({ message: "Imóvel deletado com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao deletar imóvel" });
-  }
-});
-
-/* =========================
-   ROTAS DE FOTOS DE IMÓVEIS
-   ========================= */
-
-// LISTAR FOTOS
-app.get("/api/imoveis/:id/fotos", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query(
-      "SELECT * FROM fotos_imoveis WHERE imovel_id = $1",
-      [id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar fotos" });
-  }
-});
-
-// ADICIONAR FOTO
-app.post("/api/imoveis/:id/fotos", async (req, res) => {
-  const { id } = req.params;
-  const { caminho_foto } = req.body;
-
-  if (!caminho_foto)
-    return res.status(400).json({ error: "Caminho da foto é obrigatório" });
-
-  try {
-    const result = await pool.query(
-      "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1,$2) RETURNING *",
-      [id, caminho_foto]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao adicionar foto" });
-  }
-});
-
-// DELETAR FOTO
-app.delete("/api/fotos/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query(
-      "DELETE FROM fotos_imoveis WHERE id=$1 RETURNING *",
-      [id]
-    );
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: "Foto não encontrada" });
-    res.json({ message: "Foto deletada com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao deletar foto" });
-  }
-});
+);
 
 /* =========================
    START SERVER
-   ========================= */
+========================= */
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
