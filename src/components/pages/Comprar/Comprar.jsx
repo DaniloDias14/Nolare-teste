@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import "./Comprar.css";
+import ImovelModal from "./ImovelModal";
 
 const Comprar = () => {
   const [imoveis, setImoveis] = useState([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [imagemAtual, setImagemAtual] = useState({});
+  const [imovelSelecionado, setImovelSelecionado] = useState(null);
 
   const imoveisPorPagina = 12;
 
@@ -48,32 +50,38 @@ const Comprar = () => {
             }}
           >
             {imoveisExibidos.map((imovel) => (
-              <div className="property-card" key={imovel.id}>
+              <div
+                className="property-card"
+                key={imovel.id}
+                onClick={() => setImovelSelecionado(imovel)}
+              >
                 <div className="image-container">
                   {imovel.fotos && imovel.fotos.length > 0 ? (
                     <div className="carousel">
                       <button
                         className="carousel-btn prev"
-                        onClick={() =>
-                          imagemAnterior(imovel.id, imovel.fotos.length)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          imagemAnterior(imovel.id, imovel.fotos.length);
+                        }}
                         aria-label="Imagem anterior"
                       >
                         ◀
                       </button>
                       <img
-                        src={`http://localhost:5000${
+                        src={
                           imovel.fotos[imagemAtual[imovel.id] || 0]
                             ?.caminho_foto || ""
-                        }`}
+                        }
                         alt={imovel.titulo}
                         className="property-image"
                       />
                       <button
                         className="carousel-btn next"
-                        onClick={() =>
-                          proximaImagem(imovel.id, imovel.fotos.length)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          proximaImagem(imovel.id, imovel.fotos.length);
+                        }}
                         aria-label="Próxima imagem"
                       >
                         ▶
@@ -136,7 +144,15 @@ const Comprar = () => {
                     )}
                   </div>
 
-                  <button className="contact-button">Entrar em Contato</button>
+                  <button
+                    className="contact-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImovelSelecionado(imovel);
+                    }}
+                  >
+                    Ver Detalhes
+                  </button>
                 </div>
               </div>
             ))}
@@ -185,6 +201,16 @@ const Comprar = () => {
           {imoveis.length} propriedades
         </div>
       </div>
+
+      {/* Modal de Detalhes */}
+      {imovelSelecionado && (
+        <ImovelModal
+          imovel={imovelSelecionado}
+          imagemAtual={imagemAtual}
+          setImagemAtual={setImagemAtual}
+          onClose={() => setImovelSelecionado(null)}
+        />
+      )}
     </div>
   );
 };
