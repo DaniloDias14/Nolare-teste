@@ -1,52 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
 
-import Header from "./components/Header/Header.jsx";
-import Footer from "./components/Footer/Footer.jsx";
-import FloatingButton from "./components/AdminPanel/FloatingButton/FloatingButton.jsx";
+import Comprar from "./components/Pages/Comprar/Comprar";
+import Alugar from "./components/Pages/Alugar/Alugar";
+import Anunciar from "./components/Pages/Anunciar/Anunciar";
+import SobreNos from "./components/Pages/SobreNos/SobreNos";
 
-import Comprar from "./components/Pages/Comprar/Comprar.jsx";
-import Alugar from "./components/Pages/Alugar/Alugar.jsx";
-import Anunciar from "./components/Pages/Anunciar/Anunciar.jsx";
-import SobreNos from "./components/Pages/SobreNos/SobreNos.jsx";
+import Dashboard from "./components/AdminPanel/Config/Dashboard/Dashboard";
+import CRUD from "./components/AdminPanel/Config/CRUD/CRUD";
 
-import Dashboard from "./components/AdminPanel/Config/Dashboard/Dashboard.jsx";
-import CRUD from "./components/AdminPanel/Config/CRUD/CRUD.jsx";
+import AdminFloatingButton from "./components/AdminPanel/FloatingButton/FloatingButton";
+import UserFloatingButton from "./components/UserPanel/FloatingButton/FloatingButton";
 
-import "./index.css";
+const App = () => {
+  const [admLogged, setAdmLogged] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showConfigOptions, setShowConfigOptions] = useState(false);
 
-function App() {
-  const [admLogged, setAdmLogged] = useState(false); // controla adm
-  const [showConfigOptions, setShowConfigOptions] = useState(false); // animação do botão ⚙️
+  useEffect(() => {
+    const savedUser = localStorage.getItem("nolare_user");
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      setAdmLogged(parsedUser.tipo_usuario === "adm");
+      setIsLoggedIn(false);
+    }
+  }, []);
 
   return (
-    <>
-      <Header setAdmLogged={setAdmLogged} />
+    <div className="app-container">
+      <Header
+        setAdmLogged={setAdmLogged}
+        setUser={(userData) => {
+          setUser(userData);
+          setIsLoggedIn(true);
+        }}
+      />
 
-      {/* FloatingButton apenas para admins */}
+      <main>
+        <Routes>
+          <Route
+            path="/comprar"
+            element={<Comprar usuario={isLoggedIn ? user : null} />}
+          />
+          <Route
+            path="/alugar"
+            element={<Alugar usuario={isLoggedIn ? user : null} />}
+          />
+          <Route
+            path="/anunciar"
+            element={<Anunciar usuario={isLoggedIn ? user : null} />}
+          />
+          <Route path="/sobre-nos" element={<SobreNos />} />
+          <Route path="/config/dashboard" element={<Dashboard />} />
+          <Route path="/config/crud" element={<CRUD />} />
+        </Routes>
+      </main>
+
+      <Footer />
+
       {admLogged && (
-        <FloatingButton
+        <AdminFloatingButton
           showConfigOptions={showConfigOptions}
           setShowConfigOptions={setShowConfigOptions}
         />
       )}
 
-      {/* Rotas da aplicação */}
-      <Routes>
-        <Route path="/" element={<Comprar />} />
-        <Route path="/comprar" element={<Comprar />} />
-        <Route path="/alugar" element={<Alugar />} />
-        <Route path="/anunciar" element={<Anunciar />} />
-        <Route path="/sobre-nos" element={<SobreNos />} />
-
-        {/* Rotas admin */}
-        <Route path="/config/dashboard" element={<Dashboard />} />
-        <Route path="/config/crud" element={<CRUD />} />
-      </Routes>
-
-      <Footer />
-    </>
+      {isLoggedIn && user && user.tipo_usuario === "user" && (
+        <UserFloatingButton user={user} />
+      )}
+    </div>
   );
-}
+};
 
 export default App;

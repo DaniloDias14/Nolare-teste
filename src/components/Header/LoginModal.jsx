@@ -1,16 +1,17 @@
+// LoginModal.jsx
 import { useState } from "react";
 import axios from "axios";
 import "./LoginModal.css";
 
-const LoginModal = ({ onClose, setAdmLogged }) => {
-  const [tab, setTab] = useState("login"); // Alterna entre login e cadastro
+const LoginModal = ({ onClose, setAdmLogged, setUser }) => {
+  const [tab, setTab] = useState("login");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginSenha, setLoginSenha] = useState("");
   const [registerNome, setRegisterNome] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerSenha, setRegisterSenha] = useState("");
   const [registerConfirmSenha, setRegisterConfirmSenha] = useState("");
-  const [registerTipo, setRegisterTipo] = useState("user"); // Tipo no cadastro
+  const [registerTipo, setRegisterTipo] = useState("user");
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
@@ -18,7 +19,6 @@ const LoginModal = ({ onClose, setAdmLogged }) => {
     setError("");
 
     try {
-      // Requisição ao backend
       const response = await axios.post("http://localhost:5000/api/login", {
         email: loginEmail,
         senha: loginSenha,
@@ -27,11 +27,18 @@ const LoginModal = ({ onClose, setAdmLogged }) => {
       if (response.data && response.data.user) {
         const user = response.data.user;
 
+        // salva usuário globalmente
+        setUser(user);
+        localStorage.setItem("nolare_user", JSON.stringify(user));
+
         // Admin liberado caso seja tipo adm
+        setAdmLogged(user.tipo_usuario === "adm");
+
+        // Mensagem no console
         if (user.tipo_usuario === "adm") {
-          setAdmLogged(true);
-        } else {
-          setAdmLogged(false);
+          console.log("Fez login como adm");
+        } else if (user.tipo_usuario === "user") {
+          console.log("Fez login como user");
         }
 
         setError("");
@@ -61,7 +68,7 @@ const LoginModal = ({ onClose, setAdmLogged }) => {
         nome: registerNome,
         email: registerEmail,
         senha: registerSenha,
-        tipo_usuario: registerTipo, // user ou adm
+        tipo_usuario: registerTipo,
       });
 
       setTab("login");
@@ -75,12 +82,10 @@ const LoginModal = ({ onClose, setAdmLogged }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
-        {/* Botão Fechar */}
         <button className="close-btn" onClick={onClose}>
           ×
         </button>
 
-        {/* Tabs */}
         <div className="tabs">
           <button
             className={tab === "login" ? "active" : ""}

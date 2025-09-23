@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "./ImovelModal.css";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-const ImovelModal = ({ imovel, onClose }) => {
+const ImovelModal = ({ imovel, onClose, usuario }) => {
   const [fotoIndex, setFotoIndex] = useState(0);
+  const [curtido, setCurtido] = useState(false);
 
   if (!imovel) return null;
 
@@ -20,6 +22,18 @@ const ImovelModal = ({ imovel, onClose }) => {
     if (e.target.className === "modal-overlay") {
       onClose();
     }
+  };
+
+  const toggleCurtida = () => {
+    if (!usuario) {
+      alert("Você precisa fazer login para curtir os imóveis!");
+      return;
+    }
+    if (usuario.tipo_usuario === "adm") {
+      alert("Você é adm, não pode curtir!");
+      return;
+    }
+    setCurtido((prev) => !prev);
   };
 
   return (
@@ -61,6 +75,18 @@ const ImovelModal = ({ imovel, onClose }) => {
               <strong>Tipo:</strong> {imovel.tipo_imovel}
             </div>
           )}
+
+          <button
+            className="like-btn-modal"
+            onClick={toggleCurtida}
+            style={{ marginTop: "12px" }}
+          >
+            {curtido ? (
+              <AiFillHeart size={24} color="red" />
+            ) : (
+              <AiOutlineHeart size={24} />
+            )}
+          </button>
         </div>
       </div>
     </div>

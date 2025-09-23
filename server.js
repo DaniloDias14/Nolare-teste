@@ -39,7 +39,6 @@ const storage = multer.diskStorage({
       }
     });
 
-    // Nome: ID do imóvel + número sequencial
     const nextNumber = maxNumber + 1;
     cb(null, `${Date.now()}-${nextNumber}${path.extname(file.originalname)}`);
   },

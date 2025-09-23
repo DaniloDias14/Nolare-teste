@@ -5,7 +5,7 @@ import { TiUserOutline } from "react-icons/ti";
 import LoginModal from "./LoginModal";
 import "./Header.css";
 
-const Header = ({ setAdmLogged }) => {
+const Header = ({ setAdmLogged, setUser }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -60,6 +60,7 @@ const Header = ({ setAdmLogged }) => {
         <LoginModal
           onClose={() => setModalOpen(false)}
           setAdmLogged={setAdmLogged}
+          setUser={setUser}
         />
       )}
     </header>

@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import "./Comprar.css";
 import ImovelModal from "./ImovelModal";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-const Comprar = () => {
+const Comprar = ({ usuario }) => {
   const [imoveis, setImoveis] = useState([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [imagemAtual, setImagemAtual] = useState({});
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
+  const [curtidas, setCurtidas] = useState({});
 
   const imoveisPorPagina = 12;
 
@@ -18,6 +20,21 @@ const Comprar = () => {
       .then((data) => setImoveis(data))
       .catch((err) => console.error("Erro ao buscar imóveis:", err));
   }, []);
+
+  const toggleCurtida = (imovelId) => {
+    if (!usuario) {
+      alert("Você precisa fazer login para curtir os imóveis!");
+      return;
+    }
+    if (usuario.tipo_usuario === "adm") {
+      alert("Você é adm, não pode curtir!");
+      return;
+    }
+    setCurtidas((prev) => ({
+      ...prev,
+      [imovelId]: !prev[imovelId],
+    }));
+  };
 
   const totalPaginas = Math.ceil(imoveis.length / imoveisPorPagina);
   const indexInicial = (paginaAtual - 1) * imoveisPorPagina;
@@ -64,7 +81,6 @@ const Comprar = () => {
                           e.stopPropagation();
                           imagemAnterior(imovel.id, imovel.fotos.length);
                         }}
-                        aria-label="Imagem anterior"
                       >
                         ◀
                       </button>
@@ -82,22 +98,9 @@ const Comprar = () => {
                           e.stopPropagation();
                           proximaImagem(imovel.id, imovel.fotos.length);
                         }}
-                        aria-label="Próxima imagem"
                       >
                         ▶
                       </button>
-                      <div className="image-indicators">
-                        {imovel.fotos.map((_, index) => (
-                          <span
-                            key={index}
-                            className={`indicator ${
-                              index === (imagemAtual[imovel.id] || 0)
-                                ? "active"
-                                : ""
-                            }`}
-                          />
-                        ))}
-                      </div>
                     </div>
                   ) : (
                     <div className="no-image">Sem imagem</div>
@@ -144,15 +147,37 @@ const Comprar = () => {
                     )}
                   </div>
 
-                  <button
-                    className="contact-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImovelSelecionado(imovel);
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
                     }}
                   >
-                    Ver Detalhes
-                  </button>
+                    <button
+                      className="contact-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImovelSelecionado(imovel);
+                      }}
+                    >
+                      Ver Detalhes
+                    </button>
+
+                    <button
+                      className="like-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCurtida(imovel.id);
+                      }}
+                    >
+                      {curtidas[imovel.id] ? (
+                        <AiFillHeart size={22} color="red" />
+                      ) : (
+                        <AiOutlineHeart size={22} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -160,54 +185,10 @@ const Comprar = () => {
         </div>
       </main>
 
-      <div className="pagination-container">
-        <div className="paginacao">
-          <button
-            className="pagination-btn"
-            disabled={paginaAtual === 1}
-            onClick={() => setPaginaAtual(paginaAtual - 1)}
-          >
-            ← Anterior
-          </button>
-
-          <div className="page-numbers">
-            {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
-              const pageNum = i + 1;
-              return (
-                <button
-                  key={pageNum}
-                  className={`page-number ${
-                    paginaAtual === pageNum ? "active" : ""
-                  }`}
-                  onClick={() => setPaginaAtual(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            className="pagination-btn"
-            disabled={paginaAtual === totalPaginas}
-            onClick={() => setPaginaAtual(paginaAtual + 1)}
-          >
-            Próxima →
-          </button>
-        </div>
-
-        <div className="pagination-info">
-          Exibindo {indexInicial + 1}-{Math.min(indexFinal, imoveis.length)} de{" "}
-          {imoveis.length} propriedades
-        </div>
-      </div>
-
-      {/* Modal de Detalhes */}
       {imovelSelecionado && (
         <ImovelModal
           imovel={imovelSelecionado}
-          imagemAtual={imagemAtual}
-          setImagemAtual={setImagemAtual}
+          usuario={usuario}
           onClose={() => setImovelSelecionado(null)}
         />
       )}
