@@ -21,7 +21,6 @@ const Curtidas = ({ usuario }) => {
         for (const c of data) {
           curtidasMap[c.imovel_id] = true;
 
-          // Buscar informações completas do imóvel
           const imovel = await fetch(
             `http://localhost:5000/api/imoveis/${c.imovel_id}`
           ).then((res) => res.json());
@@ -34,36 +33,64 @@ const Curtidas = ({ usuario }) => {
       .catch((err) => console.error("Erro ao buscar curtidas:", err));
   }, [usuario]);
 
+  const removerImovel = (imovelId) => {
+    setImoveis((prev) => prev.filter((i) => i.id !== imovelId));
+  };
+
+  const adicionarImovel = async (imovelId) => {
+    setImoveis((prev) => {
+      if (prev.some((i) => i.id === imovelId)) return prev;
+      return [...prev, { id: imovelId, carregando: true }];
+    });
+
+    try {
+      const novoImovel = await fetch(
+        `http://localhost:5000/api/imoveis/${imovelId}`
+      ).then((res) => res.json());
+
+      setImoveis((prev) =>
+        prev.map((i) =>
+          i.id === imovelId && i.carregando
+            ? { ...novoImovel, fotos: novoImovel.fotos || [] }
+            : i
+        )
+      );
+    } catch (err) {
+      console.error("Erro ao adicionar imóvel curtido:", err);
+      setImoveis((prev) =>
+        prev.filter((i) => i.id !== imovelId || !i.carregando)
+      );
+    }
+  };
+
   const toggleCurtida = async (imovelId) => {
-    if (!usuario || usuario.tipo_usuario === "adm") return;
+    if (!usuario) return;
 
     try {
       const res = await fetch(
         `http://localhost:5000/api/curtidas/${usuario.id}/${imovelId}`,
         { method: "POST" }
       );
+
       if (!res.ok) throw new Error("Erro ao alternar curtida");
 
-      setCurtidas((prev) => ({
-        ...prev,
-        [imovelId]: !prev[imovelId],
-      }));
+      setCurtidas((prev) => {
+        const atualizado = { ...prev, [imovelId]: !prev[imovelId] };
 
-      // Atualiza lista de imóveis curtidos
-      if (!curtidas[imovelId]) {
-        const novoImovel = await fetch(
-          `http://localhost:5000/api/imoveis/${imovelId}`
-        ).then((res) => res.json());
-        setImoveis((prev) => [
-          ...prev,
-          { ...novoImovel, fotos: novoImovel.fotos || [] },
-        ]);
-      } else {
-        setImoveis((prev) => prev.filter((i) => i.id !== imovelId));
-      }
+        // Se descurtiu, remove da lista de imóveis
+        if (prev[imovelId] && !atualizado[imovelId]) {
+          removerImovel(imovelId);
+        }
+
+        // Se curtiu, adiciona à lista
+        if (!prev[imovelId] && atualizado[imovelId]) {
+          adicionarImovel(imovelId);
+        }
+
+        return atualizado;
+      });
     } catch (err) {
       console.error(err);
-      alert("Não foi possível curtir/descurtir o imóvel.");
     }
   };
 
@@ -95,7 +122,7 @@ const Curtidas = ({ usuario }) => {
             onClick={() => setImovelSelecionado(imovel)}
           >
             <div className="image-container">
-              {imovel.fotos.length > 0 ? (
+              {imovel.fotos && imovel.fotos.length > 0 ? (
                 <div className="carousel">
                   <button
                     className="carousel-btn prev"
@@ -161,6 +188,8 @@ const Curtidas = ({ usuario }) => {
           usuario={usuario}
           curtidas={curtidas}
           setCurtidas={setCurtidas}
+          onDescurtir={removerImovel}
+          onCurtir={adicionarImovel}
         />
       )}
     </div>

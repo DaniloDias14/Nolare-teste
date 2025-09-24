@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-const ImovelModal = ({ imovel, onClose, usuario, curtidas, setCurtidas }) => {
+const ImovelModal = ({
+  imovel,
+  onClose,
+  usuario,
+  curtidas,
+  setCurtidas,
+  onDescurtir,
+  onCurtir,
+}) => {
   const [fotoIndex, setFotoIndex] = useState(0);
 
   if (!imovel) return null;
@@ -30,7 +38,6 @@ const ImovelModal = ({ imovel, onClose, usuario, curtidas, setCurtidas }) => {
       return;
     }
 
-    // Bloquear ADM
     if (usuario.tipo_usuario === "adm") {
       alert("Administradores não podem curtir imóveis.");
       return;
@@ -43,10 +50,21 @@ const ImovelModal = ({ imovel, onClose, usuario, curtidas, setCurtidas }) => {
       );
       if (!res.ok) throw new Error("Erro ao alternar curtida");
 
-      setCurtidas((prev) => ({
-        ...prev,
-        [imovel.id]: !prev[imovel.id],
-      }));
+      setCurtidas((prev) => {
+        const atualizado = { ...prev, [imovel.id]: !prev[imovel.id] };
+
+        // Se descurtiu, remove da lista
+        if (prev[imovel.id] && !atualizado[imovel.id] && onDescurtir) {
+          onDescurtir(imovel.id);
+        }
+
+        // Se curtiu, adiciona à lista
+        if (!prev[imovel.id] && atualizado[imovel.id] && onCurtir) {
+          onCurtir(imovel.id);
+        }
+
+        return atualizado;
+      });
     } catch (err) {
       console.error(err);
       alert("Não foi possível curtir/descurtir o imóvel.");
