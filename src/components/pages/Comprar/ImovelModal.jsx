@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-const ImovelModal = ({ imovel, onClose, usuario }) => {
+const ImovelModal = ({ imovel, onClose, usuario, curtidas, setCurtidas }) => {
   const [fotoIndex, setFotoIndex] = useState(0);
-  const [curtido, setCurtido] = useState(false);
 
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
+  const curtido = !!curtidas[imovel.id];
 
   const handlePrev = () => {
     setFotoIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
@@ -24,16 +24,33 @@ const ImovelModal = ({ imovel, onClose, usuario }) => {
     }
   };
 
-  const toggleCurtida = () => {
+  const toggleCurtida = async () => {
     if (!usuario) {
       alert("Você precisa fazer login para curtir os imóveis!");
       return;
     }
+
+    // Bloquear ADM
     if (usuario.tipo_usuario === "adm") {
-      alert("Você é adm, não pode curtir!");
+      alert("Administradores não podem curtir imóveis.");
       return;
     }
-    setCurtido((prev) => !prev);
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/curtidas/${usuario.id}/${imovel.id}`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Erro ao alternar curtida");
+
+      setCurtidas((prev) => ({
+        ...prev,
+        [imovel.id]: !prev[imovel.id],
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível curtir/descurtir o imóvel.");
+    }
   };
 
   return (
@@ -76,11 +93,7 @@ const ImovelModal = ({ imovel, onClose, usuario }) => {
             </div>
           )}
 
-          <button
-            className="like-btn-modal"
-            onClick={toggleCurtida}
-            style={{ marginTop: "12px" }}
-          >
+          <button className="like-btn-modal" onClick={toggleCurtida}>
             {curtido ? (
               <AiFillHeart size={24} color="red" />
             ) : (

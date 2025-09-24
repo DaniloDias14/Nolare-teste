@@ -13,6 +13,7 @@ import CRUD from "./components/AdminPanel/Config/CRUD/CRUD";
 
 import AdminFloatingButton from "./components/AdminPanel/FloatingButton/FloatingButton";
 import UserFloatingButton from "./components/UserPanel/FloatingButton/FloatingButton";
+import Curtidas from "./components/UserPanel/Curtidas/Curtidas.jsx";
 
 const App = () => {
   const [admLogged, setAdmLogged] = useState(false);
@@ -57,6 +58,10 @@ const App = () => {
           <Route path="/sobre-nos" element={<SobreNos />} />
           <Route path="/config/dashboard" element={<Dashboard />} />
           <Route path="/config/crud" element={<CRUD />} />
+          <Route
+            path="/curtidas"
+            element={<Curtidas usuario={isLoggedIn ? user : null} />}
+          />
         </Routes>
       </main>
 

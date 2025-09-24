@@ -1,34 +1,71 @@
 import React, { useEffect, useState } from "react";
 import "./Curtidas.css";
-import ImovelModal from "../../Pages/Comprar/ImovelModal.jsx"; // caminho ajustado
-import { AiFillHeart } from "react-icons/ai";
+import ImovelModal from "../../Pages/Comprar/ImovelModal.jsx";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 const Curtidas = ({ usuario }) => {
   const [imoveis, setImoveis] = useState([]);
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
   const [imagemAtual, setImagemAtual] = useState({});
-  const [curtidos, setCurtidos] = useState([]);
+  const [curtidas, setCurtidas] = useState({});
 
   useEffect(() => {
-    if (!usuario?.id) return;
+    if (!usuario || usuario.tipo_usuario === "adm") return;
 
-    // Busca imóveis curtidos pelo usuário
     fetch(`http://localhost:5000/api/curtidas/${usuario.id}`)
       .then((res) => res.json())
-      .then((data) => setCurtidos(data.map((c) => c.id)))
+      .then(async (data) => {
+        const curtidasMap = {};
+        const imoveisCompletos = [];
+
+        for (const c of data) {
+          curtidasMap[c.imovel_id] = true;
+
+          // Buscar informações completas do imóvel
+          const imovel = await fetch(
+            `http://localhost:5000/api/imoveis/${c.imovel_id}`
+          ).then((res) => res.json());
+          imoveisCompletos.push({ ...imovel, fotos: imovel.fotos || [] });
+        }
+
+        setCurtidas(curtidasMap);
+        setImoveis(imoveisCompletos);
+      })
       .catch((err) => console.error("Erro ao buscar curtidas:", err));
   }, [usuario]);
 
-  useEffect(() => {
-    if (curtidos.length === 0) return;
+  const toggleCurtida = async (imovelId) => {
+    if (!usuario || usuario.tipo_usuario === "adm") return;
 
-    fetch("http://localhost:5000/api/imoveis")
-      .then((res) => res.json())
-      .then((data) =>
-        setImoveis(data.filter((imovel) => curtidos.includes(imovel.id)))
-      )
-      .catch((err) => console.error("Erro ao buscar imóveis:", err));
-  }, [curtidos]);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/curtidas/${usuario.id}/${imovelId}`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Erro ao alternar curtida");
+
+      setCurtidas((prev) => ({
+        ...prev,
+        [imovelId]: !prev[imovelId],
+      }));
+
+      // Atualiza lista de imóveis curtidos
+      if (!curtidas[imovelId]) {
+        const novoImovel = await fetch(
+          `http://localhost:5000/api/imoveis/${imovelId}`
+        ).then((res) => res.json());
+        setImoveis((prev) => [
+          ...prev,
+          { ...novoImovel, fotos: novoImovel.fotos || [] },
+        ]);
+      } else {
+        setImoveis((prev) => prev.filter((i) => i.id !== imovelId));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível curtir/descurtir o imóvel.");
+    }
+  };
 
   const proximaImagem = (id, total) => {
     setImagemAtual((prev) => ({
@@ -44,6 +81,8 @@ const Curtidas = ({ usuario }) => {
     }));
   };
 
+  if (!usuario) return <p>Faça login para ver seus imóveis curtidos.</p>;
+
   return (
     <div className="curtidas-page">
       <h2>Imóveis Curtidos</h2>
@@ -56,7 +95,7 @@ const Curtidas = ({ usuario }) => {
             onClick={() => setImovelSelecionado(imovel)}
           >
             <div className="image-container">
-              {imovel.fotos && imovel.fotos.length > 0 ? (
+              {imovel.fotos.length > 0 ? (
                 <div className="carousel">
                   <button
                     className="carousel-btn prev"
@@ -87,9 +126,18 @@ const Curtidas = ({ usuario }) => {
               ) : (
                 <div className="no-image">Sem imagem</div>
               )}
-
-              <button className="like-button" disabled>
-                <AiFillHeart size={26} color="red" />
+              <button
+                className="like-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCurtida(imovel.id);
+                }}
+              >
+                {curtidas[imovel.id] ? (
+                  <AiFillHeart size={26} color="red" />
+                ) : (
+                  <AiOutlineHeart size={26} />
+                )}
               </button>
             </div>
 
@@ -97,6 +145,10 @@ const Curtidas = ({ usuario }) => {
               <h3>{imovel.titulo}</h3>
               <p>{imovel.endereco}</p>
               <p>R$ {imovel.preco}</p>
+              {imovel.area && <p>🏠 {imovel.area}</p>}
+              {imovel.quartos && <p>🛏 {imovel.quartos} quartos</p>}
+              {imovel.banheiros && <p>🚿 {imovel.banheiros} banheiros</p>}
+              {imovel.vagas && <p>🚗 {imovel.vagas} vagas</p>}
             </div>
           </div>
         ))}
@@ -106,7 +158,9 @@ const Curtidas = ({ usuario }) => {
         <ImovelModal
           imovel={imovelSelecionado}
           onClose={() => setImovelSelecionado(null)}
-          setImagemAtual={setImagemAtual}
+          usuario={usuario}
+          curtidas={curtidas}
+          setCurtidas={setCurtidas}
         />
       )}
     </div>

@@ -1,25 +1,20 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import pool from "./db.js"; // Conexão com o banco
+import pool from "./db.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 
 dotenv.config();
-
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use("/fotos_imoveis", express.static("public/fotos_imoveis")); // Serve imagens estáticas
+app.use("/fotos_imoveis", express.static("public/fotos_imoveis"));
 
-/* =========================
-   MULTER CONFIG PARA UPLOAD DE FOTOS
-========================= */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = "public/fotos_imoveis";
@@ -49,7 +44,6 @@ const upload = multer({ storage });
 /* =========================
    ROTAS DE AUTENTICAÇÃO
 ========================= */
-// LOGIN
 app.post("/api/login", async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha)
@@ -74,10 +68,8 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// REGISTER
 app.post("/api/register", async (req, res) => {
   const { nome, email, senha, tipo_usuario } = req.body;
-
   if (
     !nome ||
     !email ||
@@ -99,7 +91,7 @@ app.post("/api/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(senha, 10);
     const insert = await pool.query(
-      "INSERT INTO usuarios (nome, email, senha, tipo_usuario) VALUES ($1, $2, $3, $4) RETURNING id, nome, email, tipo_usuario, data_criacao",
+      "INSERT INTO usuarios (nome, email, senha, tipo_usuario) VALUES ($1,$2,$3,$4) RETURNING id, nome, email, tipo_usuario, data_criacao",
       [nome, email, hashedPassword, tipo_usuario]
     );
 
@@ -113,7 +105,6 @@ app.post("/api/register", async (req, res) => {
 /* =========================
    ROTAS DE IMÓVEIS
 ========================= */
-// LISTAR TODOS IMÓVEIS VISÍVEIS
 app.get("/api/imoveis", async (req, res) => {
   try {
     const result = await pool.query(
@@ -126,7 +117,6 @@ app.get("/api/imoveis", async (req, res) => {
   }
 });
 
-// OBTER IMÓVEL POR ID
 app.get("/api/imoveis/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -143,10 +133,8 @@ app.get("/api/imoveis/:id", async (req, res) => {
   }
 });
 
-// CRIAR IMÓVEL (ADMIN)
 app.post("/api/imoveis", async (req, res) => {
   const { titulo, descricao, preco, endereco, criado_por } = req.body;
-
   if (!titulo || !preco || !criado_por)
     return res.status(400).json({ error: "Campos obrigatórios ausentes" });
 
@@ -162,7 +150,6 @@ app.post("/api/imoveis", async (req, res) => {
   }
 });
 
-// UPLOAD DE FOTOS (várias)
 app.post(
   "/api/imoveis/:id/upload",
   upload.array("fotos", 10),
@@ -188,6 +175,49 @@ app.post(
     }
   }
 );
+
+/* =========================
+   ROTAS DE CURTIDAS
+========================= */
+app.get("/api/curtidas/:usuarioId", async (req, res) => {
+  const { usuarioId } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT c.*, i.titulo, i.preco, i.endereco, i.visivel, json_agg(f.*) AS fotos FROM curtidas c JOIN imoveis i ON c.imovel_id = i.id LEFT JOIN fotos_imoveis f ON i.id = f.imovel_id WHERE c.usuario_id = $1 GROUP BY c.id, i.id",
+      [usuarioId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar curtidas:", err);
+    res.status(500).json({ error: "Erro ao buscar curtidas" });
+  }
+});
+
+app.post("/api/curtidas/:usuarioId/:imovelId", async (req, res) => {
+  const { usuarioId, imovelId } = req.params;
+  try {
+    const check = await pool.query(
+      "SELECT * FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
+      [usuarioId, imovelId]
+    );
+    if (check.rows.length > 0) {
+      await pool.query(
+        "DELETE FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
+        [usuarioId, imovelId]
+      );
+      return res.json({ message: "Curtida removida" });
+    } else {
+      const insert = await pool.query(
+        "INSERT INTO curtidas (usuario_id, imovel_id) VALUES ($1, $2) RETURNING *",
+        [usuarioId, imovelId]
+      );
+      return res.json(insert.rows[0]);
+    }
+  } catch (err) {
+    console.error("Erro ao alternar curtida:", err);
+    res.status(500).json({ error: "Erro ao processar curtida" });
+  }
+});
 
 /* =========================
    START SERVER

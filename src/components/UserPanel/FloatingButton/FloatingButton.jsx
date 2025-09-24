@@ -1,16 +1,18 @@
 import React from "react";
-import { FaHeart } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { AiFillHeart } from "react-icons/ai";
 import "./FloatingButton.css";
 
-const UserFloatingButton = ({ user }) => {
-  // Só aparece se o nível do usuário for "user"
-  if (!user || user.tipo_usuario !== "user") return null;
+const UserFloatingButton = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/curtidas");
+  };
 
   return (
-    <div className="floating-container-user">
-      <button className="floating-btn-user">
-        <FaHeart size={22} />
-      </button>
+    <div className="user-floating-button" onClick={handleClick}>
+      <AiFillHeart size={24} color="red" />
     </div>
   );
 };

@@ -21,19 +21,46 @@ const Comprar = ({ usuario }) => {
       .catch((err) => console.error("Erro ao buscar imóveis:", err));
   }, []);
 
-  const toggleCurtida = (imovelId) => {
+  useEffect(() => {
+    if (usuario) {
+      fetch(`http://localhost:5000/api/curtidas/${usuario.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const curtidasMap = {};
+          data.forEach((c) => (curtidasMap[c.imovel_id] = true));
+          setCurtidas(curtidasMap);
+        })
+        .catch((err) => console.error("Erro ao buscar curtidas:", err));
+    }
+  }, [usuario]);
+
+  const toggleCurtida = async (imovelId) => {
     if (!usuario) {
       alert("Você precisa fazer login para curtir os imóveis!");
       return;
     }
+
+    // Bloquear ADM
     if (usuario.tipo_usuario === "adm") {
-      alert("Você é adm, não pode curtir!");
+      alert("Administradores não podem curtir imóveis.");
       return;
     }
-    setCurtidas((prev) => ({
-      ...prev,
-      [imovelId]: !prev[imovelId],
-    }));
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/curtidas/${usuario.id}/${imovelId}`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Erro ao alternar curtida");
+
+      setCurtidas((prev) => ({
+        ...prev,
+        [imovelId]: !prev[imovelId],
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível curtir/descurtir o imóvel.");
+    }
   };
 
   const totalPaginas = Math.ceil(imoveis.length / imoveisPorPagina);
@@ -73,7 +100,7 @@ const Comprar = ({ usuario }) => {
                 onClick={() => setImovelSelecionado(imovel)}
               >
                 <div className="image-container">
-                  {imovel.fotos && imovel.fotos.length > 0 ? (
+                  {imovel.fotos?.length > 0 ? (
                     <div className="carousel">
                       <button
                         className="carousel-btn prev"
@@ -87,7 +114,7 @@ const Comprar = ({ usuario }) => {
                       <img
                         src={
                           imovel.fotos[imagemAtual[imovel.id] || 0]
-                            ?.caminho_foto || ""
+                            ?.caminho_foto
                         }
                         alt={imovel.titulo}
                         className="property-image"
@@ -112,48 +139,29 @@ const Comprar = ({ usuario }) => {
                     <h3 className="property-title">{imovel.titulo}</h3>
                     <div className="property-price">R$ {imovel.preco}</div>
                   </div>
-
                   <div className="property-location">
                     <span className="location-icon">📍</span>
                     {imovel.endereco || "Localização não disponível"}
                   </div>
-
                   <p className="property-description">{imovel.descricao}</p>
-
                   <div className="property-features">
                     {imovel.area && (
-                      <div className="feature">
-                        <span className="feature-icon">🏠</span>
-                        <span>{imovel.area}</span>
-                      </div>
+                      <div className="feature">🏠 {imovel.area}</div>
                     )}
                     {imovel.quartos && (
-                      <div className="feature">
-                        <span className="feature-icon">🛏️</span>
-                        <span>{imovel.quartos} quartos</span>
-                      </div>
+                      <div className="feature">🛏 {imovel.quartos} quartos</div>
                     )}
                     {imovel.banheiros && (
                       <div className="feature">
-                        <span className="feature-icon">🚿</span>
-                        <span>{imovel.banheiros} banheiros</span>
+                        🚿 {imovel.banheiros} banheiros
                       </div>
                     )}
                     {imovel.vagas && (
-                      <div className="feature">
-                        <span className="feature-icon">🚗</span>
-                        <span>{imovel.vagas} vagas</span>
-                      </div>
+                      <div className="feature">🚗 {imovel.vagas} vagas</div>
                     )}
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                  <div className="action-buttons">
                     <button
                       className="contact-button"
                       onClick={(e) => {
@@ -189,6 +197,8 @@ const Comprar = ({ usuario }) => {
         <ImovelModal
           imovel={imovelSelecionado}
           usuario={usuario}
+          curtidas={curtidas}
+          setCurtidas={setCurtidas}
           onClose={() => setImovelSelecionado(null)}
         />
       )}
