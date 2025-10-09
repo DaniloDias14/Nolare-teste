@@ -1,116 +1,239 @@
+/* ================================
+   Container Principal
+================================ */
 .crud-container {
-  padding: 40px;
-  text-align: center;
+  padding: 25px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
 }
 
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  gap: 10px;
-}
-
-.tab-button {
-  padding: 10px 20px;
-  cursor: pointer;
-  border: 1px solid #191970;
-  border-radius: 6px;
-  background-color: white;
-  color: #191970;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.tab-button.active,
-.tab-button:hover {
-  background-color: #191970;
-  color: white;
-}
-
+/* ================================
+   Botões
+================================ */
 .open-popup {
-  margin-bottom: 20px;
   padding: 10px 20px;
-  background-color: #4169e1;
-  color: white;
+  background-color: #28a745;
+  color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-weight: bold;
+  transition: background 0.2s;
 }
 
 .open-popup:hover {
-  background-color: #191970;
+  background-color: #218838;
 }
 
+.next-step-btn,
+.back-step-btn,
+.submit-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.next-step-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.next-step-btn:hover {
+  background-color: #0056b3;
+}
+
+.back-step-btn {
+  background-color: #6c757d;
+  color: white;
+  margin-right: 10px;
+}
+
+.back-step-btn:hover {
+  background-color: #545b62;
+}
+
+.submit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #218838;
+}
+
+/* ================================
+   Popup
+================================ */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 1000;
 }
 
 .popup {
-  background: white;
+  background-color: #fff;
   padding: 30px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
+  border-radius: 10px;
+  width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   position: relative;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.popup input {
+/* Botão fechar */
+.close-popup-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.close-popup-btn:hover {
+  color: red;
+}
+
+/* ================================
+   Formulário
+================================ */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form input[type="text"],
+form input[type="number"],
+form select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   width: 100%;
-  margin-bottom: 12px;
-  padding: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Grid para organizar campos lado a lado */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.form-row .form-field {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row .form-field label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* ================================
+   Checkbox
+================================ */
+.checkbox-label,
+.destaque-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.caracteristicas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.caracteristicas-grid .checkbox-label {
+  width: 45%;
+}
+
+/* ================================
+   Seções
+================================ */
+form h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+/* ================================
+   Fotos
+================================ */
+.foto-inputs input[type="file"] {
+  margin-bottom: 10px;
+}
+
+.foto-preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.foto-preview img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
 
-.foto-inputs input {
-  margin-bottom: 8px;
+/* ================================
+   Mensagens de erro
+================================ */
+.error-msg {
+  color: red;
+  font-weight: bold;
 }
 
-.popup-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-}
-
-.popup-actions button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.popup-actions .cancel-btn {
-  background-color: #ccc;
-}
-
-.popup-actions button[type="submit"] {
-  background-color: #4169e1;
-  color: white;
+/* ================================
+   Lista de imóveis
+================================ */
+.read-section {
+  margin-top: 30px;
 }
 
 .imoveis-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
-  margin-top: 20px;
 }
 
 .imovel-card {
   border: 1px solid #ccc;
-  padding: 16px;
   border-radius: 8px;
-  text-align: left;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.imovel-card img {
+  border-radius: 6px;
+  margin-top: 8px;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
 }

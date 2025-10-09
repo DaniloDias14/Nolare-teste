@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
@@ -12,6 +12,57 @@ const ImovelModal = ({
   onCurtir,
 }) => {
   const [fotoIndex, setFotoIndex] = useState(0);
+  const [caracteristicas, setCaracteristicas] = useState({});
+
+  useEffect(() => {
+    if (!imovel) return;
+
+    // Todos os campos possíveis que são características
+    const camposCaracteristicas = [
+      "quarto",
+      "suite",
+      "banheiro",
+      "vaga",
+      "andar",
+      "andar_total",
+      "mobiliado",
+      "piscina",
+      "churrasqueira",
+      "salao_de_festa",
+      "academia",
+      "playground",
+      "jardim",
+      "varanda",
+      "interfone",
+      "acessibilidade_pcd",
+      "ar_condicionado",
+      "energia_solar",
+      "quadra",
+      "lavanderia",
+      "closet",
+      "escritorio",
+      "lareira",
+      "alarme",
+      "camera_vigilancia",
+      "bicicletario",
+      "sala_jogos",
+      "brinquedoteca",
+      "elevador",
+      "pomar",
+      "lago",
+      "aceita_animais",
+      "construtora",
+    ];
+
+    const obj = {};
+    camposCaracteristicas.forEach((campo) => {
+      if (imovel[campo] !== undefined && imovel[campo] !== null) {
+        obj[campo] = imovel[campo];
+      }
+    });
+
+    setCaracteristicas(obj);
+  }, [imovel]);
 
   if (!imovel) return null;
 
@@ -53,12 +104,10 @@ const ImovelModal = ({
       setCurtidas((prev) => {
         const atualizado = { ...prev, [imovel.id]: !prev[imovel.id] };
 
-        // Se descurtiu, remove da lista
         if (prev[imovel.id] && !atualizado[imovel.id] && onDescurtir) {
           onDescurtir(imovel.id);
         }
 
-        // Se curtiu, adiciona à lista
         if (!prev[imovel.id] && atualizado[imovel.id] && onCurtir) {
           onCurtir(imovel.id);
         }
@@ -69,6 +118,34 @@ const ImovelModal = ({
       console.error(err);
       alert("Não foi possível curtir/descurtir o imóvel.");
     }
+  };
+
+  const renderCaracteristicas = () => {
+    if (!caracteristicas || Object.keys(caracteristicas).length === 0)
+      return null;
+
+    return (
+      <div className="features-container">
+        {Object.entries(caracteristicas).map(([key, value]) => {
+          if (value === true) {
+            return (
+              <span key={key} className="feature-item">
+                {key.replace(/_/g, " ")} ✅
+              </span>
+            );
+          } else if (value || value === 0) {
+            return (
+              <span key={key} className="feature-item">
+                {key.replace(/_/g, " ").charAt(0).toUpperCase() +
+                  key.replace(/_/g, " ").slice(1)}
+                : {value}
+              </span>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
   };
 
   return (
@@ -84,7 +161,7 @@ const ImovelModal = ({
               ◀
             </button>
             <img
-              src={fotos[fotoIndex].caminho_foto}
+              src={fotos[fotoIndex]?.caminho_foto}
               alt={`Foto ${fotoIndex + 1}`}
               className="modal-foto"
             />
@@ -96,6 +173,7 @@ const ImovelModal = ({
 
         <div className="modal-content">
           <h2>{imovel.titulo}</h2>
+
           <div className="property-detail">
             <strong>Descrição:</strong> {imovel.descricao || "-"}
           </div>
@@ -103,13 +181,31 @@ const ImovelModal = ({
             <strong>Preço:</strong> R$ {imovel.preco || "-"}
           </div>
           <div className="property-detail">
-            <strong>Endereço:</strong> {imovel.endereco || "-"}
+            <strong>Status:</strong> {imovel.status || "-"}
           </div>
-          {imovel.tipo_imovel && (
-            <div className="property-detail">
-              <strong>Tipo:</strong> {imovel.tipo_imovel}
-            </div>
-          )}
+          <div className="property-detail">
+            <strong>Finalidade:</strong> {imovel.finalidade || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>CEP:</strong> {imovel.cep || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Estado:</strong> {imovel.estado || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Cidade:</strong> {imovel.cidade || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Bairro:</strong> {imovel.bairro || "-"}
+          </div>
+          <div className="property-detail">
+            <strong>Área Total:</strong> {imovel.area_total || "-"} m²
+          </div>
+          <div className="property-detail">
+            <strong>Área Construída:</strong> {imovel.area_construida || "-"} m²
+          </div>
+
+          {renderCaracteristicas()}
 
           <button className="like-btn-modal" onClick={toggleCurtida}>
             {curtido ? (

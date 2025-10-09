@@ -1,67 +1,253 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import "./CRUD.css";
 
+const booleanFields = [
+  "suite",
+  "piscina",
+  "churrasqueira",
+  "salao_de_festa",
+  "academia",
+  "playground",
+  "jardim",
+  "varanda",
+  "interfone",
+  "acessibilidade_pcd",
+  "mobiliado",
+  "energia_solar",
+  "quadra",
+  "lavanderia",
+  "closet",
+  "escritorio",
+  "lareira",
+  "alarme",
+  "camera_vigilancia",
+  "bicicletario",
+  "sala_jogos",
+  "brinquedoteca",
+  "elevador",
+  "pomar",
+  "lago",
+  "aceita_animais",
+];
+
+const estados = ["Santa Catarina"];
+const cidades = [
+  "Araranguá",
+  "Balneário Arroio do Silva",
+  "Criciúma",
+  "Forquilhinha",
+  "Içara",
+  "Morro da Fumaça",
+  "Nova Veneza",
+  "Siderópolis",
+  "Urussanga",
+];
+const finalidades = ["Venda", "Aluguel", "Temporada"];
+const construtoras = [
+  "Construfase",
+  "Construtora Fontana",
+  "Corbetta Construtora",
+  "Criciúma Construções",
+];
+
 const CRUD = () => {
-  const [activeTab, setActiveTab] = useState("Create");
   const [showPopup, setShowPopup] = useState(false);
+  const [step, setStep] = useState(1);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
     preco: "",
-    localizacao: "",
-    area: "",
-    quartos: "",
-    banheiros: "",
-    vagas: "",
-    fotos: [null, null, null], // arquivos selecionados
+    tipo: "",
+    status: "",
+    finalidade: "",
+    destaque: false,
+    visivel: true,
+    cep: "",
+    estado: "",
+    cidade: "",
+    bairro: "",
+    area_total: "",
+    area_construida: "",
+    fotos: [null, null, null],
+
+    condominio: "",
+    iptu: "",
+    quarto: "",
+    suite: false,
+    banheiro: "",
+    vaga: "",
+    andar: "",
+    andar_total: "",
+    piscina: false,
+    churrasqueira: false,
+    salao_de_festa: false,
+    academia: false,
+    playground: false,
+    jardim: false,
+    varanda: false,
+    interfone: false,
+    acessibilidade_pcd: false,
+    mobiliado: false,
+    ar_condicionado: "",
+    energia_solar: false,
+    quadra: false,
+    lavanderia: false,
+    closet: false,
+    escritorio: false,
+    lareira: false,
+    alarme: false,
+    camera_vigilancia: false,
+    bicicletario: false,
+    sala_jogos: false,
+    brinquedoteca: false,
+    elevador: false,
+    pomar: false,
+    lago: false,
+    aceita_animais: false,
+    construtora: "",
   });
-  const [imoveis, setImoveis] = useState([]);
-
-  // Listar imóveis (Read)
-  const fetchImoveis = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/imoveis");
-      setImoveis(res.data);
-    } catch (err) {
-      console.error("Erro ao buscar imóveis:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchImoveis();
-  }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    let newValue = type === "checkbox" ? checked : value;
+
+    if (name === "cep") {
+      newValue = newValue.replace(/\D/g, "");
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
   };
 
   const handleFotoChange = (index, file) => {
-    const newFotos = [...formData.fotos];
-    newFotos[index] = file;
-    setFormData({ ...formData, fotos: newFotos });
+    setFormData((prev) => {
+      const newFotos = [...prev.fotos];
+      newFotos[index] = file || null;
+      return { ...prev, fotos: newFotos };
+    });
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setStep(1);
+    setErrorMsg("");
+    setFormData({
+      titulo: "",
+      descricao: "",
+      preco: "",
+      tipo: "",
+      status: "",
+      finalidade: "",
+      destaque: false,
+      visivel: true,
+      cep: "",
+      estado: "",
+      cidade: "",
+      bairro: "",
+      area_total: "",
+      area_construida: "",
+      fotos: [null, null, null],
+      condominio: "",
+      iptu: "",
+      quarto: "",
+      suite: false,
+      banheiro: "",
+      vaga: "",
+      andar: "",
+      andar_total: "",
+      piscina: false,
+      churrasqueira: false,
+      salao_de_festa: false,
+      academia: false,
+      playground: false,
+      jardim: false,
+      varanda: false,
+      interfone: false,
+      acessibilidade_pcd: false,
+      mobiliado: false,
+      ar_condicionado: "",
+      energia_solar: false,
+      quadra: false,
+      lavanderia: false,
+      closet: false,
+      escritorio: false,
+      lareira: false,
+      alarme: false,
+      camera_vigilancia: false,
+      bicicletario: false,
+      sala_jogos: false,
+      brinquedoteca: false,
+      elevador: false,
+      pomar: false,
+      lago: false,
+      aceita_animais: false,
+      construtora: "",
+    });
+  };
+
+  const parseNumberOrNull = (value) => {
+    if (value === "" || value === null || value === undefined) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
+
     try {
-      // Criar imóvel primeiro
-      const payload = {
-        titulo: formData.titulo,
-        descricao: formData.descricao,
-        preco: formData.preco,
-        endereco: formData.localizacao,
-        criado_por: 1, // Substitua pelo ID do admin logado
+      const imovelPayload = {
+        titulo: formData.titulo || null,
+        descricao: formData.descricao || null,
+        preco: parseNumberOrNull(formData.preco),
+        tipo: formData.tipo || null,
+        status: formData.status || null,
+        finalidade: formData.finalidade || null,
+        destaque: !!formData.destaque,
+        visivel: formData.visivel ?? true,
+        cep: formData.cep || null,
+        estado: formData.estado || null,
+        cidade: formData.cidade || null,
+        bairro: formData.bairro || null,
+        area_total: parseNumberOrNull(formData.area_total),
+        area_construida: parseNumberOrNull(formData.area_construida),
+        criado_por: 1,
       };
 
-      const res = await axios.post(
+      const createRes = await axios.post(
         "http://localhost:5000/api/imoveis",
-        payload
+        imovelPayload
       );
-      const imovelId = res.data.id;
+      const imovelId = createRes.data?.id;
+      if (!imovelId) throw new Error("ID do imóvel não retornado.");
 
-      // Upload de fotos
+      const caracteristicasPayload = {
+        imovel_id: imovelId,
+        condominio: parseNumberOrNull(formData.condominio),
+        iptu: parseNumberOrNull(formData.iptu),
+        quarto: parseNumberOrNull(formData.quarto),
+        banheiro: parseNumberOrNull(formData.banheiro),
+        vaga: parseNumberOrNull(formData.vaga),
+        andar: parseNumberOrNull(formData.andar),
+        andar_total: parseNumberOrNull(formData.andar_total),
+        ar_condicionado: parseNumberOrNull(formData.ar_condicionado),
+        construtora: formData.construtora?.trim() || null,
+        ...booleanFields.reduce((acc, f) => {
+          acc[f] = !!formData[f];
+          return acc;
+        }, {}),
+      };
+
+      await axios.post(
+        "http://localhost:5000/api/imoveis_caracteristicas",
+        caracteristicasPayload
+      );
+
       const formDataFotos = new FormData();
       formData.fotos.forEach((foto) => {
         if (foto) formDataFotos.append("fotos", foto);
@@ -71,65 +257,48 @@ const CRUD = () => {
         await axios.post(
           `http://localhost:5000/api/imoveis/${imovelId}/upload`,
           formDataFotos,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
         );
       }
 
-      alert("Imóvel criado com sucesso!");
-      setShowPopup(false);
-      setFormData({
-        titulo: "",
-        descricao: "",
-        preco: "",
-        localizacao: "",
-        area: "",
-        quartos: "",
-        banheiros: "",
-        vagas: "",
-        fotos: [null, null, null],
-      });
-
-      fetchImoveis(); // Atualiza a lista
+      alert("Imóvel cadastrado com sucesso!");
+      handleClosePopup();
     } catch (err) {
-      console.error("Erro ao criar imóvel:", err);
-      alert("Erro ao criar imóvel.");
+      console.error("Erro ao cadastrar imóvel:", err);
+      setErrorMsg(
+        err.response?.data?.error || err.message || "Erro inesperado."
+      );
     }
   };
 
   return (
     <div className="crud-container">
-      <h2>Gerenciar Imóveis (CRUD)</h2>
+      <h2>Adicionar Novo Imóvel</h2>
+      <button className="open-popup" onClick={() => setShowPopup(true)}>
+        Adicionar Novo Imóvel
+      </button>
 
-      <div className="tabs">
-        {["Create", "Read", "Update", "Delete"].map((tab) => (
-          <button
-            key={tab}
-            className={`tab-button ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <button className="close-popup-btn" onClick={handleClosePopup}>
+              ×
+            </button>
 
-      {activeTab === "Create" && (
-        <>
-          <button className="open-popup" onClick={() => setShowPopup(true)}>
-            Adicionar Novo Imóvel
-          </button>
+            <h3>Cadastrar Imóvel</h3>
+            {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
 
-          {showPopup && (
-            <div className="popup-overlay">
-              <div className="popup">
-                <h3>Cadastrar Imóvel</h3>
-                <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
+              {step === 1 && (
+                <>
                   <input
                     type="text"
                     name="titulo"
                     placeholder="Título"
                     value={formData.titulo}
                     onChange={handleInputChange}
-                    required
                   />
                   <input
                     type="text"
@@ -137,7 +306,6 @@ const CRUD = () => {
                     placeholder="Descrição"
                     value={formData.descricao}
                     onChange={handleInputChange}
-                    required
                   />
                   <input
                     type="number"
@@ -145,106 +313,210 @@ const CRUD = () => {
                     placeholder="Preço"
                     value={formData.preco}
                     onChange={handleInputChange}
-                    required
                   />
+
+                  {/* Campo de tipo atualizado */}
+                  <select
+                    name="tipo"
+                    value={formData.tipo}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione o tipo</option>
+                    <option value="Casa">Casa</option>
+                    <option value="Apartamento">Apartamento</option>
+                    <option value="Cobertura">Cobertura</option>
+                    <option value="Kitnet">Kitnet</option>
+                    <option value="Terreno">Terreno</option>
+                    <option value="Sala comercial">Sala comercial</option>
+                    <option value="Galpão">Galpão</option>
+                    <option value="Sítio">Sítio</option>
+                    <option value="Fazenda">Fazenda</option>
+                  </select>
+
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione o status</option>
+                    <option value="disponivel">Disponível</option>
+                    <option value="vendido">Vendido</option>
+                  </select>
+                  <select
+                    name="finalidade"
+                    value={formData.finalidade}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione a finalidade</option>
+                    {finalidades.map((f) => (
+                      <option key={f} value={f.toLowerCase()}>
+                        {f}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="destaque"
+                      checked={formData.destaque}
+                      onChange={handleInputChange}
+                    />{" "}
+                    Marcar como destaque
+                  </label>
+
                   <input
                     type="text"
-                    name="localizacao"
-                    placeholder="Localização"
-                    value={formData.localizacao}
+                    name="cep"
+                    placeholder="CEP"
+                    value={formData.cep}
                     onChange={handleInputChange}
                   />
+                  <select
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione o estado</option>
+                    {estados.map((f) => (
+                      <option key={f} value={f}>
+                        {f}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    name="cidade"
+                    value={formData.cidade}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione a cidade</option>
+                    {cidades.map((f) => (
+                      <option key={f} value={f}>
+                        {f}
+                      </option>
+                    ))}
+                  </select>
                   <input
                     type="text"
-                    name="area"
-                    placeholder="Área"
-                    value={formData.area}
+                    name="bairro"
+                    placeholder="Bairro"
+                    value={formData.bairro}
                     onChange={handleInputChange}
                   />
                   <input
                     type="number"
-                    name="quartos"
-                    placeholder="Quartos"
-                    value={formData.quartos}
+                    name="area_total"
+                    placeholder="Área Total"
+                    value={formData.area_total}
                     onChange={handleInputChange}
                   />
                   <input
                     type="number"
-                    name="banheiros"
-                    placeholder="Banheiros"
-                    value={formData.banheiros}
-                    onChange={handleInputChange}
-                  />
-                  <input
-                    type="number"
-                    name="vagas"
-                    placeholder="Vagas"
-                    value={formData.vagas}
+                    name="area_construida"
+                    placeholder="Área Construída"
+                    value={formData.area_construida}
                     onChange={handleInputChange}
                   />
 
-                  <div className="foto-inputs">
-                    {formData.fotos.map((foto, idx) => (
+                  <div>
+                    <button type="button" onClick={() => setStep(2)}>
+                      Próximo: Características
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <h4>Características</h4>
+                  {booleanFields.map((f) => (
+                    <label key={f}>
                       <input
-                        key={idx}
+                        type="checkbox"
+                        name={f}
+                        checked={formData[f]}
+                        onChange={handleInputChange}
+                      />
+                      {f.replace(/_/g, " ")}
+                    </label>
+                  ))}
+
+                  {[
+                    "condominio",
+                    "iptu",
+                    "quarto",
+                    "banheiro",
+                    "vaga",
+                    "andar",
+                    "andar_total",
+                    "ar_condicionado",
+                  ].map((f) => (
+                    <input
+                      key={f}
+                      type="number"
+                      name={f}
+                      placeholder={f}
+                      value={formData[f]}
+                      onChange={handleInputChange}
+                    />
+                  ))}
+
+                  <select
+                    name="construtora"
+                    value={formData.construtora}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Selecione a construtora</option>
+                    {construtoras.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div>
+                    <button type="button" onClick={() => setStep(1)}>
+                      Voltar
+                    </button>
+                    <button type="button" onClick={() => setStep(3)}>
+                      Próximo: Fotos
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <h4>Fotos</h4>
+                  {formData.fotos.map((foto, idx) => (
+                    <div key={idx}>
+                      {foto && (
+                        <img
+                          src={URL.createObjectURL(foto)}
+                          alt={`foto-${idx}`}
+                          width="120"
+                        />
+                      )}
+                      <input
                         type="file"
                         accept="image/*"
                         onChange={(e) =>
                           handleFotoChange(idx, e.target.files[0])
                         }
                       />
-                    ))}
-                  </div>
-
-                  <div className="popup-actions">
-                    <button type="submit">Salvar</button>
-                    <button
-                      type="button"
-                      onClick={() => setShowPopup(false)}
-                      className="cancel-btn"
-                    >
-                      Cancelar
+                    </div>
+                  ))}
+                  <div>
+                    <button type="button" onClick={() => setStep(2)}>
+                      Voltar
                     </button>
+                    <button type="submit">Salvar Imóvel</button>
                   </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {activeTab === "Read" && (
-        <div className="read-section">
-          {imoveis.length === 0 ? (
-            <p>Nenhum imóvel cadastrado.</p>
-          ) : (
-            <div className="imoveis-list">
-              {imoveis.map((imovel) => (
-                <div key={imovel.id} className="imovel-card">
-                  <h4>{imovel.titulo}</h4>
-                  <p>{imovel.descricao}</p>
-                  <p>Preço: R$ {imovel.preco}</p>
-                  <p>Endereço: {imovel.endereco}</p>
-
-                  {imovel.fotos &&
-                    imovel.fotos.length > 0 &&
-                    imovel.fotos.map((foto) => (
-                      <img
-                        key={foto.id}
-                        src={`http://localhost:5000${foto.caminho_foto}`}
-                        alt={imovel.titulo}
-                        style={{ width: "200px", marginRight: "10px" }}
-                      />
-                    ))}
-                </div>
-              ))}
-            </div>
-          )}
+                </>
+              )}
+            </form>
+          </div>
         </div>
-      )}
-
-      {activeTab !== "Create" && activeTab !== "Read" && (
-        <p>Funcionalidade {activeTab} ainda não implementada.</p>
       )}
     </div>
   );

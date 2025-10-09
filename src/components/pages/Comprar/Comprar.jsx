@@ -40,7 +40,6 @@ const Comprar = ({ usuario }) => {
       return;
     }
 
-    // Bloquear ADM
     if (usuario.tipo_usuario === "adm") {
       alert("Administradores não podem curtir imóveis.");
       return;
@@ -80,6 +79,134 @@ const Comprar = ({ usuario }) => {
       ...prev,
       [id]: (prev[id] || 0) === 0 ? total - 1 : (prev[id] || 0) - 1,
     }));
+  };
+
+  // -------------------------
+  // Helpers para exibir campos por tipo
+  // -------------------------
+  const normalizeStr = (s) =>
+    s
+      ? String(s)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+      : "";
+
+  const renderTypeSpecific = (imovel) => {
+    const tipoRaw = imovel.tipo ?? imovel.tipo_imovel ?? "";
+    const tipo = normalizeStr(tipoRaw);
+
+    const areaTotal = imovel.area_total;
+    const areaConstruida = imovel.area_construida;
+    const quarto = imovel.caracteristicas?.quarto ?? imovel.quarto ?? null;
+    const banheiro =
+      imovel.caracteristicas?.banheiro ?? imovel.banheiro ?? null;
+    const andar = imovel.caracteristicas?.andar ?? imovel.andar ?? null;
+    const mobiliado =
+      imovel.caracteristicas?.mobiliado ?? imovel.mobiliado ?? false;
+
+    const mobiliadoSym = mobiliado ? "☑" : "☐";
+
+    // Mostrar campos conforme o tipo pedido
+    switch (tipo) {
+      case "casa":
+        return (
+          <>
+            {areaTotal != null && <div>Área total: {areaTotal} m²</div>}
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+            {quarto != null && <div>🛏 {quarto} quartos</div>}
+            <div>Mobiliado: {mobiliadoSym}</div>
+          </>
+        );
+
+      case "apartamento":
+        return (
+          <>
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+            {quarto != null && <div>🛏 {quarto} quartos</div>}
+            {andar != null && <div>Andar: {andar}</div>}
+            <div>Mobiliado: {mobiliadoSym}</div>
+          </>
+        );
+
+      case "cobertura":
+        return (
+          <>
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+            {quarto != null && <div>🛏 {quarto} quartos</div>}
+            {andar != null && <div>Andar: {andar}</div>}
+            <div>Mobiliado: {mobiliadoSym}</div>
+          </>
+        );
+
+      case "kitnet":
+        return (
+          <>
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+            {quarto != null && <div>🛏 {quarto} quartos</div>}
+            {andar != null && <div>Andar: {andar}</div>}
+            <div>Mobiliado: {mobiliadoSym}</div>
+          </>
+        );
+
+      case "terreno":
+        return (
+          <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
+        );
+
+      case "sala comercial":
+        return (
+          <>
+            {areaTotal != null && <div>Área total: {areaTotal} m²</div>}
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+            {banheiro != null && <div>🛁 {banheiro} banheiros</div>}
+            <div>Mobiliado: {mobiliadoSym}</div>
+          </>
+        );
+
+      case "galpao":
+      case "galpão":
+        return (
+          <>
+            {areaTotal != null && <div>Área total: {areaTotal} m²</div>}
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+          </>
+        );
+
+      case "sitio":
+      case "sítio":
+        return (
+          <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
+        );
+
+      case "fazenda":
+        return (
+          <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
+        );
+
+      default:
+        // fallback: mostra áreas caso existam (comportamento parecido ao anterior)
+        return (
+          <>
+            {areaTotal != null && <div>Área total: {areaTotal} m²</div>}
+            {areaConstruida != null && (
+              <div>Área construída: {areaConstruida} m²</div>
+            )}
+          </>
+        );
+    }
   };
 
   return (
@@ -137,27 +264,37 @@ const Comprar = ({ usuario }) => {
                 <div className="property-content">
                   <div className="property-header">
                     <h3 className="property-title">{imovel.titulo}</h3>
-                    <div className="property-price">R$ {imovel.preco}</div>
+                    <div className="property-price">
+                      R$ {imovel.preco || "-"}
+                    </div>
                   </div>
-                  <div className="property-location">
-                    <span className="location-icon">📍</span>
-                    {imovel.endereco || "Localização não disponível"}
+
+                  {/* sempre exibir localização (cidade - bairro) */}
+                  <div className="property-details">
+                    <div>
+                      Localização: {imovel.cidade || "Cidade não informada"} -{" "}
+                      {imovel.bairro || "Bairro não informado"}
+                    </div>
+
+                    {/* campos específicos por tipo */}
+                    {renderTypeSpecific(imovel)}
                   </div>
-                  <p className="property-description">{imovel.descricao}</p>
+
                   <div className="property-features">
-                    {imovel.area && (
-                      <div className="feature">🏠 {imovel.area}</div>
-                    )}
-                    {imovel.quartos && (
-                      <div className="feature">🛏 {imovel.quartos} quartos</div>
-                    )}
-                    {imovel.banheiros && (
+                    {imovel.caracteristicas?.quarto && (
                       <div className="feature">
-                        🚿 {imovel.banheiros} banheiros
+                        🛏 {imovel.caracteristicas.quarto} quartos
                       </div>
                     )}
-                    {imovel.vagas && (
-                      <div className="feature">🚗 {imovel.vagas} vagas</div>
+                    {imovel.caracteristicas?.banheiro && (
+                      <div className="feature">
+                        🛁 {imovel.caracteristicas.banheiro} banheiros
+                      </div>
+                    )}
+                    {imovel.caracteristicas?.vaga && (
+                      <div className="feature">
+                        🚗 {imovel.caracteristicas.vaga} vagas
+                      </div>
                     )}
                   </div>
 
