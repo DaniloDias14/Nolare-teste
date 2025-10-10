@@ -5,6 +5,7 @@ import pool from "./db.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const app = express();
@@ -13,6 +14,133 @@ const PORT = process.env.BACKEND_PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use("/fotos_imoveis", express.static("public/fotos_imoveis"));
+
+// =========================
+// ROTAS DE AUTENTICAÇÃO
+// =========================
+
+app.post("/api/login", async (req, res) => {
+  const { email, senha } = req.body;
+
+  if (!email || !senha) {
+    return res.status(400).json({ error: "Email e senha são obrigatórios" });
+  }
+
+  try {
+    const result = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
+      email,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Credenciais inválidas" });
+    }
+
+    const user = result.rows[0];
+
+    // Compara a senha fornecida com o hash armazenado
+    const senhaValida = await bcrypt.compare(senha, user.senha);
+
+    if (!senhaValida) {
+      return res.status(401).json({ error: "Credenciais inválidas" });
+    }
+
+    // Remove a senha do objeto antes de enviar
+    const { senha: _, ...userSemSenha } = user;
+
+    res.json({ user: userSemSenha });
+  } catch (err) {
+    console.error("Erro ao fazer login:", err);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
+app.post("/api/register", async (req, res) => {
+  const { nome, email, senha, tipo_usuario } = req.body;
+
+  if (!nome || !email || !senha || !tipo_usuario) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+  }
+
+  if (!["user", "adm"].includes(tipo_usuario)) {
+    return res.status(400).json({ error: "Tipo de usuário inválido" });
+  }
+
+  try {
+    // Verifica se o email já existe
+    const emailExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE email = $1",
+      [email]
+    );
+
+    if (emailExiste.rows.length > 0) {
+      return res.status(409).json({ error: "Email já cadastrado" });
+    }
+
+    // Hash da senha
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    // Insere o novo usuário
+    const result = await pool.query(
+      "INSERT INTO usuarios (nome, email, senha, tipo_usuario) VALUES ($1, $2, $3, $4) RETURNING id, nome, email, tipo_usuario, data_criacao",
+      [nome, email, senhaHash, tipo_usuario]
+    );
+
+    res.status(201).json({ user: result.rows[0] });
+  } catch (err) {
+    console.error("Erro ao registrar usuário:", err);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
+// =========================
+// ROTAS DE CURTIDAS
+// =========================
+
+app.get("/api/curtidas/:usuario_id", async (req, res) => {
+  const { usuario_id } = req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM curtidas WHERE usuario_id = $1",
+      [usuario_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar curtidas:", err);
+    res.status(500).json({ error: "Erro ao buscar curtidas" });
+  }
+});
+
+app.post("/api/curtidas/:usuario_id/:imovel_id", async (req, res) => {
+  const { usuario_id, imovel_id } = req.params;
+
+  try {
+    // Verifica se já existe curtida
+    const curtidaExiste = await pool.query(
+      "SELECT id FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
+      [usuario_id, imovel_id]
+    );
+
+    if (curtidaExiste.rows.length > 0) {
+      // Remove curtida
+      await pool.query(
+        "DELETE FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
+        [usuario_id, imovel_id]
+      );
+      res.json({ curtido: false });
+    } else {
+      // Adiciona curtida
+      await pool.query(
+        "INSERT INTO curtidas (usuario_id, imovel_id) VALUES ($1, $2)",
+        [usuario_id, imovel_id]
+      );
+      res.json({ curtido: true });
+    }
+  } catch (err) {
+    console.error("Erro ao alternar curtida:", err);
+    res.status(500).json({ error: "Erro ao alternar curtida" });
+  }
+});
 
 // =========================
 // Configuração do multer
@@ -31,7 +159,7 @@ const storage = multer.diskStorage({
     files.forEach((f) => {
       const match = f.match(/^(\d+)-(\d+)\./);
       if (match) {
-        const num = parseInt(match[2]);
+        const num = Number.parseInt(match[2]);
         if (num > maxNumber) maxNumber = num;
       }
     });
@@ -378,7 +506,7 @@ app.post(
 
     try {
       const fotosInseridas = [];
-      for (let file of req.files) {
+      for (const file of req.files) {
         const caminho = `/fotos_imoveis/${file.filename}`;
         const result = await pool.query(
           "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
