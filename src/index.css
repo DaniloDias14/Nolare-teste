@@ -1,5 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Sanchez:ital@0;1&display=swap");
+
 :root {
-  --azul-meia-noite: #191970;
+  --primary-blue: #191970;
+  --background-cream: #f0efe2;
+  --white: #ffffff;
+  --text-dark: #1a1a1a;
+  --text-gray: #666666;
+  --red-accent: #dc3545;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html {
@@ -7,13 +20,20 @@ html {
 }
 
 body {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Sanchez", serif;
   margin: 0;
-  background: #fff;
+  background: var(--background-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: var(--text-dark);
 }
 
 main {
-  padding-top: 1rem;
+  min-height: calc(100vh - 200px);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }

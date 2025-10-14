@@ -1,5 +1,7 @@
+"use client";
+
 // Header.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { TiUserOutline } from "react-icons/ti";
 import LoginModal from "./LoginModal";
@@ -12,6 +14,10 @@ const Header = ({ setAdmLogged, setUser }) => {
   const handleLogoClick = (e) => {
     e.preventDefault(); // previne comportamento padrão do Link
     window.scrollTo({ top: 0, behavior: "smooth" }); // volta para o topo
+  };
+
+  const handleMenuClick = () => {
+    setMenuOpen(false);
   };
 
   return (
@@ -36,16 +42,24 @@ const Header = ({ setAdmLogged, setUser }) => {
         {/* Links do menu */}
         <ul className={`menu ${menuOpen ? "menu-open" : ""}`}>
           <li>
-            <Link to="/comprar">Comprar</Link>
+            <Link to="/comprar" onClick={handleMenuClick}>
+              Comprar
+            </Link>
           </li>
           <li>
-            <Link to="/alugar">Alugar</Link>
+            <Link to="/alugar" onClick={handleMenuClick}>
+              Alugar
+            </Link>
           </li>
           <li>
-            <Link to="/anunciar">Anunciar</Link>
+            <Link to="/anunciar" onClick={handleMenuClick}>
+              Anunciar
+            </Link>
           </li>
           <li>
-            <Link to="/sobre-nos">Sobre Nós</Link>
+            <Link to="/sobre-nos" onClick={handleMenuClick}>
+              Sobre Nós
+            </Link>
           </li>
         </ul>
 

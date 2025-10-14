@@ -1,17 +1,18 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import "./Config.css";
 
 const Config = () => {
   return (
     <div className="config-container">
-      <h1>Painel Administrativo</h1>
+      <h1 className="config-title">Painel Administrativo</h1>
       <div className="config-options">
         <Link to="/config/dashboard" className="config-button">
-          Dashboard
+          <span className="config-icon">📊</span>
+          <span>Dashboard</span>
         </Link>
         <Link to="/config/crud" className="config-button">
-          Gerenciar Imóveis (CRUD)
+          <span className="config-icon">🏠</span>
+          <span>Gerenciar Imóveis</span>
         </Link>
       </div>
     </div>

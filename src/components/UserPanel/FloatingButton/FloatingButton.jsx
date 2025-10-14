@@ -1,6 +1,6 @@
-import React from "react";
+"use client";
 import { useNavigate } from "react-router-dom";
-import { AiFillHeart } from "react-icons/ai";
+import { AiOutlineHeart } from "react-icons/ai";
 import "./FloatingButton.css";
 
 const UserFloatingButton = () => {
@@ -12,7 +12,7 @@ const UserFloatingButton = () => {
 
   return (
     <div className="user-floating-button" onClick={handleClick}>
-      <AiFillHeart size={24} color="red" />
+      <AiOutlineHeart size={26} />
     </div>
   );
 };

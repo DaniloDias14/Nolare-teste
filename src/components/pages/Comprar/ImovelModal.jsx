@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
@@ -99,7 +101,9 @@ const ImovelModal = ({
         `http://localhost:5000/api/curtidas/${usuario.id}/${
           imovel.id ?? imovel.imovel_id
         }`,
-        { method: "POST" }
+        {
+          method: "POST",
+        }
       );
       if (!res.ok) throw new Error("Erro ao alternar curtida");
 

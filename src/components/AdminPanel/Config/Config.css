@@ -1,25 +1,88 @@
 .config-container {
-  padding: 40px;
+  min-height: calc(100vh - 80px);
+  background-color: #f0efe2;
+  padding: 60px 20px;
   text-align: center;
 }
 
+.config-title {
+  font-family: "Sanchez", serif;
+  color: #191970;
+  font-size: 36px;
+  margin-bottom: 50px;
+  font-weight: bold;
+  position: relative;
+  display: inline-block;
+}
+
+.config-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #191970;
+}
+
 .config-options {
-  margin-top: 20px;
   display: flex;
-  gap: 20px;
+  gap: 30px;
   justify-content: center;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .config-button {
-  padding: 12px 24px;
-  background-color: #007bff;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 40px 50px;
+  background-color: white;
+  color: #191970;
   text-decoration: none;
-  border-radius: 8px;
-  transition: background 0.3s ease;
+  border-radius: 20px;
+  border: 2px solid #191970;
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.3s ease;
+  font-family: "Sanchez", serif;
   font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 15px rgba(25, 25, 112, 0.15);
+  min-width: 200px;
 }
 
 .config-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(25, 25, 112, 0.25);
+  background-color: #191970;
+  color: white;
+}
+
+.config-icon {
+  font-size: 48px;
+  transition: transform 0.3s ease;
+}
+
+.config-button:hover .config-icon {
+  transform: scale(1.2) rotate(10deg);
+}
+
+@media (max-width: 768px) {
+  .config-title {
+    font-size: 28px;
+  }
+
+  .config-options {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .config-button {
+    width: 100%;
+    max-width: 300px;
+  }
 }

@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import { Link } from "react-router-dom";
 import { FiSettings } from "react-icons/fi";
 import "./FloatingButton.css";

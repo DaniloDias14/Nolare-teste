@@ -35,7 +35,6 @@ const Comprar = ({ usuario }) => {
   }, [usuario]);
 
   const toggleCurtida = async (imovel) => {
-    // Aceita tanto imovel.id quanto imovel.imovel_id
     const imovelId = imovel?.id ?? imovel?.imovel_id;
     if (!imovelId) {
       console.error("ID do imóvel não encontrado:", imovel);
@@ -58,6 +57,12 @@ const Comprar = ({ usuario }) => {
         { method: "POST" }
       );
       if (!res.ok) throw new Error("Erro ao alternar curtida");
+
+      const likeBtn = document.querySelector(`[data-imovel-id="${imovelId}"]`);
+      if (likeBtn && !curtidas[imovelId]) {
+        likeBtn.classList.add("heart-burst");
+        setTimeout(() => likeBtn.classList.remove("heart-burst"), 600);
+      }
 
       setCurtidas((prev) => ({
         ...prev,
@@ -178,6 +183,12 @@ const Comprar = ({ usuario }) => {
 
   return (
     <div className="comprar">
+      <div className="properties-section">
+        <h1 style={{ textDecoration: "underline" }}>
+          Encontre seu imóvel dos sonhos
+        </h1>
+      </div>
+
       <main className="properties-section">
         <div className="container">
           <div
@@ -193,59 +204,61 @@ const Comprar = ({ usuario }) => {
                 key={imovel.id ?? imovel.imovel_id}
                 onClick={() => setImovelSelecionado(imovel)}
               >
-                <div className="image-container">
-                  {imovel.fotos?.length > 0 ? (
-                    <div className="carousel">
-                      <button
-                        className="carousel-btn prev"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          imagemAnterior(
-                            imovel.id ?? imovel.imovel_id,
-                            imovel.fotos.length
-                          );
-                        }}
-                      >
-                        ◀
-                      </button>
-                      <img
-                        src={
-                          imovel.fotos[
-                            imagemAtual[imovel.id ?? imovel.imovel_id] || 0
-                          ]?.caminho_foto
-                        }
-                        alt={imovel.titulo}
-                        className="property-image"
-                      />
-                      <button
-                        className="carousel-btn next"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          proximaImagem(
-                            imovel.id ?? imovel.imovel_id,
-                            imovel.fotos.length
-                          );
-                        }}
-                      >
-                        ▶
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="no-image">Sem imagem</div>
-                  )}
+                <div className="image-wrapper">
+                  <div className="image-container">
+                    {imovel.fotos?.length > 0 ? (
+                      <div className="carousel">
+                        <button
+                          className="carousel-btn prev"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            imagemAnterior(
+                              imovel.id ?? imovel.imovel_id,
+                              imovel.fotos.length
+                            );
+                          }}
+                        >
+                          ◀
+                        </button>
+                        <img
+                          src={
+                            imovel.fotos[
+                              imagemAtual[imovel.id ?? imovel.imovel_id] || 0
+                            ]?.caminho_foto
+                          }
+                          alt={imovel.titulo}
+                          className="property-image"
+                        />
+                        <button
+                          className="carousel-btn next"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            proximaImagem(
+                              imovel.id ?? imovel.imovel_id,
+                              imovel.fotos.length
+                            );
+                          }}
+                        >
+                          ▶
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="no-image">Sem imagem</div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="property-content">
                   <div className="property-header">
                     <h3 className="property-title">{imovel.titulo}</h3>
-                    <div className="property-price">
-                      R$ {imovel.preco || "-"}
+                    <div className="property-price-single">
+                      R$ {(imovel.preco || 0).toLocaleString("pt-BR")}
                     </div>
                   </div>
 
                   <div className="property-details">
                     <div>
-                      Localização: {imovel.cidade || "Cidade não informada"} -{" "}
+                      📍 {imovel.cidade || "Cidade não informada"} -{" "}
                       {imovel.bairro || "Bairro não informado"}
                     </div>
                     {renderTypeSpecific(imovel)}
@@ -277,20 +290,21 @@ const Comprar = ({ usuario }) => {
                         setImovelSelecionado(imovel);
                       }}
                     >
-                      Ver Detalhes
+                      Entrar em Contato
                     </button>
 
                     <button
                       className="like-btn"
+                      data-imovel-id={imovel.id ?? imovel.imovel_id}
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleCurtida(imovel);
                       }}
                     >
                       {curtidas[imovel.id ?? imovel.imovel_id] ? (
-                        <AiFillHeart size={22} color="red" />
+                        <AiFillHeart size={28} color="#191970" />
                       ) : (
-                        <AiOutlineHeart size={22} />
+                        <AiOutlineHeart size={28} color="#191970" />
                       )}
                     </button>
                   </div>

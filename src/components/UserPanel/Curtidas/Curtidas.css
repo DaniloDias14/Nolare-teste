@@ -1,141 +1,276 @@
+/* Cards iguais à página principal com todas as melhorias */
 .curtidas-page {
-  padding: 20px;
+  min-height: calc(100vh - 80px);
+  background-color: #f0efe2;
+  padding: 3rem 0;
 }
 
 .curtidas-page h2 {
+  font-family: "Sanchez", serif;
+  color: #191970;
   text-align: center;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.curtidas-page h2::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #191970;
+  border-radius: 2px;
 }
 
 .curtidas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
   justify-items: center;
+}
+
+.curtidas-page > p {
+  text-align: center;
+  font-family: "Sanchez", serif;
+  color: #191970;
+  font-size: 1.2rem;
+  margin-top: 3rem;
 }
 
 .property-card {
   width: 100%;
-  max-width: 320px;
-  background: #fff;
-  border-radius: 12px;
+  max-width: 420px;
+  background: white;
+  border: 2px solid #191970;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.2);
 }
 
 .property-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(25, 25, 112, 0.35);
 }
 
 .image-container {
   position: relative;
-}
-
-.property-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.no-image {
-  width: 100%;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #eee;
-  color: #888;
-  font-size: 16px;
+  height: 260px;
+  overflow: hidden;
+  background: #f5f5f5;
 }
 
 .carousel {
   position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.property-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.property-card:hover .property-image {
+  transform: scale(1.08);
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8e8e8;
+  color: #666;
+  font-family: "Sanchez", serif;
+  font-size: 16px;
 }
 
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(25, 25, 112, 0.75);
+  color: white;
   border: none;
-  font-size: 18px;
-  padding: 5px 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
 }
 
 .carousel-btn:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(25, 25, 112, 0.95);
+  transform: translateY(-50%) scale(1.2);
+  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.5);
 }
 
 .carousel-btn.prev {
-  left: 5px;
+  left: 15px;
 }
 
 .carousel-btn.next {
-  right: 5px;
+  right: 15px;
 }
 
 .like-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   background: transparent;
   border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 3;
+}
+
+.like-button:hover {
+  transform: scale(1.15);
+  background: rgba(25, 25, 112, 0.05);
+}
+
+.like-button.liked {
+  animation: heartBurst 0.6s ease;
+}
+
+@keyframes heartBurst {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.4) rotate(-15deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(15deg);
+  }
+  75% {
+    transform: scale(1.3) rotate(-10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .property-content {
-  padding: 15px;
+  padding: 1.5rem;
+  font-family: "Sanchez", serif;
 }
 
-.property-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.property-title {
-  font-size: 18px;
+.property-content h3 {
+  color: #191970;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
-  margin: 0;
 }
 
-.property-price {
-  font-size: 16px;
-  font-weight: 500;
-  color: #e53935;
-}
-
-.property-location {
-  display: flex;
-  align-items: center;
-  margin: 8px 0;
-  color: #555;
-}
-
-.location-icon {
-  margin-right: 5px;
-}
-
-.property-description {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
+.property-content p {
+  color: #191970;
+  font-size: 0.95rem;
+  margin: 0.5rem 0;
+  line-height: 1.6;
 }
 
 .property-features {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e8e8e8;
 }
 
 .feature {
-  font-size: 12px;
-  background: #f2f2f2;
-  padding: 4px 6px;
-  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #f0efe2;
+  color: #191970;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-family: "Sanchez", serif;
+  font-weight: 500;
+}
+
+/* Mensagem quando não há curtidos */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.empty-illustration {
+  margin-bottom: 2rem;
+  font-size: 5rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  font-family: "Sanchez", serif;
+  color: #191970;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-family: "Sanchez", serif;
+  color: #191970;
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 1200px) {
+  .curtidas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .curtidas-page {
+    padding: 2rem 0;
+  }
+
+  .curtidas-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .curtidas-page h2 {
+    font-size: 2rem;
+  }
+
+  .property-card {
+    max-width: 100%;
+  }
 }
