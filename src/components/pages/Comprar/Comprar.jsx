@@ -34,7 +34,14 @@ const Comprar = ({ usuario }) => {
     }
   }, [usuario]);
 
-  const toggleCurtida = async (imovelId) => {
+  const toggleCurtida = async (imovel) => {
+    // Aceita tanto imovel.id quanto imovel.imovel_id
+    const imovelId = imovel?.id ?? imovel?.imovel_id;
+    if (!imovelId) {
+      console.error("ID do imóvel não encontrado:", imovel);
+      return;
+    }
+
     if (!usuario) {
       alert("Você precisa fazer login para curtir os imóveis!");
       return;
@@ -81,9 +88,6 @@ const Comprar = ({ usuario }) => {
     }));
   };
 
-  // -------------------------
-  // Helpers para exibir campos por tipo
-  // -------------------------
   const normalizeStr = (s) =>
     s
       ? String(s)
@@ -107,7 +111,6 @@ const Comprar = ({ usuario }) => {
 
     const mobiliadoSym = mobiliado ? "☑" : "☐";
 
-    // Mostrar campos conforme o tipo pedido
     switch (tipo) {
       case "casa":
         return (
@@ -120,31 +123,8 @@ const Comprar = ({ usuario }) => {
             <div>Mobiliado: {mobiliadoSym}</div>
           </>
         );
-
       case "apartamento":
-        return (
-          <>
-            {areaConstruida != null && (
-              <div>Área construída: {areaConstruida} m²</div>
-            )}
-            {quarto != null && <div>🛏 {quarto} quartos</div>}
-            {andar != null && <div>Andar: {andar}</div>}
-            <div>Mobiliado: {mobiliadoSym}</div>
-          </>
-        );
-
       case "cobertura":
-        return (
-          <>
-            {areaConstruida != null && (
-              <div>Área construída: {areaConstruida} m²</div>
-            )}
-            {quarto != null && <div>🛏 {quarto} quartos</div>}
-            {andar != null && <div>Andar: {andar}</div>}
-            <div>Mobiliado: {mobiliadoSym}</div>
-          </>
-        );
-
       case "kitnet":
         return (
           <>
@@ -156,12 +136,13 @@ const Comprar = ({ usuario }) => {
             <div>Mobiliado: {mobiliadoSym}</div>
           </>
         );
-
       case "terreno":
+      case "sitio":
+      case "sítio":
+      case "fazenda":
         return (
           <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
         );
-
       case "sala comercial":
         return (
           <>
@@ -173,7 +154,6 @@ const Comprar = ({ usuario }) => {
             <div>Mobiliado: {mobiliadoSym}</div>
           </>
         );
-
       case "galpao":
       case "galpão":
         return (
@@ -184,20 +164,7 @@ const Comprar = ({ usuario }) => {
             )}
           </>
         );
-
-      case "sitio":
-      case "sítio":
-        return (
-          <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
-        );
-
-      case "fazenda":
-        return (
-          <>{areaTotal != null && <div>Área total: {areaTotal} m²</div>}</>
-        );
-
       default:
-        // fallback: mostra áreas caso existam (comportamento parecido ao anterior)
         return (
           <>
             {areaTotal != null && <div>Área total: {areaTotal} m²</div>}
@@ -223,7 +190,7 @@ const Comprar = ({ usuario }) => {
             {imoveisExibidos.map((imovel) => (
               <div
                 className="property-card"
-                key={imovel.id}
+                key={imovel.id ?? imovel.imovel_id}
                 onClick={() => setImovelSelecionado(imovel)}
               >
                 <div className="image-container">
@@ -233,15 +200,19 @@ const Comprar = ({ usuario }) => {
                         className="carousel-btn prev"
                         onClick={(e) => {
                           e.stopPropagation();
-                          imagemAnterior(imovel.id, imovel.fotos.length);
+                          imagemAnterior(
+                            imovel.id ?? imovel.imovel_id,
+                            imovel.fotos.length
+                          );
                         }}
                       >
                         ◀
                       </button>
                       <img
                         src={
-                          imovel.fotos[imagemAtual[imovel.id] || 0]
-                            ?.caminho_foto
+                          imovel.fotos[
+                            imagemAtual[imovel.id ?? imovel.imovel_id] || 0
+                          ]?.caminho_foto
                         }
                         alt={imovel.titulo}
                         className="property-image"
@@ -250,7 +221,10 @@ const Comprar = ({ usuario }) => {
                         className="carousel-btn next"
                         onClick={(e) => {
                           e.stopPropagation();
-                          proximaImagem(imovel.id, imovel.fotos.length);
+                          proximaImagem(
+                            imovel.id ?? imovel.imovel_id,
+                            imovel.fotos.length
+                          );
                         }}
                       >
                         ▶
@@ -269,14 +243,11 @@ const Comprar = ({ usuario }) => {
                     </div>
                   </div>
 
-                  {/* sempre exibir localização (cidade - bairro) */}
                   <div className="property-details">
                     <div>
                       Localização: {imovel.cidade || "Cidade não informada"} -{" "}
                       {imovel.bairro || "Bairro não informado"}
                     </div>
-
-                    {/* campos específicos por tipo */}
                     {renderTypeSpecific(imovel)}
                   </div>
 
@@ -313,10 +284,10 @@ const Comprar = ({ usuario }) => {
                       className="like-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleCurtida(imovel.id);
+                        toggleCurtida(imovel);
                       }}
                     >
-                      {curtidas[imovel.id] ? (
+                      {curtidas[imovel.id ?? imovel.imovel_id] ? (
                         <AiFillHeart size={22} color="red" />
                       ) : (
                         <AiOutlineHeart size={22} />

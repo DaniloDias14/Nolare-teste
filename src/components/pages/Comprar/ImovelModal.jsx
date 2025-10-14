@@ -17,7 +17,6 @@ const ImovelModal = ({
   useEffect(() => {
     if (!imovel) return;
 
-    // Todos os campos possíveis que são características
     const camposCaracteristicas = [
       "quarto",
       "suite",
@@ -67,7 +66,7 @@ const ImovelModal = ({
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
-  const curtido = !!curtidas[imovel.id];
+  const curtido = !!curtidas[imovel.id ?? imovel.imovel_id];
 
   const handlePrev = () => {
     setFotoIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
@@ -95,21 +94,35 @@ const ImovelModal = ({
     }
 
     try {
+      // Corrigido: ordem correta usuario.id / imovel.id
       const res = await fetch(
-        `http://localhost:5000/api/curtidas/${usuario.id}/${imovel.id}`,
+        `http://localhost:5000/api/curtidas/${usuario.id}/${
+          imovel.id ?? imovel.imovel_id
+        }`,
         { method: "POST" }
       );
       if (!res.ok) throw new Error("Erro ao alternar curtida");
 
       setCurtidas((prev) => {
-        const atualizado = { ...prev, [imovel.id]: !prev[imovel.id] };
+        const atualizado = {
+          ...prev,
+          [imovel.id ?? imovel.imovel_id]: !prev[imovel.id ?? imovel.imovel_id],
+        };
 
-        if (prev[imovel.id] && !atualizado[imovel.id] && onDescurtir) {
-          onDescurtir(imovel.id);
+        if (
+          prev[imovel.id ?? imovel.imovel_id] &&
+          !atualizado[imovel.id ?? imovel.imovel_id] &&
+          onDescurtir
+        ) {
+          onDescurtir(imovel.id ?? imovel.imovel_id);
         }
 
-        if (!prev[imovel.id] && atualizado[imovel.id] && onCurtir) {
-          onCurtir(imovel.id);
+        if (
+          !prev[imovel.id ?? imovel.imovel_id] &&
+          atualizado[imovel.id ?? imovel.imovel_id] &&
+          onCurtir
+        ) {
+          onCurtir(imovel.id ?? imovel.imovel_id);
         }
 
         return atualizado;

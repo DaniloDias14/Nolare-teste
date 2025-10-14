@@ -34,13 +34,13 @@ const Curtidas = ({ usuario }) => {
   }, [usuario]);
 
   const removerImovel = (imovelId) => {
-    setImoveis((prev) => prev.filter((i) => i.id !== imovelId));
+    setImoveis((prev) => prev.filter((i) => i.imovel_id !== imovelId)); // ✅ Corrigido
   };
 
   const adicionarImovel = async (imovelId) => {
     setImoveis((prev) => {
-      if (prev.some((i) => i.id === imovelId)) return prev;
-      return [...prev, { id: imovelId, carregando: true }];
+      if (prev.some((i) => i.imovel_id === imovelId)) return prev; // ✅ Corrigido
+      return [...prev, { imovel_id: imovelId, carregando: true }];
     });
 
     try {
@@ -50,7 +50,7 @@ const Curtidas = ({ usuario }) => {
 
       setImoveis((prev) =>
         prev.map((i) =>
-          i.id === imovelId && i.carregando
+          i.imovel_id === imovelId && i.carregando // ✅ Corrigido
             ? { ...novoImovel, fotos: novoImovel.fotos || [] }
             : i
         )
@@ -58,7 +58,7 @@ const Curtidas = ({ usuario }) => {
     } catch (err) {
       console.error("Erro ao adicionar imóvel curtido:", err);
       setImoveis((prev) =>
-        prev.filter((i) => i.id !== imovelId || !i.carregando)
+        prev.filter((i) => i.imovel_id !== imovelId || !i.carregando)
       );
     }
   };
@@ -77,12 +77,10 @@ const Curtidas = ({ usuario }) => {
       setCurtidas((prev) => {
         const atualizado = { ...prev, [imovelId]: !prev[imovelId] };
 
-        // Se descurtiu, remove da lista de imóveis
         if (prev[imovelId] && !atualizado[imovelId]) {
           removerImovel(imovelId);
         }
 
-        // Se curtiu, adiciona à lista
         if (!prev[imovelId] && atualizado[imovelId]) {
           adicionarImovel(imovelId);
         }
@@ -118,7 +116,7 @@ const Curtidas = ({ usuario }) => {
         {imoveis.map((imovel) => (
           <div
             className="property-card"
-            key={imovel.id}
+            key={imovel.imovel_id} // ✅ Corrigido
             onClick={() => setImovelSelecionado(imovel)}
           >
             <div className="image-container">
@@ -128,15 +126,16 @@ const Curtidas = ({ usuario }) => {
                     className="carousel-btn prev"
                     onClick={(e) => {
                       e.stopPropagation();
-                      imagemAnterior(imovel.id, imovel.fotos.length);
+                      imagemAnterior(imovel.imovel_id, imovel.fotos.length); // ✅ Corrigido
                     }}
                   >
                     ◀
                   </button>
                   <img
-                    src={
-                      imovel.fotos[imagemAtual[imovel.id] || 0]?.caminho_foto
-                    }
+                    src={`http://localhost:5000${
+                      imovel.fotos[imagemAtual[imovel.imovel_id] || 0]
+                        ?.caminho_foto
+                    }`} // ✅ Corrigido
                     alt={imovel.titulo}
                     className="property-image"
                   />
@@ -144,7 +143,7 @@ const Curtidas = ({ usuario }) => {
                     className="carousel-btn next"
                     onClick={(e) => {
                       e.stopPropagation();
-                      proximaImagem(imovel.id, imovel.fotos.length);
+                      proximaImagem(imovel.imovel_id, imovel.fotos.length); // ✅ Corrigido
                     }}
                   >
                     ▶
@@ -157,10 +156,10 @@ const Curtidas = ({ usuario }) => {
                 className="like-button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleCurtida(imovel.id);
+                  toggleCurtida(imovel.imovel_id); // ✅ Corrigido
                 }}
               >
-                {curtidas[imovel.id] ? (
+                {curtidas[imovel.imovel_id] ? ( // ✅ Corrigido
                   <AiFillHeart size={26} color="red" />
                 ) : (
                   <AiOutlineHeart size={26} />

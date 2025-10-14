@@ -27,7 +27,7 @@ const App = () => {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
       setAdmLogged(parsedUser.tipo_usuario === "adm");
-      setIsLoggedIn(false);
+      setIsLoggedIn(true); // ✅ Corrigido aqui
     }
   }, []);
 
