@@ -44,12 +44,40 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
+    await pool.query(
+      "INSERT INTO usuario_sessoes (usuario_id, data_login, ativo) VALUES ($1, CURRENT_TIMESTAMP, TRUE)",
+      [user.id]
+    );
+
     // Remove a senha do objeto antes de enviar
     const { senha: _, ...userSemSenha } = user;
 
     res.json({ user: userSemSenha });
   } catch (err) {
     console.error("Erro ao fazer login:", err);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
+app.post("/api/logout", async (req, res) => {
+  const { usuario_id } = req.body;
+
+  if (!usuario_id) {
+    return res.status(400).json({ error: "usuario_id é obrigatório" });
+  }
+
+  try {
+    // Update the most recent active session for this user
+    await pool.query(
+      `UPDATE usuario_sessoes 
+       SET data_logout = CURRENT_TIMESTAMP, ativo = FALSE 
+       WHERE usuario_id = $1 AND ativo = TRUE`,
+      [usuario_id]
+    );
+
+    res.json({ message: "Logout realizado com sucesso" });
+  } catch (err) {
+    console.error("Erro ao fazer logout:", err);
     res.status(500).json({ error: "Erro no servidor" });
   }
 });
@@ -89,6 +117,62 @@ app.post("/api/register", async (req, res) => {
   } catch (err) {
     console.error("Erro ao registrar usuário:", err);
     res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
+// =========================
+// ROTAS DE SESSÕES (para Dashboard)
+// =========================
+
+app.get("/api/sessoes/ativos", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT COUNT(DISTINCT usuario_id) as count FROM usuario_sessoes WHERE ativo = TRUE"
+    );
+    res.json({ count: Number.parseInt(result.rows[0].count) });
+  } catch (err) {
+    console.error("Erro ao buscar usuários ativos:", err);
+    res.status(500).json({ error: "Erro ao buscar usuários ativos" });
+  }
+});
+
+app.get("/api/sessoes/pico/:data", async (req, res) => {
+  const { data } = req.params;
+
+  try {
+    // Query to find peak concurrent users on a specific date
+    const result = await pool.query(
+      `WITH sessoes_dia AS (
+        SELECT 
+          usuario_id,
+          data_login,
+          COALESCE(data_logout, CURRENT_TIMESTAMP) as data_logout
+        FROM usuario_sessoes
+        WHERE DATE(data_login) = $1 OR DATE(data_logout) = $1
+      ),
+      intervalos AS (
+        SELECT data_login as momento FROM sessoes_dia
+        UNION
+        SELECT data_logout as momento FROM sessoes_dia
+      ),
+      contagem AS (
+        SELECT 
+          i.momento,
+          COUNT(DISTINCT s.usuario_id) as usuarios_ativos
+        FROM intervalos i
+        LEFT JOIN sessoes_dia s ON i.momento >= s.data_login AND i.momento <= s.data_logout
+        WHERE DATE(i.momento) = $1
+        GROUP BY i.momento
+      )
+      SELECT COALESCE(MAX(usuarios_ativos), 0) as pico
+      FROM contagem`,
+      [data]
+    );
+
+    res.json({ pico: Number.parseInt(result.rows[0].pico) });
+  } catch (err) {
+    console.error("Erro ao buscar pico de usuários:", err);
+    res.status(500).json({ error: "Erro ao buscar pico de usuários" });
   }
 });
 
@@ -139,6 +223,108 @@ app.post("/api/curtidas/:usuario_id/:imovel_id", async (req, res) => {
   } catch (err) {
     console.error("Erro ao alternar curtida:", err);
     res.status(500).json({ error: "Erro ao alternar curtida" });
+  }
+});
+
+// =========================
+// ROTAS DE ESTATÍSTICAS (para Dashboard)
+// =========================
+
+app.get("/api/estatisticas/usuarios", async (req, res) => {
+  try {
+    const totalResult = await pool.query(
+      "SELECT COUNT(*) as total FROM usuarios"
+    );
+    const tiposResult = await pool.query(
+      "SELECT tipo_usuario, COUNT(*) as count FROM usuarios GROUP BY tipo_usuario"
+    );
+    const ultimoResult = await pool.query(
+      "SELECT data_criacao FROM usuarios ORDER BY data_criacao DESC LIMIT 1"
+    );
+
+    const tipos = {};
+    tiposResult.rows.forEach((row) => {
+      tipos[row.tipo_usuario] = Number.parseInt(row.count);
+    });
+
+    res.json({
+      total: Number.parseInt(totalResult.rows[0].total),
+      tipos: tipos,
+      ultimo_cadastro: ultimoResult.rows[0]?.data_criacao || null,
+    });
+  } catch (err) {
+    console.error("Erro ao buscar estatísticas de usuários:", err);
+    res.status(500).json({ error: "Erro ao buscar estatísticas" });
+  }
+});
+
+app.get("/api/estatisticas/imoveis", async (req, res) => {
+  try {
+    const totalResult = await pool.query(
+      "SELECT COUNT(*) as total FROM imoveis WHERE visivel = TRUE"
+    );
+    const mediaPrecoResult = await pool.query(
+      "SELECT AVG(preco) as media FROM imoveis WHERE visivel = TRUE"
+    );
+    const ultimoResult = await pool.query(
+      "SELECT data_criacao FROM imoveis WHERE visivel = TRUE ORDER BY data_criacao DESC LIMIT 1"
+    );
+    const destaqueResult = await pool.query(
+      "SELECT COUNT(*) as count FROM imoveis WHERE destaque = TRUE AND visivel = TRUE"
+    );
+    const statusResult = await pool.query(
+      "SELECT status, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY status"
+    );
+    const finalidadeResult = await pool.query(
+      "SELECT finalidade, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY finalidade"
+    );
+    const tipoResult = await pool.query(
+      "SELECT tipo, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY tipo"
+    );
+
+    // Get properties by construtora from caracteristicas table
+    const construtoraResult = await pool.query(
+      `SELECT ic.construtora, COUNT(*) as count 
+       FROM imoveis_caracteristicas ic
+       JOIN imoveis i ON i.id = ic.imovel_id
+       WHERE i.visivel = TRUE AND ic.construtora IS NOT NULL
+       GROUP BY ic.construtora`
+    );
+
+    const status = {};
+    statusResult.rows.forEach((row) => {
+      if (row.status) status[row.status] = Number.parseInt(row.count);
+    });
+
+    const finalidade = {};
+    finalidadeResult.rows.forEach((row) => {
+      if (row.finalidade)
+        finalidade[row.finalidade] = Number.parseInt(row.count);
+    });
+
+    const tipo = {};
+    tipoResult.rows.forEach((row) => {
+      if (row.tipo) tipo[row.tipo] = Number.parseInt(row.count);
+    });
+
+    const construtora = {};
+    construtoraResult.rows.forEach((row) => {
+      construtora[row.construtora] = Number.parseInt(row.count);
+    });
+
+    res.json({
+      total: Number.parseInt(totalResult.rows[0].total),
+      media_preco: Number.parseFloat(mediaPrecoResult.rows[0].media) || 0,
+      ultimo_cadastro: ultimoResult.rows[0]?.data_criacao || null,
+      destaque: Number.parseInt(destaqueResult.rows[0].count),
+      status: status,
+      finalidade: finalidade,
+      tipo: tipo,
+      construtora: construtora,
+    });
+  } catch (err) {
+    console.error("Erro ao buscar estatísticas de imóveis:", err);
+    res.status(500).json({ error: "Erro ao buscar estatísticas" });
   }
 });
 

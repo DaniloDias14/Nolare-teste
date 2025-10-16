@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 
@@ -10,10 +10,10 @@ import Alugar from "./components/Pages/Alugar/Alugar";
 import Anunciar from "./components/Pages/Anunciar/Anunciar";
 import SobreNos from "./components/Pages/SobreNos/SobreNos";
 
-import Dashboard from "./components/AdminPanel/Config/Dashboard/Dashboard";
-import CRUD from "./components/AdminPanel/Config/CRUD/CRUD";
+import Dashboard from "./components/AdminPanel/Dashboard/Dashboard";
+import AdicionarImovel from "./components/AdminPanel/AdicionarImovel/AdicionarImovel";
 
-import AdminFloatingButton from "./components/AdminPanel/FloatingButton/FloatingButton";
+import AdminFloatingButton from "./components/AdminPanel/FloatingButtonAdmin/FloatingButtonAdmin";
 import UserFloatingButton from "./components/UserPanel/FloatingButton/FloatingButton";
 import Curtidas from "./components/UserPanel/Curtidas/Curtidas.jsx";
 
@@ -22,6 +22,10 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showConfigOptions, setShowConfigOptions] = useState(false);
+  const [showAdicionarImovelPopup, setShowAdicionarImovelPopup] =
+    useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedUser = localStorage.getItem("nolare_user");
@@ -29,9 +33,19 @@ const App = () => {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
       setAdmLogged(parsedUser.tipo_usuario === "adm");
-      setIsLoggedIn(true); // ✅ Corrigido aqui
+      setIsLoggedIn(true);
     }
   }, []);
+
+  const handleAdicionarImovelClick = () => {
+    setShowAdicionarImovelPopup(true);
+    setShowConfigOptions(false);
+  };
+
+  const handleDashboardClick = () => {
+    navigate("/config/dashboard");
+    setShowConfigOptions(false);
+  };
 
   return (
     <div className="app-container">
@@ -59,7 +73,6 @@ const App = () => {
           />
           <Route path="/sobre-nos" element={<SobreNos />} />
           <Route path="/config/dashboard" element={<Dashboard />} />
-          <Route path="/config/crud" element={<CRUD />} />
           <Route
             path="/curtidas"
             element={<Curtidas usuario={isLoggedIn ? user : null} />}
@@ -70,10 +83,18 @@ const App = () => {
       <Footer />
 
       {admLogged && (
-        <AdminFloatingButton
-          showConfigOptions={showConfigOptions}
-          setShowConfigOptions={setShowConfigOptions}
-        />
+        <>
+          <AdminFloatingButton
+            showConfigOptions={showConfigOptions}
+            setShowConfigOptions={setShowConfigOptions}
+            onAdicionarImovelClick={handleAdicionarImovelClick}
+            onDashboardClick={handleDashboardClick}
+          />
+          <AdicionarImovel
+            showPopup={showAdicionarImovelPopup}
+            setShowPopup={setShowAdicionarImovelPopup}
+          />
+        </>
       )}
 
       {isLoggedIn && user && user.tipo_usuario === "user" && (

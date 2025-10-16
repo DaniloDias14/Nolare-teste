@@ -1,12 +1,16 @@
 "use client";
-import { Link } from "react-router-dom";
 import { FiSettings } from "react-icons/fi";
-import "./FloatingButton.css";
+import "./FloatingButtonAdmin.css";
 
-const FloatingButton = ({ showConfigOptions, setShowConfigOptions }) => {
+const FloatingButtonAdmin = ({
+  showConfigOptions,
+  setShowConfigOptions,
+  onAdicionarImovelClick,
+  onDashboardClick,
+}) => {
   return (
     <div className="floating-container">
-      {/* Botão principal ⚙️ */}
+      {/* Botão principal */}
       <button
         className="floating-btn"
         onClick={() => setShowConfigOptions(!showConfigOptions)}
@@ -16,15 +20,15 @@ const FloatingButton = ({ showConfigOptions, setShowConfigOptions }) => {
 
       {/* Opções administrativas */}
       <div className={`config-options ${showConfigOptions ? "show" : ""}`}>
-        <Link to="/config/dashboard" className="config-link">
+        <button onClick={onDashboardClick} className="config-link">
           Dashboard
-        </Link>
-        <Link to="/config/crud" className="config-link">
-          Gerenciar Imóveis
-        </Link>
+        </button>
+        <button onClick={onAdicionarImovelClick} className="config-link">
+          Adicionar Imóvel
+        </button>
       </div>
     </div>
   );
 };
 
-export default FloatingButton;
+export default FloatingButtonAdmin;
