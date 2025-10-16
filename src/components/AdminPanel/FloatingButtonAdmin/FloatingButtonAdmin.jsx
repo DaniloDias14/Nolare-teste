@@ -15,16 +15,16 @@ const FloatingButtonAdmin = ({
         className="floating-btn"
         onClick={() => setShowConfigOptions(!showConfigOptions)}
       >
-        <FiSettings size={24} />
+        <FiSettings size={24} className="settings-icon" />
       </button>
 
       {/* Opções administrativas */}
       <div className={`config-options ${showConfigOptions ? "show" : ""}`}>
-        <button onClick={onDashboardClick} className="config-link">
-          Dashboard
-        </button>
         <button onClick={onAdicionarImovelClick} className="config-link">
           Adicionar Imóvel
+        </button>
+        <button onClick={onDashboardClick} className="config-link">
+          Dashboard
         </button>
       </div>
     </div>

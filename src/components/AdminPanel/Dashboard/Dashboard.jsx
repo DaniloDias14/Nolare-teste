@@ -113,8 +113,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Dashboard Administrativo</h1>
-
       {/* User Statistics Section */}
       <section className="dashboard-section">
         <h2 className="section-title">Estatísticas de Usuários</h2>

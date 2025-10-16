@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 
@@ -26,6 +26,9 @@ const App = () => {
     useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isDashboardRoute = location.pathname === "/config/dashboard";
 
   useEffect(() => {
     const savedUser = localStorage.getItem("nolare_user");
@@ -49,13 +52,15 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <Header
-        setAdmLogged={setAdmLogged}
-        setUser={(userData) => {
-          setUser(userData);
-          setIsLoggedIn(true);
-        }}
-      />
+      {!isDashboardRoute && (
+        <Header
+          setAdmLogged={setAdmLogged}
+          setUser={(userData) => {
+            setUser(userData);
+            setIsLoggedIn(true);
+          }}
+        />
+      )}
 
       <main>
         <Routes>
@@ -80,7 +85,7 @@ const App = () => {
         </Routes>
       </main>
 
-      <Footer />
+      {!isDashboardRoute && <Footer />}
 
       {admLogged && (
         <>

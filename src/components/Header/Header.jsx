@@ -12,8 +12,8 @@ const Header = ({ setAdmLogged, setUser }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleLogoClick = (e) => {
-    e.preventDefault(); // previne comportamento padrão do Link
-    window.scrollTo({ top: 0, behavior: "smooth" }); // volta para o topo
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleMenuClick = () => {
@@ -25,11 +25,7 @@ const Header = ({ setAdmLogged, setUser }) => {
       <nav className="nav">
         {/* Logo */}
         <a href="/" className="logo" onClick={handleLogoClick}>
-          <img
-            src="/nolare-real-estate-logo-elegant.png"
-            alt="Nolare"
-            className="logo-img"
-          />
+          <img src="/logo.png" alt="Nolare" className="logo-img" />
         </a>
 
         {/* Hamburger para mobile */}

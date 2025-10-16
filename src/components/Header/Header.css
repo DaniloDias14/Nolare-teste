@@ -4,9 +4,9 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  /* Sombra mais forte e visível */
-  box-shadow: 0 4px 16px rgba(25, 25, 112, 0.25);
-  border-bottom: 1px solid rgba(25, 25, 112, 0.1);
+  /* Sombra mais suave */
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.12);
+  border-bottom: 1px solid rgba(25, 25, 112, 0.08);
 }
 
 .nav {
@@ -42,7 +42,6 @@
   flex-direction: column;
   gap: 5px;
   padding: 8px;
-  /* Melhor transição do hambúrguer */
   z-index: 1001;
 }
 
@@ -66,7 +65,6 @@
 .menu li a {
   text-decoration: none;
   color: var(--primary-blue);
-  /* Fonte maior e em negrito */
   font-weight: 700;
   font-size: 1.1rem;
   padding: 0.5rem 0;
@@ -87,10 +85,10 @@
 }
 
 .menu li a:hover::after {
-  /* Traço até 75% da largura */
   width: 75%;
 }
 
+/* Animação discreta no botão Conectar-se */
 .perfil-icon {
   background: var(--primary-blue);
   color: var(--white);
@@ -104,8 +102,8 @@
   font-weight: 500;
   font-size: 1rem;
   font-family: "Sanchez", serif;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
 }
 
 .perfil-icon::before {
@@ -114,8 +112,13 @@
 }
 
 .perfil-icon:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
+  background: #2a2a8f;
+}
+
+.perfil-icon:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 968px) {
@@ -147,7 +150,6 @@
     padding: 2rem 0;
     gap: 0;
     box-shadow: 4px 0 15px rgba(25, 25, 112, 0.15);
-    /* Transição mais suave e natural */
     transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
   }

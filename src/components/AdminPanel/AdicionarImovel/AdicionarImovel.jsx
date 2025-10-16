@@ -5,32 +5,36 @@ import axios from "axios";
 import "./AdicionarImovel.css";
 
 const booleanFields = [
-  "suite",
-  "piscina",
-  "churrasqueira",
-  "salao_de_festa",
-  "academia",
-  "playground",
-  "jardim",
-  "varanda",
-  "interfone",
   "acessibilidade_pcd",
-  "mobiliado",
-  "energia_solar",
-  "quadra",
-  "lavanderia",
-  "closet",
-  "escritorio",
-  "lareira",
-  "alarme",
-  "camera_vigilancia",
-  "bicicletario",
-  "sala_jogos",
-  "brinquedoteca",
-  "elevador",
-  "pomar",
-  "lago",
   "aceita_animais",
+  "academia",
+  "alarme",
+  "bicicletario",
+  "brinquedoteca",
+  "camera_vigilancia",
+  "carregador_carro_eletrico",
+  "churrasqueira",
+  "closet",
+  "elevador",
+  "energia_solar",
+  "escritorio",
+  "estudio",
+  "gerador_energia",
+  "interfone",
+  "jardim",
+  "lago",
+  "lareira",
+  "lavanderia",
+  "mobiliado",
+  "playground",
+  "piscina",
+  "pomar",
+  "portaria_24h",
+  "quadra",
+  "sala_jogos",
+  "salao_de_festa",
+  "suite",
+  "varanda",
 ];
 
 const estados = ["Santa Catarina"];
@@ -45,7 +49,7 @@ const cidades = [
   "Siderópolis",
   "Urussanga",
 ];
-const finalidades = ["Venda", "Aluguel", "Temporada"];
+const finalidades = ["Aluguel", "Temporada", "Venda"];
 const construtoras = [
   "Construfase",
   "Construtora Fontana",
@@ -54,9 +58,9 @@ const construtoras = [
 ];
 
 const AdicionarImovel = ({ showPopup, setShowPopup }) => {
-  const [activeTab, setActiveTab] = useState(1); // Tab navigation state
+  const [activeTab, setActiveTab] = useState(1);
   const [errorMsg, setErrorMsg] = useState("");
-  const [draggedIndex, setDraggedIndex] = useState(null); // For drag & drop
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -73,7 +77,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     bairro: "",
     area_total: "",
     area_construida: "",
-    fotos: Array(10).fill(null), // Support up to 10 photos
+    fotos: Array(10).fill(null),
 
     condominio: "",
     iptu: "",
@@ -110,6 +114,10 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     lago: false,
     aceita_animais: false,
     construtora: "",
+    portaria_24h: false,
+    carregador_carro_eletrico: false,
+    gerador_energia: false,
+    estudio: false,
   });
 
   const handleInputChange = (e) => {
@@ -126,7 +134,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     }));
   };
 
-  // Handle photo file selection
   const handleFotoChange = (index, file) => {
     setFormData((prev) => {
       const newFotos = [...prev.fotos];
@@ -135,7 +142,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     });
   };
 
-  // Remove photo
   const handleRemoveFoto = (index) => {
     setFormData((prev) => {
       const newFotos = [...prev.fotos];
@@ -144,7 +150,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     });
   };
 
-  // Drag & drop handlers for photo reordering
   const handleDragStart = (index) => {
     setDraggedIndex(index);
   };
@@ -221,6 +226,10 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       lago: false,
       aceita_animais: false,
       construtora: "",
+      portaria_24h: false,
+      carregador_carro_eletrico: false,
+      gerador_energia: false,
+      estudio: false,
     });
   };
 
@@ -230,7 +239,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     return Number.isFinite(n) ? n : null;
   };
 
-  // Validate required fields with specific error messages
   const validateForm = () => {
     const errors = [];
 
@@ -260,13 +268,11 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     e.preventDefault();
     setErrorMsg("");
 
-    // Validate required fields
     if (!validateForm()) {
       return;
     }
 
     try {
-      // Create property payload
       const imovelPayload = {
         titulo: formData.titulo || null,
         descricao: formData.descricao || null,
@@ -292,7 +298,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       const imovelId = createRes.data?.id;
       if (!imovelId) throw new Error("ID do imóvel não retornado.");
 
-      // Create characteristics payload
       const caracteristicasPayload = {
         imovel_id: imovelId,
         condominio: parseNumberOrNull(formData.condominio),
@@ -315,7 +320,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         caracteristicasPayload
       );
 
-      // Upload photos if any
       const formDataFotos = new FormData();
       formData.fotos.forEach((foto) => {
         if (foto) formDataFotos.append("fotos", foto);
@@ -341,6 +345,42 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     }
   };
 
+  const formatFieldLabel = (field) => {
+    const labels = {
+      acessibilidade_pcd: "Acessibilidade PCD",
+      aceita_animais: "Aceita Animais",
+      academia: "Academia",
+      alarme: "Alarme",
+      bicicletario: "Bicicletário",
+      brinquedoteca: "Brinquedoteca",
+      camera_vigilancia: "Câmera de Vigilância",
+      carregador_carro_eletrico: "Carregador de Carro Elétrico",
+      churrasqueira: "Churrasqueira",
+      closet: "Closet",
+      elevador: "Elevador",
+      energia_solar: "Energia Solar",
+      escritorio: "Escritório",
+      estudio: "Estúdio",
+      gerador_energia: "Gerador de Energia",
+      interfone: "Interfone",
+      jardim: "Jardim",
+      lago: "Lago",
+      lareira: "Lareira",
+      lavanderia: "Lavanderia",
+      mobiliado: "Mobiliado",
+      playground: "Playground",
+      piscina: "Piscina",
+      pomar: "Pomar",
+      portaria_24h: "Portaria 24h",
+      quadra: "Quadra",
+      sala_jogos: "Sala de Jogos",
+      salao_de_festa: "Salão de Festa",
+      suite: "Suíte",
+      varanda: "Varanda",
+    };
+    return labels[field] || field.replace(/_/g, " ");
+  };
+
   return (
     <>
       {showPopup && (
@@ -353,7 +393,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
             <h3>Adicionar Imóvel</h3>
             {errorMsg && <p className="error-msg">{errorMsg}</p>}
 
-            {/* Tab navigation */}
             <div className="tabs-container">
               <button
                 className={`tab ${activeTab === 1 ? "active" : ""}`}
@@ -379,9 +418,9 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Tab 1: Basic Information */}
               {activeTab === 1 && (
                 <div className="tab-content">
+                  <h4>Identificação</h4>
                   <div className="form-row">
                     <input
                       type="text"
@@ -404,6 +443,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     />
                   </div>
 
+                  <h4>Valor</h4>
                   <div className="form-row">
                     <input
                       type="number"
@@ -411,41 +451,47 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Preço *"
                       value={formData.preco}
                       onChange={handleInputChange}
+                      className="full-width"
                     />
+                  </div>
+
+                  <h4>Classificação</h4>
+                  <div className="form-row">
                     <select
                       name="tipo"
                       value={formData.tipo}
                       onChange={handleInputChange}
                     >
-                      <option value="">Selecione o tipo</option>
-                      <option value="Casa">Casa</option>
+                      <option value="">Selecione o Tipo</option>
                       <option value="Apartamento">Apartamento</option>
+                      <option value="Casa">Casa</option>
+                      <option value="Chalé">Chalé</option>
                       <option value="Cobertura">Cobertura</option>
-                      <option value="Kitnet">Kitnet</option>
-                      <option value="Terreno">Terreno</option>
-                      <option value="Sala comercial">Sala comercial</option>
-                      <option value="Galpão">Galpão</option>
-                      <option value="Sítio">Sítio</option>
                       <option value="Fazenda">Fazenda</option>
+                      <option value="Galpão">Galpão</option>
+                      <option value="Kitnet">Kitnet</option>
+                      <option value="Sala comercial">Sala Comercial</option>
+                      <option value="Sítio">Sítio</option>
+                      <option value="Terreno">Terreno</option>
                     </select>
-                  </div>
-
-                  <div className="form-row">
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
                     >
-                      <option value="">Selecione o status</option>
+                      <option value="">Selecione o Status</option>
                       <option value="disponivel">Disponível</option>
                       <option value="vendido">Vendido</option>
                     </select>
+                  </div>
+
+                  <div className="form-row">
                     <select
                       name="finalidade"
                       value={formData.finalidade}
                       onChange={handleInputChange}
                     >
-                      <option value="">Selecione a finalidade</option>
+                      <option value="">Selecione a Finalidade</option>
                       {finalidades.map((f) => (
                         <option key={f} value={f.toLowerCase()}>
                           {f}
@@ -454,6 +500,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     </select>
                   </div>
 
+                  <h4>Destaque</h4>
                   <div className="form-row">
                     <label className="checkbox-label">
                       <input
@@ -462,7 +509,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                         checked={formData.destaque}
                         onChange={handleInputChange}
                       />
-                      <span>Marcar como destaque</span>
+                      <span>Marcar como Destaque</span>
                     </label>
                   </div>
 
@@ -480,7 +527,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       value={formData.estado}
                       onChange={handleInputChange}
                     >
-                      <option value="">Selecione o estado</option>
+                      <option value="">Selecione o Estado</option>
                       {estados.map((f) => (
                         <option key={f} value={f}>
                           {f}
@@ -495,7 +542,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       value={formData.cidade}
                       onChange={handleInputChange}
                     >
-                      <option value="">Selecione a cidade</option>
+                      <option value="">Selecione a Cidade</option>
                       {cidades.map((f) => (
                         <option key={f} value={f}>
                           {f}
@@ -531,7 +578,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                 </div>
               )}
 
-              {/* Tab 2: Characteristics */}
               {activeTab === 2 && (
                 <div className="tab-content">
                   <h4>Valores</h4>
@@ -574,14 +620,14 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="number"
                       name="vaga"
-                      placeholder="Vagas de garagem"
+                      placeholder="Vagas de Garagem"
                       value={formData.vaga}
                       onChange={handleInputChange}
                     />
                     <input
                       type="number"
                       name="ar_condicionado"
-                      placeholder="Ar condicionado"
+                      placeholder="Ar Condicionado"
                       value={formData.ar_condicionado}
                       onChange={handleInputChange}
                     />
@@ -598,7 +644,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="number"
                       name="andar_total"
-                      placeholder="Total de andares"
+                      placeholder="Total de Andares"
                       value={formData.andar_total}
                       onChange={handleInputChange}
                     />
@@ -612,7 +658,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       onChange={handleInputChange}
                       className="full-width"
                     >
-                      <option value="">Selecione a construtora</option>
+                      <option value="">Selecione a Construtora</option>
                       {construtoras.map((c) => (
                         <option key={c} value={c}>
                           {c}
@@ -621,7 +667,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     </select>
                   </div>
 
-                  <h4>Comodidades</h4>
+                  <h4>Características</h4>
                   <div className="caracteristicas-grid">
                     {booleanFields.map((f) => (
                       <label key={f} className="checkbox-label">
@@ -631,19 +677,15 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                           checked={formData[f]}
                           onChange={handleInputChange}
                         />
-                        <span>{f.replace(/_/g, " ")}</span>
+                        <span>{formatFieldLabel(f)}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Tab 3: Photos */}
               {activeTab === 3 && (
                 <div className="tab-content">
-                  <p className="photo-instructions">
-                    Adicione até 10 fotos. Arraste para reorganizar a ordem.
-                  </p>
                   <div className="fotos-grid">
                     {formData.fotos.map((foto, idx) => (
                       <div
@@ -689,7 +731,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                 </div>
               )}
 
-              {/* Submit button - always visible */}
               <div className="submit-container">
                 <button type="submit" className="submit-btn">
                   Adicionar Imóvel
