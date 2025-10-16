@@ -390,7 +390,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
               ×
             </button>
 
-            <h3>Adicionar Imóvel</h3>
             {errorMsg && <p className="error-msg">{errorMsg}</p>}
 
             <div className="tabs-container">

@@ -294,6 +294,13 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
+
+      <button
+        className="return-home-btn"
+        onClick={() => (window.location.href = "/comprar")}
+      >
+        Voltar para Página Inicial
+      </button>
     </div>
   );
 };

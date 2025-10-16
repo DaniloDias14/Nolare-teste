@@ -4,8 +4,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  /* Sombra mais suave */
-  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.12);
+  /* Sombra mais visível mas ainda discreta */
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.15);
   border-bottom: 1px solid rgba(25, 25, 112, 0.08);
 }
 

@@ -25,7 +25,7 @@ const Header = ({ setAdmLogged, setUser }) => {
       <nav className="nav">
         {/* Logo */}
         <a href="/" className="logo" onClick={handleLogoClick}>
-          <img src="/logo.png" alt="Nolare" className="logo-img" />
+          <img src="/logo_1.png" alt="Nolare" className="logo-img" />
         </a>
 
         {/* Hamburger para mobile */}

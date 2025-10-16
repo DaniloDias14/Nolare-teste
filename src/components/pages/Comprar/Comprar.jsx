@@ -12,7 +12,7 @@ const Comprar = ({ usuario }) => {
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
   const [curtidas, setCurtidas] = useState({});
 
-  const imoveisPorPagina = 12;
+  const imoveisPorPagina = 15;
 
   useEffect(() => {
     fetch("http://localhost:5000/api/imoveis")
@@ -79,6 +79,14 @@ const Comprar = ({ usuario }) => {
   const indexFinal = indexInicial + imoveisPorPagina;
   const imoveisExibidos = imoveis.slice(indexInicial, indexFinal);
 
+  const gerarNumerosPaginas = () => {
+    const paginas = [];
+    for (let i = 1; i <= totalPaginas; i++) {
+      paginas.push(i);
+    }
+    return paginas;
+  };
+
   const proximaImagem = (id, total) => {
     setImagemAtual((prev) => ({
       ...prev,
@@ -114,7 +122,7 @@ const Comprar = ({ usuario }) => {
     const mobiliado =
       imovel.caracteristicas?.mobiliado ?? imovel.mobiliado ?? false;
 
-    const mobiliadoSym = mobiliado ? "☑" : "☐";
+    const mobiliadoTexto = mobiliado ? "Mobiliado" : "Não mobiliado";
 
     switch (tipo) {
       case "casa":
@@ -125,7 +133,7 @@ const Comprar = ({ usuario }) => {
               <div>Área construída: {areaConstruida} m²</div>
             )}
             {quarto != null && <div>🛏 {quarto} quartos</div>}
-            <div>Mobiliado: {mobiliadoSym}</div>
+            <div>{mobiliadoTexto}</div>
           </>
         );
       case "apartamento":
@@ -138,7 +146,7 @@ const Comprar = ({ usuario }) => {
             )}
             {quarto != null && <div>🛏 {quarto} quartos</div>}
             {andar != null && <div>Andar: {andar}</div>}
-            <div>Mobiliado: {mobiliadoSym}</div>
+            <div>{mobiliadoTexto}</div>
           </>
         );
       case "terreno":
@@ -156,7 +164,7 @@ const Comprar = ({ usuario }) => {
               <div>Área construída: {areaConstruida} m²</div>
             )}
             {banheiro != null && <div>🛁 {banheiro} banheiros</div>}
-            <div>Mobiliado: {mobiliadoSym}</div>
+            <div>{mobiliadoTexto}</div>
           </>
         );
       case "galpao":
@@ -185,7 +193,7 @@ const Comprar = ({ usuario }) => {
     <div className="comprar">
       <div className="properties-section">
         <h1 style={{ textDecoration: "underline" }}>
-          Encontre seu imóvel dos sonhos
+          Encontre um imóvel ideal para você
         </h1>
       </div>
 
@@ -287,7 +295,7 @@ const Comprar = ({ usuario }) => {
                       className="contact-button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setImovelSelecionado(imovel);
+                        window.open("https://www.youtube.com", "_blank");
                       }}
                     >
                       Entrar em Contato
@@ -312,6 +320,50 @@ const Comprar = ({ usuario }) => {
               </div>
             ))}
           </div>
+
+          {totalPaginas > 1 && (
+            <div className="pagination">
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={() =>
+                    setPaginaAtual((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={paginaAtual === 1}
+                >
+                  ← Anterior
+                </button>
+
+                <div className="pagination-info">
+                  Página {paginaAtual} de {totalPaginas}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  onClick={() =>
+                    setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))
+                  }
+                  disabled={paginaAtual === totalPaginas}
+                >
+                  Próxima →
+                </button>
+              </div>
+
+              <div className="pagination-numbers">
+                {gerarNumerosPaginas().map((numeroPagina) => (
+                  <button
+                    key={numeroPagina}
+                    className={`page-number-btn ${
+                      paginaAtual === numeroPagina ? "active" : ""
+                    }`}
+                    onClick={() => setPaginaAtual(numeroPagina)}
+                  >
+                    {numeroPagina}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

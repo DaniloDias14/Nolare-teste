@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 
@@ -64,6 +70,7 @@ const App = () => {
 
       <main>
         <Routes>
+          <Route path="/" element={<Navigate to="/comprar" replace />} />
           <Route
             path="/comprar"
             element={<Comprar usuario={isLoggedIn ? user : null} />}

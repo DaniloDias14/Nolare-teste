@@ -47,26 +47,23 @@
   margin-bottom: 3rem;
 }
 
+/* Contorno discreto e sombra mais aparente, removida animação do card inteiro */
 .property-card {
   width: 100%;
   max-width: 420px;
   background: var(--white);
   border-radius: 20px;
   overflow: hidden;
-  border: 2px solid var(--primary-blue);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  transition: box-shadow 0.3s ease;
   cursor: pointer;
-  /* Sombra ao redor do card, não apenas contorno */
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.2);
+  box-shadow: 0 8px 24px rgba(25, 25, 112, 0.25);
 }
 
 .property-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  /* Sombra mais forte no hover */
-  box-shadow: 0 12px 35px rgba(25, 25, 112, 0.35);
+  box-shadow: 0 12px 32px rgba(25, 25, 112, 0.35);
 }
 
-/* Removido padding do image-wrapper para foto ocupar todo espaço */
 .image-wrapper {
   padding: 0;
 }
@@ -76,19 +73,19 @@
   height: 260px;
   overflow: hidden;
   background: #f5f5f5;
-  /* Removido border-radius para foto ocupar todo espaço */
   border-radius: 0;
 }
 
+/* Foto expande ao passar o mouse */
 .property-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.property-card:hover .property-image {
-  transform: scale(1.08);
+.property-image:hover {
+  transform: scale(1.1);
 }
 
 .no-image {
@@ -111,29 +108,30 @@
   justify-content: center;
 }
 
+/* Setas com fundo mais transparente e expandem ao passar o mouse */
 .carousel-btn {
   position: absolute;
-  background: rgba(25, 25, 112, 0.75);
+  background: rgba(25, 25, 112, 0.25);
   color: var(--white);
   border: none;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
-  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-weight: 400;
 }
 
 .carousel-btn:hover {
-  background: rgba(25, 25, 112, 0.95);
-  transform: scale(1.2);
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.5);
+  background: rgba(25, 25, 112, 0.5);
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
 }
 
 .carousel-btn.prev {
@@ -211,6 +209,7 @@
   align-items: stretch;
 }
 
+/* Botão com animação igual ao "Conectar-se" do Header */
 .contact-button {
   flex: 1;
   background: var(--primary-blue);
@@ -221,16 +220,22 @@
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
   font-family: "Sanchez", serif;
 }
 
 .contact-button:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
+  background: #2a2a8f;
 }
 
+.contact-button:active {
+  transform: translateY(0);
+}
+
+/* Coração expande ao passar o mouse */
 .like-btn {
   background: transparent;
   border: none;
@@ -245,7 +250,7 @@
 }
 
 .like-btn:hover {
-  transform: scale(1.15);
+  transform: scale(1.2);
   background: rgba(25, 25, 112, 0.05);
 }
 
@@ -269,6 +274,98 @@
   100% {
     transform: scale(1) rotate(0deg);
   }
+}
+
+/* Adicionado sistema de paginação */
+.pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 3rem 0;
+  padding: 2rem 0;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pagination-btn {
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
+  font-family: "Sanchez", serif;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
+  background: #2a2a8f;
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination-info {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+  font-family: "Sanchez", serif;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.page-number-btn {
+  background: var(--white);
+  color: var(--primary-blue);
+  border: 2px solid var(--primary-blue);
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Sanchez", serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-number-btn:hover {
+  background: var(--primary-blue);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
+}
+
+.page-number-btn.active {
+  background: var(--primary-blue);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
 }
 
 @media (max-width: 1200px) {
@@ -298,5 +395,30 @@
 
   .property-features {
     grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    gap: 1rem;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .pagination-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .pagination-numbers {
+    gap: 0.4rem;
+  }
+
+  .page-number-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
   }
 }

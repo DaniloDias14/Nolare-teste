@@ -1,57 +1,92 @@
 import "./Footer.css";
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
-import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
+import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { MdEmail, MdPhone } from "react-icons/md";
 
 const Footer = () => {
+  const testLink = "https://www.youtube.com";
+
   return (
     <footer className="footer">
       <div className="footer-content">
-        <div className="footer-section">
-          <h3>Nolare</h3>
-          <p>Encontre o imóvel dos seus sonhos com a gente.</p>
+        <div className="footer-logo-section">
+          <div className="footer-logo-container">
+            <img src="/logo.png" alt="Nolare" className="footer-logo-img" />
+            <div className="footer-logo-text">
+              <h3>Nolare</h3>
+            </div>
+          </div>
+          <p className="footer-slogan">Transformando lugares em lares.</p>
         </div>
 
         <div className="footer-section">
           <h4>Contato</h4>
           <div className="footer-contact">
-            <div className="contact-item">
+            <a
+              href={testLink}
+              className="contact-item"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <MdPhone size={18} />
-              <span>(11) 1234-5678</span>
-            </div>
-            <div className="contact-item">
+              <span>(48) 9 1234-5678</span>
+            </a>
+            <a
+              href={testLink}
+              className="contact-item"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <MdEmail size={18} />
-              <span>contato@nolare.com.br</span>
-            </div>
-            <div className="contact-item">
-              <MdLocationOn size={18} />
-              <span>São Paulo, SP</span>
-            </div>
+              <span>nolare@gmail.com</span>
+            </a>
           </div>
         </div>
 
         <div className="footer-section">
           <h4>Redes Sociais</h4>
           <div className="footer-social">
-            <a href="#" aria-label="Facebook">
+            <a
+              href={testLink}
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaFacebook size={24} />
             </a>
-            <a href="#" aria-label="Instagram">
+            <a
+              href={testLink}
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaInstagram size={24} />
             </a>
-            <a href="#" aria-label="LinkedIn">
+            <a
+              href={testLink}
+              aria-label="LinkedIn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaLinkedin size={24} />
             </a>
-            <a href="#" aria-label="Twitter">
-              <FaTwitter size={24} />
+          </div>
+        </div>
+
+        <div className="footer-section">
+          <h4>Informações Legais</h4>
+          <div className="footer-legal">
+            <a href={testLink} target="_blank" rel="noopener noreferrer">
+              Política de Privacidade
+            </a>
+            <a href={testLink} target="_blank" rel="noopener noreferrer">
+              Termos de Uso
             </a>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>
-          © {new Date().getFullYear()} Nolare. Todos os direitos reservados.
-        </p>
+        <p>© 2025 Nolare. Todos os direitos reservados.</p>
       </div>
     </footer>
   );
