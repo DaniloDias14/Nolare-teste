@@ -368,6 +368,25 @@
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
 }
 
+/* Added styles for no results message */
+.sem-resultados {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--white);
+  border-radius: 20px;
+  margin: 0 auto 3rem;
+  max-width: 600px;
+  box-shadow: 0 8px 24px rgba(25, 25, 112, 0.15);
+}
+
+.sem-resultados p {
+  font-size: 1.2rem;
+  color: var(--primary-blue);
+  font-weight: 600;
+  font-family: "Sanchez", serif;
+  line-height: 1.6;
+}
+
 @media (max-width: 1200px) {
   .grid-imoveis {
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));

@@ -2,22 +2,29 @@
 
 import { useState, useEffect } from "react";
 import "./Comprar.css";
-import ImovelModal from "./ImovelModal";
+import ImovelModal from "../../ImovelModal/ImovelModal";
+import Destaque from "../../Destaque/Destaque";
+import Filtro from "../../Filtro/Filtro";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 const Comprar = ({ usuario }) => {
   const [imoveis, setImoveis] = useState([]);
+  const [imoveisFiltrados, setImoveisFiltrados] = useState([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [imagemAtual, setImagemAtual] = useState({});
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
   const [curtidas, setCurtidas] = useState({});
+  const [mensagemSemResultados, setMensagemSemResultados] = useState("");
 
   const imoveisPorPagina = 15;
 
   useEffect(() => {
     fetch("http://localhost:5000/api/imoveis")
       .then((res) => res.json())
-      .then((data) => setImoveis(data))
+      .then((data) => {
+        setImoveis(data);
+        setImoveisFiltrados(data);
+      })
       .catch((err) => console.error("Erro ao buscar imóveis:", err));
   }, []);
 
@@ -33,6 +40,115 @@ const Comprar = ({ usuario }) => {
         .catch((err) => console.error("Erro ao buscar curtidas:", err));
     }
   }, [usuario]);
+
+  const handleFiltrar = (filtros) => {
+    if (
+      Object.keys(filtros).length === 0 ||
+      Object.values(filtros).every((v) => !v)
+    ) {
+      setImoveisFiltrados(imoveis);
+      setMensagemSemResultados("");
+      setPaginaAtual(1);
+      return;
+    }
+
+    const normalizeStr = (s) =>
+      s
+        ? String(s)
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+        : "";
+
+    const filtrados = imoveis.filter((imovel) => {
+      let match = true;
+
+      if (
+        filtros.tipo &&
+        normalizeStr(imovel.tipo) !== normalizeStr(filtros.tipo)
+      ) {
+        match = false;
+      }
+
+      if (
+        filtros.finalidade &&
+        normalizeStr(imovel.finalidade) !== normalizeStr(filtros.finalidade)
+      ) {
+        match = false;
+      }
+
+      if (filtros.localizacao) {
+        const loc = normalizeStr(filtros.localizacao);
+        const cidade = normalizeStr(imovel.cidade);
+        const bairro = normalizeStr(imovel.bairro);
+        if (!cidade.includes(loc) && !bairro.includes(loc)) {
+          match = false;
+        }
+      }
+
+      if (
+        filtros.precoMin &&
+        imovel.preco < Number.parseFloat(filtros.precoMin)
+      ) {
+        match = false;
+      }
+
+      if (
+        filtros.precoMax &&
+        imovel.preco > Number.parseFloat(filtros.precoMax)
+      ) {
+        match = false;
+      }
+
+      if (
+        filtros.quartos &&
+        imovel.caracteristicas?.quarto < Number.parseInt(filtros.quartos)
+      ) {
+        match = false;
+      }
+
+      if (
+        filtros.banheiros &&
+        imovel.caracteristicas?.banheiro < Number.parseInt(filtros.banheiros)
+      ) {
+        match = false;
+      }
+
+      if (
+        filtros.vagas &&
+        imovel.caracteristicas?.vaga < Number.parseInt(filtros.vagas)
+      ) {
+        match = false;
+      }
+
+      if (filtros.areaMin) {
+        const area = imovel.area_total || imovel.area_construida || 0;
+        if (area < Number.parseFloat(filtros.areaMin)) {
+          match = false;
+        }
+      }
+
+      if (filtros.areaMax) {
+        const area = imovel.area_total || imovel.area_construida || 0;
+        if (area > Number.parseFloat(filtros.areaMax)) {
+          match = false;
+        }
+      }
+
+      return match;
+    });
+
+    setImoveisFiltrados(filtrados);
+    setPaginaAtual(1);
+
+    if (filtrados.length === 0) {
+      setMensagemSemResultados(
+        "Ainda não temos esse tipo de imóvel disponível, mas em breve poderemos ter!"
+      );
+    } else {
+      setMensagemSemResultados("");
+    }
+  };
 
   const toggleCurtida = async (imovel) => {
     const imovelId = imovel?.id ?? imovel?.imovel_id;
@@ -74,10 +190,10 @@ const Comprar = ({ usuario }) => {
     }
   };
 
-  const totalPaginas = Math.ceil(imoveis.length / imoveisPorPagina);
+  const totalPaginas = Math.ceil(imoveisFiltrados.length / imoveisPorPagina);
   const indexInicial = (paginaAtual - 1) * imoveisPorPagina;
   const indexFinal = indexInicial + imoveisPorPagina;
-  const imoveisExibidos = imoveis.slice(indexInicial, indexFinal);
+  const imoveisExibidos = imoveisFiltrados.slice(indexInicial, indexFinal);
 
   const gerarNumerosPaginas = () => {
     const paginas = [];
@@ -197,8 +313,23 @@ const Comprar = ({ usuario }) => {
         </h1>
       </div>
 
+      <Destaque
+        usuario={usuario}
+        curtidas={curtidas}
+        setCurtidas={setCurtidas}
+        onImovelClick={setImovelSelecionado}
+      />
+
+      <Filtro onFiltrar={handleFiltrar} />
+
       <main className="properties-section">
         <div className="container">
+          {mensagemSemResultados && (
+            <div className="sem-resultados">
+              <p>{mensagemSemResultados}</p>
+            </div>
+          )}
+
           <div
             className="grid-imoveis"
             style={{

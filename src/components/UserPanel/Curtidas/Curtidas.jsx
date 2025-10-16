@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "./Curtidas.css";
-import ImovelModal from "../../Pages/Comprar/ImovelModal.jsx";
+import ImovelModal from "../../ImovelModal/ImovelModal";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 const Curtidas = ({ usuario }) => {
