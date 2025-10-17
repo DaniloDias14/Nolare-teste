@@ -418,6 +418,7 @@ app.get("/api/imoveis", async (req, res) => {
           'pomar', ic.pomar,
           'lago', ic.lago,
           'aceita_animais', ic.aceita_animais,
+          'na_planta', ic.na_planta,
           'construtora', ic.construtora
         ) AS caracteristicas,
 
@@ -494,6 +495,7 @@ app.get("/api/imoveis/:id", async (req, res) => {
           'pomar', ic.pomar,
           'lago', ic.lago,
           'aceita_animais', ic.aceita_animais,
+          'na_planta', ic.na_planta,
           'construtora', ic.construtora
         ) AS caracteristicas,
 
@@ -627,6 +629,7 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "pomar",
     "lago",
     "aceita_animais",
+    "na_planta",
     "construtora",
   ];
 
@@ -660,6 +663,7 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
           "pomar",
           "lago",
           "aceita_animais",
+          "na_planta",
         ].includes(c)
       ? false
       : null

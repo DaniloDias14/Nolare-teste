@@ -26,6 +26,7 @@ const booleanFields = [
   "lareira",
   "lavanderia",
   "mobiliado",
+  "na_planta",
   "playground",
   "piscina",
   "pomar",
@@ -118,6 +119,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     carregador_carro_eletrico: false,
     gerador_energia: false,
     estudio: false,
+    na_planta: false,
   });
 
   const handleInputChange = (e) => {
@@ -230,6 +232,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       carregador_carro_eletrico: false,
       gerador_energia: false,
       estudio: false,
+      na_planta: false,
     });
   };
 
@@ -368,6 +371,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       lareira: "Lareira",
       lavanderia: "Lavanderia",
       mobiliado: "Mobiliado",
+      na_planta: "Na Planta",
       playground: "Playground",
       piscina: "Piscina",
       pomar: "Pomar",

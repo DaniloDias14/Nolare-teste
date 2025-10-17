@@ -1,9 +1,10 @@
 "use client";
+
 import { useNavigate } from "react-router-dom";
 import { AiOutlineHeart } from "react-icons/ai";
-import "./FloatingButton.css";
+import "./FloatingButtonUser.css";
 
-const UserFloatingButton = () => {
+const FloatingButtonUser = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -17,4 +18,4 @@ const UserFloatingButton = () => {
   );
 };
 
-export default UserFloatingButton;
+export default FloatingButtonUser;

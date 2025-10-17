@@ -23,34 +23,40 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   padding: 1rem 0 2rem;
-  cursor: grab;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+/* Removed cursor grab for desktop */
+@media (max-width: 768px) {
+  .destaque-carousel {
+    cursor: grab;
+  }
+
+  .destaque-carousel:active {
+    cursor: grabbing;
+  }
 }
 
 .destaque-carousel::-webkit-scrollbar {
   display: none;
 }
 
-.destaque-carousel:active {
-  cursor: grabbing;
-}
-
+/* Increased shadow, removed hover transform */
 .destaque-card {
   min-width: 380px;
   max-width: 380px;
   background: var(--white);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(25, 25, 112, 0.25);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 10px 28px rgba(25, 25, 112, 0.3);
+  transition: box-shadow 0.3s ease;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .destaque-card:hover {
-  box-shadow: 0 12px 32px rgba(25, 25, 112, 0.35);
-  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(25, 25, 112, 0.4);
 }
 
 .destaque-image-container {
@@ -68,6 +74,7 @@
   justify-content: center;
 }
 
+/* Image hover animation maintained */
 .destaque-image {
   width: 100%;
   height: 100%;
@@ -91,9 +98,10 @@
   font-family: "Sanchez", serif;
 }
 
+/* Removed background, cleaner arrows, white to blue on hover */
 .destaque-carousel-btn {
   position: absolute;
-  background: rgba(25, 25, 112, 0.25);
+  background: transparent;
   color: var(--white);
   border: none;
   width: 40px;
@@ -105,15 +113,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-weight: 400;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .destaque-carousel-btn:hover {
-  background: rgba(25, 25, 112, 0.5);
-  transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
+  color: var(--primary-blue);
+  transform: scale(1.2);
 }
 
 .destaque-carousel-btn.prev {
@@ -191,6 +197,7 @@
   align-items: stretch;
 }
 
+/* Button animation maintained */
 .destaque-contact-button {
   flex: 1;
   background: var(--primary-blue);
@@ -216,6 +223,7 @@
   transform: translateY(0);
 }
 
+/* Heart animation maintained */
 .destaque-like-btn {
   background: transparent;
   border: none;
@@ -263,10 +271,11 @@
   margin-top: 1rem;
 }
 
+/* Same style as image arrows */
 .destaque-nav-btn {
-  background: var(--primary-blue);
+  background: transparent;
   color: var(--white);
-  border: none;
+  border: 2px solid var(--primary-blue);
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -276,14 +285,14 @@
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
   font-weight: 700;
+  color: var(--primary-blue);
 }
 
 .destaque-nav-btn:hover {
   transform: scale(1.15);
-  box-shadow: 0 6px 16px rgba(25, 25, 112, 0.4);
-  background: #2a2a8f;
+  background: var(--primary-blue);
+  color: var(--white);
 }
 
 .destaque-nav-btn:active {

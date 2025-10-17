@@ -63,6 +63,7 @@ const Comprar = ({ usuario }) => {
     const filtrados = imoveis.filter((imovel) => {
       let match = true;
 
+      // Tipo
       if (
         filtros.tipo &&
         normalizeStr(imovel.tipo) !== normalizeStr(filtros.tipo)
@@ -70,6 +71,7 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
+      // Finalidade
       if (
         filtros.finalidade &&
         normalizeStr(imovel.finalidade) !== normalizeStr(filtros.finalidade)
@@ -77,6 +79,7 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
+      // Localização
       if (filtros.localizacao) {
         const loc = normalizeStr(filtros.localizacao);
         const cidade = normalizeStr(imovel.cidade);
@@ -86,13 +89,13 @@ const Comprar = ({ usuario }) => {
         }
       }
 
+      // Preço
       if (
         filtros.precoMin &&
         imovel.preco < Number.parseFloat(filtros.precoMin)
       ) {
         match = false;
       }
-
       if (
         filtros.precoMax &&
         imovel.preco > Number.parseFloat(filtros.precoMax)
@@ -100,39 +103,191 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
+      // Área Total
+      if (
+        filtros.areaTotalMin &&
+        (imovel.area_total || 0) < Number.parseFloat(filtros.areaTotalMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.areaTotalMax &&
+        (imovel.area_total || 0) > Number.parseFloat(filtros.areaTotalMax)
+      ) {
+        match = false;
+      }
+
+      // Área Construída
+      if (
+        filtros.areaConstruidaMin &&
+        (imovel.area_construida || 0) <
+          Number.parseFloat(filtros.areaConstruidaMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.areaConstruidaMax &&
+        (imovel.area_construida || 0) >
+          Number.parseFloat(filtros.areaConstruidaMax)
+      ) {
+        match = false;
+      }
+
+      // Condomínio
+      if (
+        filtros.condominioMin &&
+        (imovel.caracteristicas?.condominio || 0) <
+          Number.parseFloat(filtros.condominioMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.condominioMax &&
+        (imovel.caracteristicas?.condominio || 0) >
+          Number.parseFloat(filtros.condominioMax)
+      ) {
+        match = false;
+      }
+
+      // IPTU
+      if (
+        filtros.iptuMin &&
+        (imovel.caracteristicas?.iptu || 0) < Number.parseFloat(filtros.iptuMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.iptuMax &&
+        (imovel.caracteristicas?.iptu || 0) > Number.parseFloat(filtros.iptuMax)
+      ) {
+        match = false;
+      }
+
+      // Quartos
       if (
         filtros.quartos &&
-        imovel.caracteristicas?.quarto < Number.parseInt(filtros.quartos)
+        (imovel.caracteristicas?.quarto || 0) < Number.parseInt(filtros.quartos)
       ) {
         match = false;
       }
 
+      // Banheiros
       if (
         filtros.banheiros &&
-        imovel.caracteristicas?.banheiro < Number.parseInt(filtros.banheiros)
+        (imovel.caracteristicas?.banheiro || 0) <
+          Number.parseInt(filtros.banheiros)
       ) {
         match = false;
       }
 
+      // Vagas
       if (
         filtros.vagas &&
-        imovel.caracteristicas?.vaga < Number.parseInt(filtros.vagas)
+        (imovel.caracteristicas?.vaga || 0) < Number.parseInt(filtros.vagas)
       ) {
         match = false;
       }
 
-      if (filtros.areaMin) {
-        const area = imovel.area_total || imovel.area_construida || 0;
-        if (area < Number.parseFloat(filtros.areaMin)) {
+      // Ar-Condicionado
+      if (
+        filtros.arCondicionado &&
+        (imovel.caracteristicas?.ar_condicionado || 0) <
+          Number.parseInt(filtros.arCondicionado)
+      ) {
+        match = false;
+      }
+
+      // Andar
+      if (
+        filtros.andarMin &&
+        (imovel.caracteristicas?.andar || 0) < Number.parseInt(filtros.andarMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.andarMax &&
+        (imovel.caracteristicas?.andar || 0) > Number.parseInt(filtros.andarMax)
+      ) {
+        match = false;
+      }
+
+      // Andar Total
+      if (
+        filtros.andarTotalMin &&
+        (imovel.caracteristicas?.andar_total || 0) <
+          Number.parseInt(filtros.andarTotalMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.andarTotalMax &&
+        (imovel.caracteristicas?.andar_total || 0) >
+          Number.parseInt(filtros.andarTotalMax)
+      ) {
+        match = false;
+      }
+
+      // Construtora
+      if (
+        filtros.construtora &&
+        normalizeStr(imovel.caracteristicas?.construtora) !==
+          normalizeStr(filtros.construtora)
+      ) {
+        match = false;
+      }
+
+      // Características booleanas
+      const caracteristicasBooleanas = [
+        "acessibilidade_pcd",
+        "aceita_animais",
+        "academia",
+        "alarme",
+        "bicicletario",
+        "brinquedoteca",
+        "camera_vigilancia",
+        "carregador_carro_eletrico",
+        "churrasqueira",
+        "closet",
+        "elevador",
+        "energia_solar",
+        "escritorio",
+        "estudio",
+        "gerador_energia",
+        "interfone",
+        "jardim",
+        "lago",
+        "lareira",
+        "lavanderia",
+        "mobiliado",
+        "piscina",
+        "playground",
+        "pomar",
+        "portaria_24h",
+        "quadra",
+        "sala_jogos",
+        "salao_de_festa",
+        "suite",
+        "varanda",
+      ];
+
+      for (const caracteristica of caracteristicasBooleanas) {
+        if (
+          filtros[caracteristica] &&
+          !imovel.caracteristicas?.[caracteristica]
+        ) {
           match = false;
+          break;
         }
       }
 
-      if (filtros.areaMax) {
-        const area = imovel.area_total || imovel.area_construida || 0;
-        if (area > Number.parseFloat(filtros.areaMax)) {
-          match = false;
+      if (filtros.identificador) {
+        const idBuscado = Number.parseInt(filtros.identificador);
+        const idImovel = imovel.id ?? imovel.imovel_id;
+        if (idImovel !== idBuscado) {
+          return false;
         }
+        // If ID matches, return true immediately (ignore other filters)
+        return true;
       }
 
       return match;
@@ -142,9 +297,15 @@ const Comprar = ({ usuario }) => {
     setPaginaAtual(1);
 
     if (filtrados.length === 0) {
-      setMensagemSemResultados(
-        "Ainda não temos esse tipo de imóvel disponível, mas em breve poderemos ter!"
-      );
+      if (filtros.identificador) {
+        setMensagemSemResultados(
+          `Nenhum imóvel encontrado com o identificador #${filtros.identificador}`
+        );
+      } else {
+        setMensagemSemResultados(
+          "Ainda não temos esse tipo de imóvel disponível, mas em breve poderemos ter!"
+        );
+      }
     } else {
       setMensagemSemResultados("");
     }
@@ -307,12 +468,6 @@ const Comprar = ({ usuario }) => {
 
   return (
     <div className="comprar">
-      <div className="properties-section">
-        <h1 style={{ textDecoration: "underline" }}>
-          Encontre um imóvel ideal para você
-        </h1>
-      </div>
-
       <Destaque
         usuario={usuario}
         curtidas={curtidas}

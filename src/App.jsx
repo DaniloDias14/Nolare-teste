@@ -20,7 +20,7 @@ import Dashboard from "./components/AdminPanel/Dashboard/Dashboard";
 import AdicionarImovel from "./components/AdminPanel/AdicionarImovel/AdicionarImovel";
 
 import AdminFloatingButton from "./components/AdminPanel/FloatingButtonAdmin/FloatingButtonAdmin";
-import UserFloatingButton from "./components/UserPanel/FloatingButton/FloatingButton";
+import UserFloatingButton from "./components/UserPanel/FloatingButtonUser/FloatingButtonUser";
 import Curtidas from "./components/UserPanel/Curtidas/Curtidas.jsx";
 
 const App = () => {

@@ -17,10 +17,14 @@ const Curtidas = ({ usuario }) => {
     fetch(`http://localhost:5000/api/curtidas/${usuario.id}`)
       .then((res) => res.json())
       .then(async (data) => {
+        const sortedData = data.sort(
+          (a, b) => new Date(b.data_curtida) - new Date(a.data_curtida)
+        );
+
         const curtidasMap = {};
         const imoveisCompletos = [];
 
-        for (const c of data) {
+        for (const c of sortedData) {
           curtidasMap[c.imovel_id] = true;
 
           const imovel = await fetch(
@@ -100,14 +104,16 @@ const Curtidas = ({ usuario }) => {
     }
   };
 
-  const proximaImagem = (id, total) => {
+  const proximaImagem = (e, id, total) => {
+    e.stopPropagation();
     setImagemAtual((prev) => ({
       ...prev,
       [id]: ((prev[id] || 0) + 1) % total,
     }));
   };
 
-  const imagemAnterior = (id, total) => {
+  const imagemAnterior = (e, id, total) => {
+    e.stopPropagation();
     setImagemAtual((prev) => ({
       ...prev,
       [id]: (prev[id] || 0) === 0 ? total - 1 : (prev[id] || 0) - 1,
@@ -122,7 +128,9 @@ const Curtidas = ({ usuario }) => {
 
       {imoveis.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-illustration">💙</div>
+          <div className="empty-illustration">
+            <AiOutlineHeart size={120} color="var(--primary-blue)" />
+          </div>
           <h3>Nenhum imóvel curtido ainda</h3>
           <p>Explore nossos imóveis e favorite os que mais gostar!</p>
         </div>
@@ -139,10 +147,9 @@ const Curtidas = ({ usuario }) => {
                   <div className="carousel">
                     <button
                       className="carousel-btn prev"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        imagemAnterior(imovel.imovel_id, imovel.fotos.length);
-                      }}
+                      onClick={(e) =>
+                        imagemAnterior(e, imovel.imovel_id, imovel.fotos.length)
+                      }
                     >
                       ◀
                     </button>
@@ -156,10 +163,9 @@ const Curtidas = ({ usuario }) => {
                     />
                     <button
                       className="carousel-btn next"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        proximaImagem(imovel.imovel_id, imovel.fotos.length);
-                      }}
+                      onClick={(e) =>
+                        proximaImagem(e, imovel.imovel_id, imovel.fotos.length)
+                      }
                     >
                       ▶
                     </button>
@@ -167,49 +173,66 @@ const Curtidas = ({ usuario }) => {
                 ) : (
                   <div className="no-image">Sem imagem</div>
                 )}
-                <button
-                  className="like-button"
-                  data-imovel-id={imovel.imovel_id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleCurtida(imovel.imovel_id);
-                  }}
-                >
-                  {curtidas[imovel.imovel_id] ? (
-                    <AiFillHeart size={28} color="#191970" />
-                  ) : (
-                    <AiOutlineHeart size={28} color="#191970" />
-                  )}
-                </button>
               </div>
 
               <div className="property-content">
-                <h3>{imovel.titulo}</h3>
-                <p>
-                  📍 {imovel.cidade} - {imovel.bairro}
-                </p>
-                <p style={{ fontWeight: 700, fontSize: "1.1rem" }}>
-                  R$ {(imovel.preco || 0).toLocaleString("pt-BR")}
-                </p>
+                <div className="property-header">
+                  <h3 className="property-title">{imovel.titulo}</h3>
+                  <div className="property-price">
+                    R$ {(imovel.preco || 0).toLocaleString("pt-BR")}
+                  </div>
+                </div>
+
+                <div className="property-details">
+                  <div>
+                    📍 {imovel.cidade || "Cidade não informada"} -{" "}
+                    {imovel.bairro || "Bairro não informado"}
+                  </div>
+                </div>
+
                 <div className="property-features">
-                  {imovel.area_total && (
-                    <span className="feature">🏠 {imovel.area_total} m²</span>
-                  )}
                   {imovel.caracteristicas?.quarto && (
-                    <span className="feature">
+                    <div className="feature">
                       🛏 {imovel.caracteristicas.quarto} quartos
-                    </span>
+                    </div>
                   )}
                   {imovel.caracteristicas?.banheiro && (
-                    <span className="feature">
+                    <div className="feature">
                       🛁 {imovel.caracteristicas.banheiro} banheiros
-                    </span>
+                    </div>
                   )}
                   {imovel.caracteristicas?.vaga && (
-                    <span className="feature">
+                    <div className="feature">
                       🚗 {imovel.caracteristicas.vaga} vagas
-                    </span>
+                    </div>
                   )}
+                </div>
+
+                <div className="action-buttons">
+                  <button
+                    className="contact-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open("https://www.youtube.com", "_blank");
+                    }}
+                  >
+                    Entrar em Contato
+                  </button>
+
+                  <button
+                    className="like-btn"
+                    data-imovel-id={imovel.imovel_id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCurtida(imovel.imovel_id);
+                    }}
+                  >
+                    {curtidas[imovel.imovel_id] ? (
+                      <AiFillHeart size={28} color="#191970" />
+                    ) : (
+                      <AiOutlineHeart size={28} color="#191970" />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
