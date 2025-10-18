@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Comprar.css";
 import ImovelModal from "../../ImovelModal/ImovelModal";
 import Destaque from "../../Destaque/Destaque";
@@ -16,8 +17,12 @@ const Comprar = ({ usuario }) => {
   const [curtidas, setCurtidas] = useState({});
   const [mensagemSemResultados, setMensagemSemResultados] = useState("");
 
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const imoveisPorPagina = 15;
 
+  // Fetch all properties
   useEffect(() => {
     fetch("http://localhost:5000/api/imoveis")
       .then((res) => res.json())
@@ -28,6 +33,17 @@ const Comprar = ({ usuario }) => {
       .catch((err) => console.error("Erro ao buscar imóveis:", err));
   }, []);
 
+  useEffect(() => {
+    if (id && imoveis.length > 0) {
+      const imovelId = Number.parseInt(id);
+      const imovel = imoveis.find((i) => (i.id ?? i.imovel_id) === imovelId);
+      if (imovel) {
+        setImovelSelecionado(imovel);
+      }
+    }
+  }, [id, imoveis]);
+
+  // Fetch user likes
   useEffect(() => {
     if (usuario) {
       fetch(`http://localhost:5000/api/curtidas/${usuario.id}`)
@@ -41,6 +57,24 @@ const Comprar = ({ usuario }) => {
     }
   }, [usuario]);
 
+  const handleOpenModal = (imovel) => {
+    const imovelId = imovel.id ?? imovel.imovel_id;
+    setImovelSelecionado(imovel);
+
+    // Update URL without navigation to preserve scroll position
+    window.history.pushState(null, "", `/imovel/${imovelId}`);
+  };
+
+  const handleCloseModal = () => {
+    setImovelSelecionado(null);
+
+    // Go back in history to restore original URL
+    if (window.location.pathname.startsWith("/imovel/")) {
+      window.history.back();
+    }
+  };
+
+  // Filter handler
   const handleFiltrar = (filtros) => {
     if (
       Object.keys(filtros).length === 0 ||
@@ -63,7 +97,6 @@ const Comprar = ({ usuario }) => {
     const filtrados = imoveis.filter((imovel) => {
       let match = true;
 
-      // Tipo
       if (
         filtros.tipo &&
         normalizeStr(imovel.tipo) !== normalizeStr(filtros.tipo)
@@ -71,7 +104,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Finalidade
       if (
         filtros.finalidade &&
         normalizeStr(imovel.finalidade) !== normalizeStr(filtros.finalidade)
@@ -79,7 +111,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Localização
       if (filtros.localizacao) {
         const loc = normalizeStr(filtros.localizacao);
         const cidade = normalizeStr(imovel.cidade);
@@ -89,7 +120,6 @@ const Comprar = ({ usuario }) => {
         }
       }
 
-      // Preço
       if (
         filtros.precoMin &&
         imovel.preco < Number.parseFloat(filtros.precoMin)
@@ -103,7 +133,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Área Total
       if (
         filtros.areaTotalMin &&
         (imovel.area_total || 0) < Number.parseFloat(filtros.areaTotalMin)
@@ -117,7 +146,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Área Construída
       if (
         filtros.areaConstruidaMin &&
         (imovel.area_construida || 0) <
@@ -133,7 +161,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Condomínio
       if (
         filtros.condominioMin &&
         (imovel.caracteristicas?.condominio || 0) <
@@ -149,7 +176,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // IPTU
       if (
         filtros.iptuMin &&
         (imovel.caracteristicas?.iptu || 0) < Number.parseFloat(filtros.iptuMin)
@@ -163,7 +189,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Quartos
       if (
         filtros.quartos &&
         (imovel.caracteristicas?.quarto || 0) < Number.parseInt(filtros.quartos)
@@ -171,7 +196,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Banheiros
       if (
         filtros.banheiros &&
         (imovel.caracteristicas?.banheiro || 0) <
@@ -180,7 +204,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Vagas
       if (
         filtros.vagas &&
         (imovel.caracteristicas?.vaga || 0) < Number.parseInt(filtros.vagas)
@@ -188,7 +211,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Ar-Condicionado
       if (
         filtros.arCondicionado &&
         (imovel.caracteristicas?.ar_condicionado || 0) <
@@ -197,7 +219,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Andar
       if (
         filtros.andarMin &&
         (imovel.caracteristicas?.andar || 0) < Number.parseInt(filtros.andarMin)
@@ -211,7 +232,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Andar Total
       if (
         filtros.andarTotalMin &&
         (imovel.caracteristicas?.andar_total || 0) <
@@ -227,7 +247,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Construtora
       if (
         filtros.construtora &&
         normalizeStr(imovel.caracteristicas?.construtora) !==
@@ -236,7 +255,6 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
-      // Características booleanas
       const caracteristicasBooleanas = [
         "acessibilidade_pcd",
         "aceita_animais",
@@ -259,6 +277,7 @@ const Comprar = ({ usuario }) => {
         "lareira",
         "lavanderia",
         "mobiliado",
+        "na_planta",
         "piscina",
         "playground",
         "pomar",
@@ -286,7 +305,6 @@ const Comprar = ({ usuario }) => {
         if (idImovel !== idBuscado) {
           return false;
         }
-        // If ID matches, return true immediately (ignore other filters)
         return true;
       }
 
@@ -311,6 +329,7 @@ const Comprar = ({ usuario }) => {
     }
   };
 
+  // Toggle like/unlike
   const toggleCurtida = async (imovel) => {
     const imovelId = imovel?.id ?? imovel?.imovel_id;
     if (!imovelId) {
@@ -351,6 +370,7 @@ const Comprar = ({ usuario }) => {
     }
   };
 
+  // Pagination
   const totalPaginas = Math.ceil(imoveisFiltrados.length / imoveisPorPagina);
   const indexInicial = (paginaAtual - 1) * imoveisPorPagina;
   const indexFinal = indexInicial + imoveisPorPagina;
@@ -364,6 +384,7 @@ const Comprar = ({ usuario }) => {
     return paginas;
   };
 
+  // Image navigation
   const proximaImagem = (id, total) => {
     setImagemAtual((prev) => ({
       ...prev,
@@ -378,6 +399,7 @@ const Comprar = ({ usuario }) => {
     }));
   };
 
+  // Render type-specific info
   const normalizeStr = (s) =>
     s
       ? String(s)
@@ -472,7 +494,7 @@ const Comprar = ({ usuario }) => {
         usuario={usuario}
         curtidas={curtidas}
         setCurtidas={setCurtidas}
-        onImovelClick={setImovelSelecionado}
+        onImovelClick={handleOpenModal}
       />
 
       <Filtro onFiltrar={handleFiltrar} />
@@ -496,7 +518,7 @@ const Comprar = ({ usuario }) => {
               <div
                 className="property-card"
                 key={imovel.id ?? imovel.imovel_id}
-                onClick={() => setImovelSelecionado(imovel)}
+                onClick={() => handleOpenModal(imovel)}
               >
                 <div className="image-wrapper">
                   <div className="image-container">
@@ -512,7 +534,7 @@ const Comprar = ({ usuario }) => {
                             );
                           }}
                         >
-                          ◀
+                          🡰
                         </button>
                         <img
                           src={
@@ -533,7 +555,7 @@ const Comprar = ({ usuario }) => {
                             );
                           }}
                         >
-                          ▶
+                          🡲
                         </button>
                       </div>
                     ) : (
@@ -596,9 +618,9 @@ const Comprar = ({ usuario }) => {
                       }}
                     >
                       {curtidas[imovel.id ?? imovel.imovel_id] ? (
-                        <AiFillHeart size={28} color="#191970" />
+                        <AiFillHeart size={26} color="#191970" />
                       ) : (
-                        <AiOutlineHeart size={28} color="#191970" />
+                        <AiOutlineHeart size={26} color="#191970" />
                       )}
                     </button>
                   </div>
@@ -659,7 +681,7 @@ const Comprar = ({ usuario }) => {
           usuario={usuario}
           curtidas={curtidas}
           setCurtidas={setCurtidas}
-          onClose={() => setImovelSelecionado(null)}
+          onClose={handleCloseModal}
         />
       )}
     </div>

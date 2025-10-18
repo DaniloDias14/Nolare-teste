@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Curtidas.css";
 import ImovelModal from "../../ImovelModal/ImovelModal";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
@@ -10,6 +11,8 @@ const Curtidas = ({ usuario }) => {
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
   const [imagemAtual, setImagemAtual] = useState({});
   const [curtidas, setCurtidas] = useState({});
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!usuario || usuario.tipo_usuario === "adm") return;
@@ -120,6 +123,23 @@ const Curtidas = ({ usuario }) => {
     }));
   };
 
+  const handleOpenModal = (imovel) => {
+    const imovelId = imovel.imovel_id;
+    setImovelSelecionado(imovel);
+
+    // Update URL without navigation to preserve scroll position
+    window.history.pushState(null, "", `/imovel/${imovelId}`);
+  };
+
+  const handleCloseModal = () => {
+    setImovelSelecionado(null);
+
+    // Go back in history to restore original URL
+    if (window.location.pathname.startsWith("/imovel/")) {
+      window.history.back();
+    }
+  };
+
   if (!usuario) return <p>Faça login para ver seus imóveis curtidos.</p>;
 
   return (
@@ -140,7 +160,7 @@ const Curtidas = ({ usuario }) => {
             <div
               className="property-card"
               key={imovel.imovel_id}
-              onClick={() => setImovelSelecionado(imovel)}
+              onClick={() => handleOpenModal(imovel)}
             >
               <div className="image-container">
                 {imovel.fotos && imovel.fotos.length > 0 ? (
@@ -151,7 +171,7 @@ const Curtidas = ({ usuario }) => {
                         imagemAnterior(e, imovel.imovel_id, imovel.fotos.length)
                       }
                     >
-                      ◀
+                      🡰
                     </button>
                     <img
                       src={`http://localhost:5000${
@@ -167,7 +187,7 @@ const Curtidas = ({ usuario }) => {
                         proximaImagem(e, imovel.imovel_id, imovel.fotos.length)
                       }
                     >
-                      ▶
+                      🡲
                     </button>
                   </div>
                 ) : (
@@ -243,7 +263,7 @@ const Curtidas = ({ usuario }) => {
       {imovelSelecionado && (
         <ImovelModal
           imovel={imovelSelecionado}
-          onClose={() => setImovelSelecionado(null)}
+          onClose={handleCloseModal}
           usuario={usuario}
           curtidas={curtidas}
           setCurtidas={setCurtidas}

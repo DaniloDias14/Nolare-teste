@@ -1,3 +1,4 @@
+/* Updated button animations - only color change + subtle shadow, no expansion */
 .floating-container {
   position: fixed;
   bottom: 30px;
@@ -17,11 +18,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease, background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Added rotation animation to settings icon */
 .floating-btn .settings-icon {
   transition: transform 0.3s ease;
 }
@@ -32,7 +31,6 @@
 
 .floating-btn:hover {
   background-color: #2a2a8f;
-  transform: scale(1.1);
   box-shadow: 0 6px 25px rgba(25, 25, 112, 0.6);
 }
 
@@ -56,7 +54,6 @@
   pointer-events: auto;
 }
 
-/* Added subtle hover animation to config buttons */
 .config-link {
   background-color: #191970;
   color: white;
@@ -66,8 +63,7 @@
   margin-bottom: 12px;
   font-weight: bold;
   font-family: "Sanchez", serif;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 10px rgba(25, 25, 112, 0.3);
   white-space: nowrap;
   border: none;
@@ -77,10 +73,5 @@
 
 .config-link:hover {
   background-color: #2a2a8f;
-  transform: translateX(-5px);
   box-shadow: 0 4px 15px rgba(25, 25, 112, 0.5);
-}
-
-.config-link:active {
-  transform: translateX(-3px) scale(0.98);
 }

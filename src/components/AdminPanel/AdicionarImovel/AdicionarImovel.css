@@ -280,6 +280,7 @@ textarea {
   justify-content: center;
 }
 
+/* Updated button animation - only color change + subtle shadow */
 .submit-btn {
   padding: 14px 40px;
   background-color: #191970;
@@ -295,12 +296,7 @@ textarea {
 
 .submit-btn:hover {
   background-color: #2a2a8f;
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(25, 25, 112, 0.4);
-}
-
-.submit-btn:active {
-  transform: translateY(0);
 }
 
 /* ================================

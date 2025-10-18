@@ -15,6 +15,7 @@ import Comprar from "./components/Pages/Comprar/Comprar";
 import Alugar from "./components/Pages/Alugar/Alugar";
 import Anunciar from "./components/Pages/Anunciar/Anunciar";
 import SobreNos from "./components/Pages/SobreNos/SobreNos";
+import ImovelPage from "./components/Pages/ImovelPage/ImovelPage";
 
 import Dashboard from "./components/AdminPanel/Dashboard/Dashboard";
 import AdicionarImovel from "./components/AdminPanel/AdicionarImovel/AdicionarImovel";
@@ -84,6 +85,10 @@ const App = () => {
             element={<Anunciar usuario={isLoggedIn ? user : null} />}
           />
           <Route path="/sobre-nos" element={<SobreNos />} />
+          <Route
+            path="/imovel/:id"
+            element={<ImovelPage usuario={isLoggedIn ? user : null} />}
+          />
           <Route path="/config/dashboard" element={<Dashboard />} />
           <Route
             path="/curtidas"

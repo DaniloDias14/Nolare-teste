@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import "./ImovelModal.css";
-import { AiFillHeart, AiOutlineHeart, AiOutlineClose } from "react-icons/ai";
-import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 const ImovelModal = ({
   imovel,
@@ -16,6 +15,14 @@ const ImovelModal = ({
 }) => {
   const [fotoIndex, setFotoIndex] = useState(0);
   const [caracteristicas, setCaracteristicas] = useState(null);
+  const [showCopyMessage, setShowCopyMessage] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   useEffect(() => {
     if (!imovel) return;
@@ -101,6 +108,17 @@ const ImovelModal = ({
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShowCopyMessage(true);
+      setTimeout(() => setShowCopyMessage(false), 2000);
+    } catch (err) {
+      console.error("Erro ao copiar link:", err);
+      alert("Não foi possível copiar o link");
+    }
+  };
+
   const formatLabel = (key) => {
     if (key === "id" || key === "imovel_id") return null;
 
@@ -155,14 +173,24 @@ const ImovelModal = ({
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content-wrapper">
         <button className="modal-close-btn" onClick={onClose}>
-          <AiOutlineClose />
+          ×
         </button>
+
+        <button
+          className="modal-share-btn"
+          onClick={handleShare}
+          title="Compartilhar imóvel"
+        >
+          <img src="/compartilhar.jpg" alt="Compartilhar" />
+        </button>
+
+        {showCopyMessage && <div className="copy-message">Link copiado!</div>}
 
         <div className="modal-gallery">
           {fotos.length > 0 ? (
             <>
               <button className="modal-nav-btn modal-prev" onClick={handlePrev}>
-                <IoChevronBack />
+                🡰
               </button>
               <img
                 src={`http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`}
@@ -170,7 +198,7 @@ const ImovelModal = ({
                 className="modal-image"
               />
               <button className="modal-nav-btn modal-next" onClick={handleNext}>
-                <IoChevronForward />
+                🡲
               </button>
               <div className="modal-dots-container">
                 {fotos.map((_, index) => (

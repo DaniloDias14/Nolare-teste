@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./AdicionarImovel.css";
 
@@ -384,6 +384,17 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     };
     return labels[field] || field.replace(/_/g, " ");
   };
+
+  useEffect(() => {
+    if (showPopup) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showPopup]);
 
   return (
     <>

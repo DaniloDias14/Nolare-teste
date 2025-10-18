@@ -13,6 +13,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -22,6 +23,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Fetch featured properties
   useEffect(() => {
     fetch("http://localhost:5000/api/imoveis")
       .then((res) => res.json())
@@ -34,6 +36,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
       );
   }, []);
 
+  // Toggle like/unlike
   const toggleCurtida = async (e, imovel) => {
     e.stopPropagation();
     const imovelId = imovel?.id ?? imovel?.imovel_id;
@@ -77,6 +80,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     }
   };
 
+  // Image navigation
   const proximaImagem = (e, id, total) => {
     e.stopPropagation();
     setImagemAtual((prev) => ({
@@ -93,9 +97,10 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     }));
   };
 
+  // Carousel navigation
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = 420;
+      const scrollAmount = 400;
       carouselRef.current.scrollBy({
         left: direction === "next" ? scrollAmount : -scrollAmount,
         behavior: "smooth",
@@ -103,6 +108,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     }
   };
 
+  // Drag handlers for mobile
   const handleMouseDown = (e) => {
     if (!isMobile) return;
     setIsDragging(true);
@@ -183,7 +189,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                         )
                       }
                     >
-                      ◀
+                      🡰
                     </button>
                     <img
                       src={
@@ -204,7 +210,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                         )
                       }
                     >
-                      ▶
+                      🡲
                     </button>
                   </div>
                 ) : (
@@ -262,9 +268,9 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                     onClick={(e) => toggleCurtida(e, imovel)}
                   >
                     {curtidas[imovel.id ?? imovel.imovel_id] ? (
-                      <AiFillHeart size={28} color="#191970" />
+                      <AiFillHeart size={26} color="#191970" />
                     ) : (
-                      <AiOutlineHeart size={28} color="#191970" />
+                      <AiOutlineHeart size={26} color="#191970" />
                     )}
                   </button>
                 </div>
@@ -278,13 +284,13 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
             className="destaque-nav-btn"
             onClick={() => scrollCarousel("prev")}
           >
-            ◀
+            🡰
           </button>
           <button
             className="destaque-nav-btn"
             onClick={() => scrollCarousel("next")}
           >
-            ▶
+            🡲
           </button>
         </div>
       </div>
