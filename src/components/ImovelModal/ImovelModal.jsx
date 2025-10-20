@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import compartilhar from "../../assets/img/compartilhar.jpg";
 
 const ImovelModal = ({
   imovel,
@@ -181,7 +182,7 @@ const ImovelModal = ({
           onClick={handleShare}
           title="Compartilhar imóvel"
         >
-          <img src=".../compartilhar.jpg" alt="Compartilhar" />
+          <img src={compartilhar} alt="Compartilhar" />
         </button>
 
         {showCopyMessage && <div className="copy-message">Link copiado!</div>}

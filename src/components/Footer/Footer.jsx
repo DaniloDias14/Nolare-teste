@@ -1,6 +1,7 @@
 import "./Footer.css";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { MdEmail, MdPhone } from "react-icons/md";
+import logo_1 from "../../assets/img/logo_1.jpg";
 
 const Footer = () => {
   const testLink = "https://www.youtube.com";
@@ -10,7 +11,7 @@ const Footer = () => {
       <div className="footer-content">
         <div className="footer-logo-section">
           <div className="footer-logo-container">
-            <img src="/logo_1.png" alt="Nolare" className="footer-logo-img" />
+            <img src={logo_1} alt="Nolare" className="footer-logo-img" />
             <div className="footer-logo-text">
               <h3>Nolare</h3>
             </div>

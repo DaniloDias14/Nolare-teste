@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { TiUserOutline } from "react-icons/ti";
 import LoginModal from "./LoginModal";
 import "./Header.css";
+import logo_1 from "../../assets/img/logo_1.jpg";
 
 const Header = ({ setAdmLogged, setUser }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,7 +26,7 @@ const Header = ({ setAdmLogged, setUser }) => {
       <nav className="nav">
         {/* Logo */}
         <a href="/" className="logo" onClick={handleLogoClick}>
-          <img src="../logo_1.jpg" alt="Nolare" className="logo-img" />
+          <img src={logo_1} alt="Nolare" className="logo-img" />
         </a>
 
         {/* Hamburger para mobile */}
