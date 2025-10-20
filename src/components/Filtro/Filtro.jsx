@@ -159,6 +159,40 @@ const Filtro = ({ onFiltrar }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // Validação para campos numéricos
+    const camposNumericos = [
+      "identificador",
+      "precoMin",
+      "precoMax",
+      "areaTotalMin",
+      "areaTotalMax",
+      "areaConstruidaMin",
+      "areaConstruidaMax",
+      "condominioMin",
+      "condominioMax",
+      "iptuMin",
+      "iptuMax",
+      "quartos",
+      "banheiros",
+      "vagas",
+      "arCondicionado",
+      "andarMin",
+      "andarMax",
+      "andarTotalMin",
+      "andarTotalMax",
+    ];
+
+    if (camposNumericos.includes(name) && type !== "checkbox") {
+      // Bloqueia caracteres inválidos: letras, negativos, pontos, vírgulas, 'e'/'E'
+      const apenasNumeros = value.replace(/[^0-9]/g, "");
+      setFiltros((prev) => ({
+        ...prev,
+        [name]: apenasNumeros,
+      }));
+      return;
+    }
+
     setFiltros((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -289,7 +323,8 @@ const Filtro = ({ onFiltrar }) => {
               <div className="filtro-group">
                 <label>Identificador (ID)</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="identificador"
                   placeholder="Digite o ID do imóvel"
                   value={filtros.identificador}
@@ -302,7 +337,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Preço (R$)</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="precoMin"
                     placeholder="Mínimo"
                     value={filtros.precoMin}
@@ -311,7 +347,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="precoMax"
                     placeholder="Máximo"
                     value={filtros.precoMax}
@@ -325,7 +362,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Área Total (m²)</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="areaTotalMin"
                     placeholder="Mínima"
                     value={filtros.areaTotalMin}
@@ -334,7 +372,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="areaTotalMax"
                     placeholder="Máxima"
                     value={filtros.areaTotalMax}
@@ -348,7 +387,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Área Construída (m²)</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="areaConstruidaMin"
                     placeholder="Mínima"
                     value={filtros.areaConstruidaMin}
@@ -357,7 +397,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="areaConstruidaMax"
                     placeholder="Máxima"
                     value={filtros.areaConstruidaMax}
@@ -371,7 +412,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Condomínio (R$)</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="condominioMin"
                     placeholder="Mínimo"
                     value={filtros.condominioMin}
@@ -380,7 +422,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="condominioMax"
                     placeholder="Máximo"
                     value={filtros.condominioMax}
@@ -394,7 +437,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>IPTU (R$)</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="iptuMin"
                     placeholder="Mínimo"
                     value={filtros.iptuMin}
@@ -403,7 +447,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="iptuMax"
                     placeholder="Máximo"
                     value={filtros.iptuMax}
@@ -416,7 +461,8 @@ const Filtro = ({ onFiltrar }) => {
               <div className="filtro-group">
                 <label>Quartos</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="quartos"
                   placeholder="Quantidade"
                   value={filtros.quartos}
@@ -428,7 +474,8 @@ const Filtro = ({ onFiltrar }) => {
               <div className="filtro-group">
                 <label>Banheiros</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="banheiros"
                   placeholder="Quantidade"
                   value={filtros.banheiros}
@@ -440,7 +487,8 @@ const Filtro = ({ onFiltrar }) => {
               <div className="filtro-group">
                 <label>Vagas de Garagem</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="vagas"
                   placeholder="Quantidade"
                   value={filtros.vagas}
@@ -452,7 +500,8 @@ const Filtro = ({ onFiltrar }) => {
               <div className="filtro-group">
                 <label>Ar-Condicionado</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="arCondicionado"
                   placeholder="Quantidade"
                   value={filtros.arCondicionado}
@@ -465,7 +514,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Andar</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="andarMin"
                     placeholder="Mínimo"
                     value={filtros.andarMin}
@@ -474,7 +524,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="andarMax"
                     placeholder="Máximo"
                     value={filtros.andarMax}
@@ -488,7 +539,8 @@ const Filtro = ({ onFiltrar }) => {
                 <label>Total de Andares</label>
                 <div className="filtro-range">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="andarTotalMin"
                     placeholder="Mínimo"
                     value={filtros.andarTotalMin}
@@ -497,7 +549,8 @@ const Filtro = ({ onFiltrar }) => {
                   />
                   <span>até</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="andarTotalMax"
                     placeholder="Máximo"
                     value={filtros.andarTotalMax}

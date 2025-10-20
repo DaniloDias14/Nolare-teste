@@ -108,7 +108,6 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     }
   };
 
-  // Drag handlers for mobile
   const handleMouseDown = (e) => {
     if (!isMobile) return;
     setIsDragging(true);
@@ -120,7 +119,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     if (!isDragging || !isMobile) return;
     e.preventDefault();
     const x = e.pageX - carouselRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
+    const walk = x - startX;
     carouselRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -142,7 +141,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
   const handleTouchMove = (e) => {
     if (!isDragging || !isMobile) return;
     const x = e.touches[0].pageX - carouselRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
+    const walk = x - startX;
     carouselRef.current.scrollLeft = scrollLeft - walk;
   };
 
