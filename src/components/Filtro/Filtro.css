@@ -79,6 +79,7 @@
   border-color: #2a2a8f;
 }
 
+/* Reduzida largura dos inputs pequenos para evitar overflow */
 .filtro-input-small {
   padding: 0.75rem 1rem;
   border: 2px solid var(--primary-blue);
@@ -93,6 +94,12 @@
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  width: 100%;
+}
+
+.filtro-input-small:focus {
+  box-shadow: 0 0 0 3px rgba(25, 25, 112, 0.1);
+  border-color: #2a2a8f;
 }
 
 /* Garantir que o wrapper de localização não cause overflow */
@@ -102,6 +109,7 @@
   max-width: 100%;
 }
 
+/* Estilização do dropdown de sugestões para combinar exatamente com os selects */
 .sugestoes-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -115,6 +123,18 @@
   z-index: 100;
   box-shadow: 0 8px 24px rgba(25, 25, 112, 0.25);
   margin-top: 0.25rem;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sugestao-item {
@@ -123,15 +143,27 @@
   transition: all 0.2s ease;
   color: var(--primary-blue);
   font-family: "Sanchez", serif;
+  font-size: 1rem;
   border-bottom: 1px solid rgba(25, 25, 112, 0.1);
+}
+
+.sugestao-item:first-child {
+  border-radius: 18px 18px 0 0;
 }
 
 .sugestao-item:last-child {
   border-bottom: none;
+  border-radius: 0 0 18px 18px;
 }
 
 .sugestao-item:hover {
-  background: var(--background-cream);
+  background: rgba(25, 25, 112, 0.08);
+  padding-left: 1.5rem;
+}
+
+/* Adicionado estilo para sugestão selecionada via teclado */
+.sugestao-item.selected {
+  background: rgba(25, 25, 112, 0.12);
   padding-left: 1.5rem;
 }
 
@@ -195,7 +227,7 @@
 
 .filtro-avancada-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -244,6 +276,7 @@
   gap: 1rem;
 }
 
+/* Uniformizado tamanho das caixas de características */
 .filtro-checkbox {
   display: flex;
   align-items: center;
@@ -252,6 +285,9 @@
   color: var(--primary-blue);
   font-family: "Sanchez", serif;
   font-size: 0.95rem;
+  min-height: 48px;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
 
 .filtro-checkbox input[type="checkbox"] {
@@ -259,10 +295,13 @@
   height: 20px;
   cursor: pointer;
   accent-color: var(--primary-blue);
+  flex-shrink: 0;
 }
 
 .filtro-checkbox span {
   user-select: none;
+  line-height: 1.3;
+  flex: 1;
 }
 
 .filtro-limpar-btn {
@@ -283,6 +322,43 @@
   background: var(--primary-blue);
   color: var(--white);
   box-shadow: 0 2px 12px rgba(25, 25, 112, 0.35);
+}
+
+/* Novos estilos para campos compactos (ID, Quartos, Banheiros, Vagas, Ar-Condicionado, Construtora) */
+.filtro-input-compact,
+.filtro-select-compact {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--primary-blue);
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-family: "Sanchez", serif;
+  color: var(--primary-blue);
+  background: var(--white);
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.filtro-select-compact {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23191970' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.filtro-input-compact:focus,
+.filtro-select-compact:focus {
+  box-shadow: 0 0 0 3px rgba(25, 25, 112, 0.1);
+  border-color: #2a2a8f;
+}
+
+/* Adicionada classe para campos mais estreitos (ID e Construtora) */
+.filtro-group-narrow {
+  max-width: 250px;
 }
 
 @media (max-width: 1024px) {
@@ -306,7 +382,6 @@
 }
 
 @media (max-width: 768px) {
-  /* Reduzido padding lateral para evitar overflow em mobile */
   .filtro-section {
     padding: 0 1rem;
   }
@@ -315,15 +390,39 @@
     padding: 1.5rem;
   }
 
-  /* Uma coluna em mobile - os 3 campos ficam empilhados com largura igual */
   .filtro-principal {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
+  /* Layout mobile reorganizado: sempre 2 campos por linha quando possível */
   .filtro-avancada-grid {
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Campos de range ocupam linha inteira */
+  .filtro-group:has(.filtro-range) {
+    grid-column: span 2;
+  }
+
+  /* ID e Construtora lado a lado */
+  .filtro-group:nth-child(1),
+  .filtro-group:nth-child(2) {
+    grid-column: span 1;
+  }
+
+  /* Quartos e Banheiros lado a lado */
+  .filtro-group:nth-child(10),
+  .filtro-group:nth-child(11) {
+    grid-column: span 1;
+  }
+
+  /* Vagas e Ar-Condicionado lado a lado */
+  .filtro-group:nth-child(12),
+  .filtro-group:nth-child(13) {
+    grid-column: span 1;
   }
 
   .filtro-checkbox-grid {
@@ -331,13 +430,52 @@
     gap: 0.8rem;
   }
 
+  .filtro-checkbox {
+    min-height: 44px;
+    font-size: 0.9rem;
+  }
+
   .filtro-range {
     flex-direction: row;
     align-items: center;
+    gap: 0.5rem;
   }
 
   .filtro-range span {
     text-align: center;
     font-size: 0.85rem;
+  }
+
+  .filtro-input-small {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .filtro-select-small {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .filtro-input-compact,
+  .filtro-select-compact {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  /* Removida regra específica para ID e Construtora no mobile */
+  .filtro-group-narrow {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Em telas muito pequenas, manter pares lado a lado */
+  .filtro-avancada-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Campos de range continuam ocupando linha inteira */
+  .filtro-group:has(.filtro-range) {
+    grid-column: span 2;
   }
 }

@@ -3,11 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import "./Filtro.css";
 
-const Filtro = ({ onFiltrar }) => {
+const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   const [buscaAvancada, setBuscaAvancada] = useState(false);
   const [sugestoes, setSugestoes] = useState([]);
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [indiceSugestaoSelecionada, setIndiceSugestaoSelecionada] =
+    useState(-1);
   const localizacaoRef = useRef(null);
+  const inputLocalizacaoRef = useRef(null);
+
+  useEffect(() => {
+    if (buscaAvancadaAtiva !== undefined) {
+      setBuscaAvancada(buscaAvancadaAtiva);
+    }
+  }, [buscaAvancadaAtiva]);
 
   const [filtros, setFiltros] = useState({
     identificador: "",
@@ -24,10 +33,12 @@ const Filtro = ({ onFiltrar }) => {
     condominioMax: "",
     iptuMin: "",
     iptuMax: "",
-    quartos: "",
-    banheiros: "",
-    vagas: "",
-    arCondicionado: "",
+    quartosMin: "",
+    quartosMax: "",
+    banheirosMin: "",
+    banheirosMax: "",
+    vagasMin: "",
+    vagasMax: "",
     andarMin: "",
     andarMax: "",
     andarTotalMin: "",
@@ -38,17 +49,22 @@ const Filtro = ({ onFiltrar }) => {
     aceita_animais: false,
     academia: false,
     alarme: false,
+    ar_condicionado: false,
     bicicletario: false,
     brinquedoteca: false,
     camera_vigilancia: false,
     carregador_carro_eletrico: false,
     churrasqueira: false,
     closet: false,
+    elevador: false,
+    energia_solar: false,
     escritorio: false,
     estudio: false,
     gerador_energia: false,
     interfone: false,
     jardim: false,
+    lago: false,
+    lareira: false,
     lavanderia: false,
     mobiliado: false,
     na_planta: false,
@@ -90,6 +106,7 @@ const Filtro = ({ onFiltrar }) => {
     { key: "aceita_animais", label: "Aceita Animais" },
     { key: "academia", label: "Academia" },
     { key: "alarme", label: "Alarme" },
+    { key: "ar_condicionado", label: "Ar-Condicionado" },
     { key: "bicicletario", label: "Bicicletário" },
     { key: "brinquedoteca", label: "Brinquedoteca" },
     { key: "camera_vigilancia", label: "Câmera de Vigilância" },
@@ -126,6 +143,7 @@ const Filtro = ({ onFiltrar }) => {
         !localizacaoRef.current.contains(event.target)
       ) {
         setMostrarSugestoes(false);
+        setIndiceSugestaoSelecionada(-1);
       }
     };
 
@@ -149,12 +167,16 @@ const Filtro = ({ onFiltrar }) => {
           );
 
           setSugestoes(filtradas);
+          if (filtradas.length > 0) {
+            setMostrarSugestoes(true);
+          }
         })
         .catch((err) => console.error("Erro ao buscar sugestões:", err));
     } else {
       setSugestoes([]);
       setMostrarSugestoes(false);
     }
+    setIndiceSugestaoSelecionada(-1);
   }, [filtros.localizacao]);
 
   const handleInputChange = (e) => {
@@ -173,10 +195,12 @@ const Filtro = ({ onFiltrar }) => {
       "condominioMax",
       "iptuMin",
       "iptuMax",
-      "quartos",
-      "banheiros",
-      "vagas",
-      "arCondicionado",
+      "quartosMin",
+      "quartosMax",
+      "banheirosMin",
+      "banheirosMax",
+      "vagasMin",
+      "vagasMax",
       "andarMin",
       "andarMax",
       "andarTotalMin",
@@ -205,6 +229,40 @@ const Filtro = ({ onFiltrar }) => {
       localizacao: sugestao,
     }));
     setMostrarSugestoes(false);
+    setIndiceSugestaoSelecionada(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!mostrarSugestoes || sugestoes.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setIndiceSugestaoSelecionada((prev) =>
+          prev < sugestoes.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setIndiceSugestaoSelecionada((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (indiceSugestaoSelecionada >= 0) {
+          handleSugestaoClick(sugestoes[indiceSugestaoSelecionada]);
+        }
+        break;
+      case "Tab":
+        if (indiceSugestaoSelecionada >= 0) {
+          e.preventDefault();
+          handleSugestaoClick(sugestoes[indiceSugestaoSelecionada]);
+        }
+        break;
+      case "Escape":
+        setMostrarSugestoes(false);
+        setIndiceSugestaoSelecionada(-1);
+        break;
+    }
   };
 
   const handleBuscar = () => {
@@ -227,10 +285,12 @@ const Filtro = ({ onFiltrar }) => {
       condominioMax: "",
       iptuMin: "",
       iptuMax: "",
-      quartos: "",
-      banheiros: "",
-      vagas: "",
-      arCondicionado: "",
+      quartosMin: "",
+      quartosMax: "",
+      banheirosMin: "",
+      banheirosMax: "",
+      vagasMin: "",
+      vagasMax: "",
       andarMin: "",
       andarMax: "",
       andarTotalMin: "",
@@ -244,6 +304,14 @@ const Filtro = ({ onFiltrar }) => {
 
     setFiltros(filtrosLimpos);
     onFiltrar({});
+  };
+
+  const toggleBuscaAvancada = () => {
+    const novoEstado = !buscaAvancada;
+    setBuscaAvancada(novoEstado);
+    if (setBuscaAvancadaAtiva) {
+      setBuscaAvancadaAtiva(novoEstado);
+    }
   };
 
   return (
@@ -280,6 +348,7 @@ const Filtro = ({ onFiltrar }) => {
 
           <div className="filtro-localizacao-wrapper" ref={localizacaoRef}>
             <input
+              ref={inputLocalizacaoRef}
               type="text"
               name="localizacao"
               placeholder="Bairro ou Cidade"
@@ -288,6 +357,7 @@ const Filtro = ({ onFiltrar }) => {
               onFocus={() => {
                 if (sugestoes.length > 0) setMostrarSugestoes(true);
               }}
+              onKeyDown={handleKeyDown}
               className="filtro-input"
             />
             {mostrarSugestoes && sugestoes.length > 0 && (
@@ -295,8 +365,11 @@ const Filtro = ({ onFiltrar }) => {
                 {sugestoes.map((sugestao, index) => (
                   <div
                     key={index}
-                    className="sugestao-item"
+                    className={`sugestao-item ${
+                      index === indiceSugestaoSelecionada ? "selected" : ""
+                    }`}
                     onClick={() => handleSugestaoClick(sugestao)}
+                    onMouseEnter={() => setIndiceSugestaoSelecionada(index)}
                   >
                     {sugestao}
                   </div>
@@ -312,7 +385,7 @@ const Filtro = ({ onFiltrar }) => {
 
         <button
           className="filtro-avancada-toggle"
-          onClick={() => setBuscaAvancada(!buscaAvancada)}
+          onClick={toggleBuscaAvancada}
         >
           {buscaAvancada ? "▲ Busca Simples" : "▼ Busca Avançada"}
         </button>
@@ -320,17 +393,34 @@ const Filtro = ({ onFiltrar }) => {
         {buscaAvancada && (
           <div className="filtro-avancada">
             <div className="filtro-avancada-grid">
-              <div className="filtro-group">
+              <div className="filtro-group filtro-group-narrow">
                 <label>Identificador (ID)</label>
                 <input
                   type="text"
                   inputMode="numeric"
                   name="identificador"
-                  placeholder="Digite o ID do imóvel"
+                  placeholder="Digite o ID"
                   value={filtros.identificador}
                   onChange={handleInputChange}
-                  className="filtro-input-small"
+                  className="filtro-input-compact"
                 />
+              </div>
+
+              <div className="filtro-group filtro-group-narrow">
+                <label>Construtora</label>
+                <select
+                  name="construtora"
+                  value={filtros.construtora}
+                  onChange={handleInputChange}
+                  className="filtro-select-compact"
+                >
+                  <option value="">Todas</option>
+                  {construtoras.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="filtro-group">
@@ -359,14 +449,14 @@ const Filtro = ({ onFiltrar }) => {
               </div>
 
               <div className="filtro-group">
-                <label>Área Total (m²)</label>
+                <label>Vagas de Garagem</label>
                 <div className="filtro-range">
                   <input
                     type="text"
                     inputMode="numeric"
-                    name="areaTotalMin"
-                    placeholder="Mínima"
-                    value={filtros.areaTotalMin}
+                    name="vagasMin"
+                    placeholder="Mínimo"
+                    value={filtros.vagasMin}
                     onChange={handleInputChange}
                     className="filtro-input-small"
                   />
@@ -374,9 +464,9 @@ const Filtro = ({ onFiltrar }) => {
                   <input
                     type="text"
                     inputMode="numeric"
-                    name="areaTotalMax"
-                    placeholder="Máxima"
-                    value={filtros.areaTotalMax}
+                    name="vagasMax"
+                    placeholder="Máximo"
+                    value={filtros.vagasMax}
                     onChange={handleInputChange}
                     className="filtro-input-small"
                   />
@@ -384,14 +474,14 @@ const Filtro = ({ onFiltrar }) => {
               </div>
 
               <div className="filtro-group">
-                <label>Área Construída (m²)</label>
+                <label>Banheiros</label>
                 <div className="filtro-range">
                   <input
                     type="text"
                     inputMode="numeric"
-                    name="areaConstruidaMin"
-                    placeholder="Mínima"
-                    value={filtros.areaConstruidaMin}
+                    name="banheirosMin"
+                    placeholder="Mínimo"
+                    value={filtros.banheirosMin}
                     onChange={handleInputChange}
                     className="filtro-input-small"
                   />
@@ -399,9 +489,34 @@ const Filtro = ({ onFiltrar }) => {
                   <input
                     type="text"
                     inputMode="numeric"
-                    name="areaConstruidaMax"
-                    placeholder="Máxima"
-                    value={filtros.areaConstruidaMax}
+                    name="banheirosMax"
+                    placeholder="Máximo"
+                    value={filtros.banheirosMax}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                </div>
+              </div>
+
+              <div className="filtro-group">
+                <label>Quartos</label>
+                <div className="filtro-range">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="quartosMin"
+                    placeholder="Mínimo"
+                    value={filtros.quartosMin}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                  <span>até</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="quartosMax"
+                    placeholder="Máximo"
+                    value={filtros.quartosMax}
                     onChange={handleInputChange}
                     className="filtro-input-small"
                   />
@@ -459,55 +574,53 @@ const Filtro = ({ onFiltrar }) => {
               </div>
 
               <div className="filtro-group">
-                <label>Quartos</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  name="quartos"
-                  placeholder="Quantidade"
-                  value={filtros.quartos}
-                  onChange={handleInputChange}
-                  className="filtro-input-small"
-                />
+                <label>Área Construída (m²)</label>
+                <div className="filtro-range">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="areaConstruidaMin"
+                    placeholder="Mínima"
+                    value={filtros.areaConstruidaMin}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                  <span>até</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="areaConstruidaMax"
+                    placeholder="Máxima"
+                    value={filtros.areaConstruidaMax}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                </div>
               </div>
 
               <div className="filtro-group">
-                <label>Banheiros</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  name="banheiros"
-                  placeholder="Quantidade"
-                  value={filtros.banheiros}
-                  onChange={handleInputChange}
-                  className="filtro-input-small"
-                />
-              </div>
-
-              <div className="filtro-group">
-                <label>Vagas de Garagem</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  name="vagas"
-                  placeholder="Quantidade"
-                  value={filtros.vagas}
-                  onChange={handleInputChange}
-                  className="filtro-input-small"
-                />
-              </div>
-
-              <div className="filtro-group">
-                <label>Ar-Condicionado</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  name="arCondicionado"
-                  placeholder="Quantidade"
-                  value={filtros.arCondicionado}
-                  onChange={handleInputChange}
-                  className="filtro-input-small"
-                />
+                <label>Área Total (m²)</label>
+                <div className="filtro-range">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="areaTotalMin"
+                    placeholder="Mínima"
+                    value={filtros.areaTotalMin}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                  <span>até</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    name="areaTotalMax"
+                    placeholder="Máxima"
+                    value={filtros.areaTotalMax}
+                    onChange={handleInputChange}
+                    className="filtro-input-small"
+                  />
+                </div>
               </div>
 
               <div className="filtro-group">
@@ -558,23 +671,6 @@ const Filtro = ({ onFiltrar }) => {
                     className="filtro-input-small"
                   />
                 </div>
-              </div>
-
-              <div className="filtro-group">
-                <label>Construtora</label>
-                <select
-                  name="construtora"
-                  value={filtros.construtora}
-                  onChange={handleInputChange}
-                  className="filtro-select-small"
-                >
-                  <option value="">Todas</option>
-                  {construtoras.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 

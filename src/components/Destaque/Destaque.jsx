@@ -100,7 +100,14 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
   // Carousel navigation
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = 400;
+      const card = carouselRef.current.querySelector(".destaque-card");
+      if (!card) return;
+
+      // Calcula largura do card + gap
+      const cardWidth = card.offsetWidth;
+      const gap = 28.8; // 1.8rem em pixels (aproximadamente)
+      const scrollAmount = cardWidth + gap;
+
       carouselRef.current.scrollBy({
         left: direction === "next" ? scrollAmount : -scrollAmount,
         behavior: "smooth",

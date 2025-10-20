@@ -16,6 +16,7 @@ const Comprar = ({ usuario }) => {
   const [imovelSelecionado, setImovelSelecionado] = useState(null);
   const [curtidas, setCurtidas] = useState({});
   const [mensagemSemResultados, setMensagemSemResultados] = useState("");
+  const [buscaAvancadaAtiva, setBuscaAvancadaAtiva] = useState(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ const Comprar = ({ usuario }) => {
       setImoveisFiltrados(imoveis);
       setMensagemSemResultados("");
       setPaginaAtual(1);
+      setBuscaAvancadaAtiva(false);
       return;
     }
 
@@ -189,32 +191,48 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
+      // Updated lógica para quartos Min/Max
       if (
-        filtros.quartos &&
-        (imovel.caracteristicas?.quarto || 0) < Number.parseInt(filtros.quartos)
+        filtros.quartosMin &&
+        (imovel.caracteristicas?.quarto || 0) <
+          Number.parseInt(filtros.quartosMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.quartosMax &&
+        (imovel.caracteristicas?.quarto || 0) >
+          Number.parseInt(filtros.quartosMax)
       ) {
         match = false;
       }
 
+      // Updated lógica para banheiros Min/Max
       if (
-        filtros.banheiros &&
+        filtros.banheirosMin &&
         (imovel.caracteristicas?.banheiro || 0) <
-          Number.parseInt(filtros.banheiros)
+          Number.parseInt(filtros.banheirosMin)
+      ) {
+        match = false;
+      }
+      if (
+        filtros.banheirosMax &&
+        (imovel.caracteristicas?.banheiro || 0) >
+          Number.parseInt(filtros.banheirosMax)
       ) {
         match = false;
       }
 
+      // Updated lógica para vagas Min/Max
       if (
-        filtros.vagas &&
-        (imovel.caracteristicas?.vaga || 0) < Number.parseInt(filtros.vagas)
+        filtros.vagasMin &&
+        (imovel.caracteristicas?.vaga || 0) < Number.parseInt(filtros.vagasMin)
       ) {
         match = false;
       }
-
       if (
-        filtros.arCondicionado &&
-        (imovel.caracteristicas?.ar_condicionado || 0) <
-          Number.parseInt(filtros.arCondicionado)
+        filtros.vagasMax &&
+        (imovel.caracteristicas?.vaga || 0) > Number.parseInt(filtros.vagasMax)
       ) {
         match = false;
       }
@@ -260,6 +278,7 @@ const Comprar = ({ usuario }) => {
         "aceita_animais",
         "academia",
         "alarme",
+        "ar_condicionado",
         "bicicletario",
         "brinquedoteca",
         "camera_vigilancia",
@@ -290,12 +309,18 @@ const Comprar = ({ usuario }) => {
       ];
 
       for (const caracteristica of caracteristicasBooleanas) {
-        if (
-          filtros[caracteristica] &&
-          !imovel.caracteristicas?.[caracteristica]
-        ) {
-          match = false;
-          break;
+        if (filtros[caracteristica]) {
+          if (caracteristica === "ar_condicionado") {
+            if ((imovel.caracteristicas?.[caracteristica] || 0) <= 0) {
+              match = false;
+              break;
+            }
+          } else {
+            if (!imovel.caracteristicas?.[caracteristica]) {
+              match = false;
+              break;
+            }
+          }
         }
       }
 
@@ -313,6 +338,7 @@ const Comprar = ({ usuario }) => {
 
     setImoveisFiltrados(filtrados);
     setPaginaAtual(1);
+    setBuscaAvancadaAtiva(true);
 
     if (filtrados.length === 0) {
       if (filtros.identificador) {
@@ -488,6 +514,14 @@ const Comprar = ({ usuario }) => {
     }
   };
 
+  const handleMudarPagina = (novaPagina) => {
+    setPaginaAtual(novaPagina);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (buscaAvancadaAtiva) {
+      setBuscaAvancadaAtiva(false);
+    }
+  };
+
   return (
     <div className="comprar">
       <Destaque
@@ -497,7 +531,11 @@ const Comprar = ({ usuario }) => {
         onImovelClick={handleOpenModal}
       />
 
-      <Filtro onFiltrar={handleFiltrar} />
+      <Filtro
+        onFiltrar={handleFiltrar}
+        buscaAvancadaAtiva={buscaAvancadaAtiva}
+        setBuscaAvancadaAtiva={setBuscaAvancadaAtiva}
+      />
 
       <main className="properties-section">
         <div className="container">
@@ -635,7 +673,7 @@ const Comprar = ({ usuario }) => {
                 <button
                   className="pagination-btn"
                   onClick={() =>
-                    setPaginaAtual((prev) => Math.max(1, prev - 1))
+                    handleMudarPagina(Math.max(1, paginaAtual - 1))
                   }
                   disabled={paginaAtual === 1}
                 >
@@ -649,7 +687,7 @@ const Comprar = ({ usuario }) => {
                 <button
                   className="pagination-btn"
                   onClick={() =>
-                    setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))
+                    handleMudarPagina(Math.min(totalPaginas, paginaAtual + 1))
                   }
                   disabled={paginaAtual === totalPaginas}
                 >
@@ -664,7 +702,7 @@ const Comprar = ({ usuario }) => {
                     className={`page-number-btn ${
                       paginaAtual === numeroPagina ? "active" : ""
                     }`}
-                    onClick={() => setPaginaAtual(numeroPagina)}
+                    onClick={() => handleMudarPagina(numeroPagina)}
                   >
                     {numeroPagina}
                   </button>

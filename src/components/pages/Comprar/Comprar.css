@@ -190,30 +190,29 @@
   margin-top: auto;
 }
 
-/* Button animation maintained as requested (exception for Curtir buttons) */
+/* Removida animação de elevação do botão "Entrar em Contato" */
 .contact-button {
   flex: 1;
   background: var(--primary-blue);
   color: var(--white);
   border: none;
-  padding: 0.9rem 1.5rem;
+  padding: 0.8rem 1.3rem;
   border-radius: 50px;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
   font-family: "Sanchez", serif;
 }
 
 .contact-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
   background: #2a2a8f;
+  box-shadow: 0 4px 16px rgba(25, 25, 112, 0.4);
 }
 
 .contact-button:active {
-  transform: translateY(0);
+  background: #1f1f6e;
 }
 
 /* Heart animation maintained as requested */
@@ -368,6 +367,7 @@
   }
 }
 
+/* Improved mobile pagination design to match desktop */
 @media (max-width: 768px) {
   .properties-section {
     padding: 0 1rem;
@@ -387,27 +387,37 @@
   }
 
   .pagination {
-    gap: 1rem;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
   }
 
   .pagination-controls {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
     width: 100%;
+    justify-content: space-between;
   }
 
   .pagination-btn {
-    width: 100%;
-    max-width: 250px;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+    flex: 1;
+    max-width: 140px;
+  }
+
+  .pagination-info {
+    font-size: 1rem;
+    white-space: nowrap;
   }
 
   .pagination-numbers {
     gap: 0.4rem;
+    max-width: 100%;
   }
 
   .page-number-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     font-size: 0.9rem;
   }
 }
