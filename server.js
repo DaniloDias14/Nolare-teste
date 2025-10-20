@@ -19,14 +19,17 @@ app.use("/fotos_imoveis", express.static("public/fotos_imoveis"));
 // ROTAS DE AUTENTICAÇÃO
 // =========================
 
+// ROTA: Login de usuário
 app.post("/api/login", async (req, res) => {
   const { email, senha } = req.body;
 
+  // VALIDAÇÃO: Campos obrigatórios
   if (!email || !senha) {
     return res.status(400).json({ error: "Email e senha são obrigatórios" });
   }
 
   try {
+    // DB QUERY: Busca usuário por email
     const result = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
       email,
     ]);
@@ -37,19 +40,20 @@ app.post("/api/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // Compara a senha fornecida com o hash armazenado
+    // VALIDAÇÃO: Compara senha com hash armazenado
     const senhaValida = await bcrypt.compare(senha, user.senha);
 
     if (!senhaValida) {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
+    // DB QUERY: Registra sessão de login
     await pool.query(
       "INSERT INTO usuario_sessoes (usuario_id, data_login, ativo) VALUES ($1, CURRENT_TIMESTAMP, TRUE)",
       [user.id]
     );
 
-    // Remove a senha do objeto antes de enviar
+    // SEGURANÇA: Remove senha antes de enviar resposta
     const { senha: _, ...userSemSenha } = user;
 
     res.json({ user: userSemSenha });
@@ -59,15 +63,17 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// ROTA: Logout de usuário
 app.post("/api/logout", async (req, res) => {
   const { usuario_id } = req.body;
 
+  // VALIDAÇÃO: Campo obrigatório
   if (!usuario_id) {
     return res.status(400).json({ error: "usuario_id é obrigatório" });
   }
 
   try {
-    // Update the most recent active session for this user
+    // DB QUERY: Atualiza sessão ativa para inativa
     await pool.query(
       `UPDATE usuario_sessoes 
        SET data_logout = CURRENT_TIMESTAMP, ativo = FALSE 
@@ -82,19 +88,22 @@ app.post("/api/logout", async (req, res) => {
   }
 });
 
+// ROTA: Registro de novo usuário
 app.post("/api/register", async (req, res) => {
   const { nome, email, senha, tipo_usuario } = req.body;
 
+  // VALIDAÇÃO: Campos obrigatórios
   if (!nome || !email || !senha || !tipo_usuario) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios" });
   }
 
+  // VALIDAÇÃO: Tipo de usuário permitido
   if (!["user", "adm"].includes(tipo_usuario)) {
     return res.status(400).json({ error: "Tipo de usuário inválido" });
   }
 
   try {
-    // Verifica se o email já existe
+    // DB QUERY: Verifica se email já existe
     const emailExiste = await pool.query(
       "SELECT id FROM usuarios WHERE email = $1",
       [email]
@@ -104,10 +113,10 @@ app.post("/api/register", async (req, res) => {
       return res.status(409).json({ error: "Email já cadastrado" });
     }
 
-    // Hash da senha
+    // SEGURANÇA: Hash da senha
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    // Insere o novo usuário
+    // DB QUERY: Insere novo usuário
     const result = await pool.query(
       "INSERT INTO usuarios (nome, email, senha, tipo_usuario) VALUES ($1, $2, $3, $4) RETURNING id, nome, email, tipo_usuario, data_criacao",
       [nome, email, senhaHash, tipo_usuario]
@@ -121,11 +130,13 @@ app.post("/api/register", async (req, res) => {
 });
 
 // =========================
-// ROTAS DE SESSÕES (para Dashboard)
+// ROTAS DE SESSÕES (Dashboard)
 // =========================
 
+// ROTA: Conta usuários ativos
 app.get("/api/sessoes/ativos", async (req, res) => {
   try {
+    // DB QUERY: Conta sessões ativas únicas
     const result = await pool.query(
       "SELECT COUNT(DISTINCT usuario_id) as count FROM usuario_sessoes WHERE ativo = TRUE"
     );
@@ -136,11 +147,12 @@ app.get("/api/sessoes/ativos", async (req, res) => {
   }
 });
 
+// ROTA: Pico de usuários em uma data específica
 app.get("/api/sessoes/pico/:data", async (req, res) => {
   const { data } = req.params;
 
   try {
-    // Query to find peak concurrent users on a specific date
+    // DB QUERY: Calcula pico de usuários simultâneos em uma data
     const result = await pool.query(
       `WITH sessoes_dia AS (
         SELECT 
@@ -180,10 +192,12 @@ app.get("/api/sessoes/pico/:data", async (req, res) => {
 // ROTAS DE CURTIDAS
 // =========================
 
+// ROTA: Busca curtidas de um usuário
 app.get("/api/curtidas/:usuario_id", async (req, res) => {
   const { usuario_id } = req.params;
 
   try {
+    // DB QUERY: Busca todas as curtidas do usuário
     const result = await pool.query(
       "SELECT * FROM curtidas WHERE usuario_id = $1",
       [usuario_id]
@@ -195,27 +209,46 @@ app.get("/api/curtidas/:usuario_id", async (req, res) => {
   }
 });
 
+// ROTA: Adiciona ou remove curtida (toggle)
 app.post("/api/curtidas/:usuario_id/:imovel_id", async (req, res) => {
   const { usuario_id, imovel_id } = req.params;
 
   try {
-    // Verifica se já existe curtida
+    // VALIDAÇÃO: Verifica se usuário existe
+    const usuarioExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1",
+      [usuario_id]
+    );
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    // VALIDAÇÃO: Verifica se imóvel existe
+    const imovelExiste = await pool.query(
+      "SELECT id FROM imoveis WHERE id = $1",
+      [imovel_id]
+    );
+    if (imovelExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Imóvel não encontrado" });
+    }
+
+    // DB QUERY: Verifica se curtida já existe
     const curtidaExiste = await pool.query(
       "SELECT id FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
       [usuario_id, imovel_id]
     );
 
     if (curtidaExiste.rows.length > 0) {
-      // Remove curtida
+      // DB QUERY: Remove curtida
       await pool.query(
         "DELETE FROM curtidas WHERE usuario_id = $1 AND imovel_id = $2",
         [usuario_id, imovel_id]
       );
       res.json({ curtido: false });
     } else {
-      // Adiciona curtida
+      // DB QUERY: Adiciona curtida com timestamp
       await pool.query(
-        "INSERT INTO curtidas (usuario_id, imovel_id) VALUES ($1, $2)",
+        "INSERT INTO curtidas (usuario_id, imovel_id, data_curtida) VALUES ($1, $2, CURRENT_TIMESTAMP)",
         [usuario_id, imovel_id]
       );
       res.json({ curtido: true });
@@ -227,17 +260,23 @@ app.post("/api/curtidas/:usuario_id/:imovel_id", async (req, res) => {
 });
 
 // =========================
-// ROTAS DE ESTATÍSTICAS (para Dashboard)
+// ROTAS DE ESTATÍSTICAS (Dashboard)
 // =========================
 
+// ROTA: Estatísticas de usuários
 app.get("/api/estatisticas/usuarios", async (req, res) => {
   try {
+    // DB QUERY: Total de usuários
     const totalResult = await pool.query(
       "SELECT COUNT(*) as total FROM usuarios"
     );
+
+    // DB QUERY: Usuários por tipo
     const tiposResult = await pool.query(
       "SELECT tipo_usuario, COUNT(*) as count FROM usuarios GROUP BY tipo_usuario"
     );
+
+    // DB QUERY: Data do último cadastro
     const ultimoResult = await pool.query(
       "SELECT data_criacao FROM usuarios ORDER BY data_criacao DESC LIMIT 1"
     );
@@ -258,31 +297,45 @@ app.get("/api/estatisticas/usuarios", async (req, res) => {
   }
 });
 
+// ROTA: Estatísticas de imóveis
 app.get("/api/estatisticas/imoveis", async (req, res) => {
   try {
+    // DB QUERY: Total de imóveis visíveis
     const totalResult = await pool.query(
       "SELECT COUNT(*) as total FROM imoveis WHERE visivel = TRUE"
     );
+
+    // DB QUERY: Preço médio dos imóveis
     const mediaPrecoResult = await pool.query(
       "SELECT AVG(preco) as media FROM imoveis WHERE visivel = TRUE"
     );
+
+    // DB QUERY: Data do último cadastro
     const ultimoResult = await pool.query(
       "SELECT data_criacao FROM imoveis WHERE visivel = TRUE ORDER BY data_criacao DESC LIMIT 1"
     );
+
+    // DB QUERY: Total de imóveis em destaque
     const destaqueResult = await pool.query(
       "SELECT COUNT(*) as count FROM imoveis WHERE destaque = TRUE AND visivel = TRUE"
     );
+
+    // DB QUERY: Imóveis por status
     const statusResult = await pool.query(
       "SELECT status, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY status"
     );
+
+    // DB QUERY: Imóveis por finalidade
     const finalidadeResult = await pool.query(
       "SELECT finalidade, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY finalidade"
     );
+
+    // DB QUERY: Imóveis por tipo
     const tipoResult = await pool.query(
       "SELECT tipo, COUNT(*) as count FROM imoveis WHERE visivel = TRUE GROUP BY tipo"
     );
 
-    // Get properties by construtora from caracteristicas table
+    // DB QUERY: Imóveis por construtora
     const construtoraResult = await pool.query(
       `SELECT ic.construtora, COUNT(*) as count 
        FROM imoveis_caracteristicas ic
@@ -329,7 +382,7 @@ app.get("/api/estatisticas/imoveis", async (req, res) => {
 });
 
 // =========================
-// Configuração do multer
+// CONFIGURAÇÃO MULTER (Upload de arquivos)
 // =========================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -361,9 +414,10 @@ const upload = multer({ storage });
 // ROTAS DE IMÓVEIS
 // =========================
 
-// Buscar todos os imóveis
+// ROTA: Busca todos os imóveis visíveis
 app.get("/api/imoveis", async (req, res) => {
   try {
+    // DB QUERY: Busca imóveis com características e fotos
     const result = await pool.query(
       `SELECT 
         i.id AS imovel_id,
@@ -386,6 +440,8 @@ app.get("/api/imoveis", async (req, res) => {
 
         json_build_object(
           'id', ic.id,
+          'condominio', ic.condominio,
+          'iptu', ic.iptu,
           'quarto', ic.quarto,
           'suite', ic.suite,
           'banheiro', ic.banheiro,
@@ -419,6 +475,10 @@ app.get("/api/imoveis", async (req, res) => {
           'lago', ic.lago,
           'aceita_animais', ic.aceita_animais,
           'na_planta', ic.na_planta,
+          'portaria_24h', ic.portaria_24h,
+          'carregador_carro_eletrico', ic.carregador_carro_eletrico,
+          'gerador_energia', ic.gerador_energia,
+          'estudio', ic.estudio,
           'construtora', ic.construtora
         ) AS caracteristicas,
 
@@ -437,10 +497,12 @@ app.get("/api/imoveis", async (req, res) => {
   }
 });
 
-// Buscar um imóvel específico por ID
+// ROTA: Busca um imóvel específico por ID
 app.get("/api/imoveis/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
+    // DB QUERY: Busca imóvel específico com características e fotos
     const result = await pool.query(
       `SELECT 
         i.id AS imovel_id,
@@ -463,6 +525,8 @@ app.get("/api/imoveis/:id", async (req, res) => {
 
         json_build_object(
           'id', ic.id,
+          'condominio', ic.condominio,
+          'iptu', ic.iptu,
           'quarto', ic.quarto,
           'suite', ic.suite,
           'banheiro', ic.banheiro,
@@ -496,6 +560,10 @@ app.get("/api/imoveis/:id", async (req, res) => {
           'lago', ic.lago,
           'aceita_animais', ic.aceita_animais,
           'na_planta', ic.na_planta,
+          'portaria_24h', ic.portaria_24h,
+          'carregador_carro_eletrico', ic.carregador_carro_eletrico,
+          'gerador_energia', ic.gerador_energia,
+          'estudio', ic.estudio,
           'construtora', ic.construtora
         ) AS caracteristicas,
 
@@ -519,7 +587,7 @@ app.get("/api/imoveis/:id", async (req, res) => {
   }
 });
 
-// Criar imóvel
+// ROTA: Cria novo imóvel
 app.post("/api/imoveis", async (req, res) => {
   const {
     titulo,
@@ -539,9 +607,26 @@ app.post("/api/imoveis", async (req, res) => {
     tipo,
   } = req.body;
 
-  if (!titulo || !preco || !criado_por)
+  // VALIDAÇÃO: Campos obrigatórios
+  if (!titulo || !preco || !criado_por) {
     return res.status(400).json({ error: "Campos obrigatórios ausentes" });
+  }
 
+  // VALIDAÇÃO: Verifica se usuário existe
+  try {
+    const usuarioExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1",
+      [criado_por]
+    );
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Usuário criador não encontrado" });
+    }
+  } catch (err) {
+    console.error("Erro ao validar usuário:", err);
+    return res.status(500).json({ error: "Erro ao validar usuário" });
+  }
+
+  // VALIDAÇÃO: Tipos de imóvel permitidos
   const tiposPermitidos = [
     "Casa",
     "Apartamento",
@@ -559,6 +644,7 @@ app.post("/api/imoveis", async (req, res) => {
   }
 
   try {
+    // DB QUERY: Insere novo imóvel
     const imovelResult = await pool.query(
       `INSERT INTO imoveis
         (titulo, descricao, preco, destaque, status, finalidade, cep, area_total, area_construida, visivel, criado_por, estado, cidade, bairro, tipo)
@@ -591,7 +677,7 @@ app.post("/api/imoveis", async (req, res) => {
   }
 });
 
-// Criar características do imóvel
+// ROTA: Cria características do imóvel
 app.post("/api/imoveis_caracteristicas", async (req, res) => {
   const campos = [
     "imovel_id",
@@ -630,49 +716,77 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "lago",
     "aceita_animais",
     "na_planta",
+    "portaria_24h",
+    "carregador_carro_eletrico",
+    "gerador_energia",
+    "estudio",
     "construtora",
+  ];
+
+  // VALIDAÇÃO: Campo obrigatório
+  if (!req.body.imovel_id) {
+    return res.status(400).json({ error: "imovel_id é obrigatório" });
+  }
+
+  // VALIDAÇÃO: Verifica se imóvel existe
+  try {
+    const imovelExiste = await pool.query(
+      "SELECT id FROM imoveis WHERE id = $1",
+      [req.body.imovel_id]
+    );
+    if (imovelExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Imóvel não encontrado" });
+    }
+  } catch (err) {
+    console.error("Erro ao validar imóvel:", err);
+    return res.status(500).json({ error: "Erro ao validar imóvel" });
+  }
+
+  // Define valores padrão para campos booleanos
+  const camposBooleanos = [
+    "suite",
+    "piscina",
+    "churrasqueira",
+    "salao_de_festa",
+    "academia",
+    "playground",
+    "jardim",
+    "varanda",
+    "interfone",
+    "acessibilidade_pcd",
+    "mobiliado",
+    "energia_solar",
+    "quadra",
+    "lavanderia",
+    "closet",
+    "escritorio",
+    "lareira",
+    "alarme",
+    "camera_vigilancia",
+    "bicicletario",
+    "sala_jogos",
+    "brinquedoteca",
+    "elevador",
+    "pomar",
+    "lago",
+    "aceita_animais",
+    "na_planta",
+    "portaria_24h",
+    "carregador_carro_eletrico",
+    "gerador_energia",
+    "estudio",
   ];
 
   const values = campos.map((c) =>
     req.body[c] !== undefined
       ? req.body[c]
-      : [
-          "suite",
-          "piscina",
-          "churrasqueira",
-          "salao_de_festa",
-          "academia",
-          "playground",
-          "jardim",
-          "varanda",
-          "interfone",
-          "acessibilidade_pcd",
-          "mobiliado",
-          "energia_solar",
-          "quadra",
-          "lavanderia",
-          "closet",
-          "escritorio",
-          "lareira",
-          "alarme",
-          "camera_vigilancia",
-          "bicicletario",
-          "sala_jogos",
-          "brinquedoteca",
-          "elevador",
-          "pomar",
-          "lago",
-          "aceita_animais",
-          "na_planta",
-        ].includes(c)
+      : camposBooleanos.includes(c)
       ? false
       : null
   );
 
-  if (!req.body.imovel_id)
-    return res.status(400).json({ error: "imovel_id é obrigatório" });
-
   try {
+    // DB QUERY: Insere características do imóvel
     const placeholders = campos.map((_, idx) => `$${idx + 1}`).join(",");
     await pool.query(
       `INSERT INTO imoveis_caracteristicas (${campos.join(
@@ -689,17 +803,35 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
   }
 });
 
-// Upload de fotos
+// ROTA: Upload de fotos do imóvel
 app.post(
   "/api/imoveis/:id/upload",
   upload.array("fotos", 10),
   async (req, res) => {
     const { id } = req.params;
-    if (!req.files || req.files.length === 0)
+
+    // VALIDAÇÃO: Verifica se arquivos foram enviados
+    if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "Arquivos não enviados" });
+    }
+
+    // VALIDAÇÃO: Verifica se imóvel existe
+    try {
+      const imovelExiste = await pool.query(
+        "SELECT id FROM imoveis WHERE id = $1",
+        [id]
+      );
+      if (imovelExiste.rows.length === 0) {
+        return res.status(404).json({ error: "Imóvel não encontrado" });
+      }
+    } catch (err) {
+      console.error("Erro ao validar imóvel:", err);
+      return res.status(500).json({ error: "Erro ao validar imóvel" });
+    }
 
     try {
       const fotosInseridas = [];
+      // DB QUERY: Insere cada foto no banco
       for (const file of req.files) {
         const caminho = `/fotos_imoveis/${file.filename}`;
         const result = await pool.query(
@@ -716,6 +848,7 @@ app.post(
   }
 );
 
+// Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

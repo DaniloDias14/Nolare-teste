@@ -181,7 +181,7 @@ const ImovelModal = ({
           onClick={handleShare}
           title="Compartilhar imóvel"
         >
-          <img src="/compartilhar.jpg" alt="Compartilhar" />
+          <img src=".../compartilhar.jpg" alt="Compartilhar" />
         </button>
 
         {showCopyMessage && <div className="copy-message">Link copiado!</div>}
