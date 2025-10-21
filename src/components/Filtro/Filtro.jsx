@@ -5,10 +5,6 @@ import "./Filtro.css";
 
 const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   const [buscaAvancada, setBuscaAvancada] = useState(false);
-  const [sugestoes, setSugestoes] = useState([]);
-  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
-  const [indiceSugestaoSelecionada, setIndiceSugestaoSelecionada] =
-    useState(-1);
   const localizacaoRef = useRef(null);
   const inputLocalizacaoRef = useRef(null);
 
@@ -136,49 +132,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     { key: "varanda", label: "Varanda" },
   ];
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        localizacaoRef.current &&
-        !localizacaoRef.current.contains(event.target)
-      ) {
-        setMostrarSugestoes(false);
-        setIndiceSugestaoSelecionada(-1);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (filtros.localizacao.length >= 2) {
-      fetch("http://localhost:5000/api/imoveis")
-        .then((res) => res.json())
-        .then((data) => {
-          const localizacoes = new Set();
-          data.forEach((imovel) => {
-            if (imovel.cidade) localizacoes.add(imovel.cidade);
-            if (imovel.bairro) localizacoes.add(imovel.bairro);
-          });
-
-          const filtradas = Array.from(localizacoes).filter((loc) =>
-            loc.toLowerCase().includes(filtros.localizacao.toLowerCase())
-          );
-
-          setSugestoes(filtradas);
-          if (filtradas.length > 0) {
-            setMostrarSugestoes(true);
-          }
-        })
-        .catch((err) => console.error("Erro ao buscar sugestões:", err));
-    } else {
-      setSugestoes([]);
-      setMostrarSugestoes(false);
-    }
-    setIndiceSugestaoSelecionada(-1);
-  }, [filtros.localizacao]);
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -221,48 +174,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const handleSugestaoClick = (sugestao) => {
-    setFiltros((prev) => ({
-      ...prev,
-      localizacao: sugestao,
-    }));
-    setMostrarSugestoes(false);
-    setIndiceSugestaoSelecionada(-1);
-  };
-
-  const handleKeyDown = (e) => {
-    if (!mostrarSugestoes || sugestoes.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setIndiceSugestaoSelecionada((prev) =>
-          prev < sugestoes.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setIndiceSugestaoSelecionada((prev) => (prev > 0 ? prev - 1 : -1));
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (indiceSugestaoSelecionada >= 0) {
-          handleSugestaoClick(sugestoes[indiceSugestaoSelecionada]);
-        }
-        break;
-      case "Tab":
-        if (indiceSugestaoSelecionada >= 0) {
-          e.preventDefault();
-          handleSugestaoClick(sugestoes[indiceSugestaoSelecionada]);
-        }
-        break;
-      case "Escape":
-        setMostrarSugestoes(false);
-        setIndiceSugestaoSelecionada(-1);
-        break;
-    }
   };
 
   const handleBuscar = () => {
@@ -346,37 +257,15 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
             ))}
           </select>
 
-          <div className="filtro-localizacao-wrapper" ref={localizacaoRef}>
-            <input
-              ref={inputLocalizacaoRef}
-              type="text"
-              name="localizacao"
-              placeholder="Bairro ou Cidade"
-              value={filtros.localizacao}
-              onChange={handleInputChange}
-              onFocus={() => {
-                if (sugestoes.length > 0) setMostrarSugestoes(true);
-              }}
-              onKeyDown={handleKeyDown}
-              className="filtro-input"
-            />
-            {mostrarSugestoes && sugestoes.length > 0 && (
-              <div className="sugestoes-dropdown">
-                {sugestoes.map((sugestao, index) => (
-                  <div
-                    key={index}
-                    className={`sugestao-item ${
-                      index === indiceSugestaoSelecionada ? "selected" : ""
-                    }`}
-                    onClick={() => handleSugestaoClick(sugestao)}
-                    onMouseEnter={() => setIndiceSugestaoSelecionada(index)}
-                  >
-                    {sugestao}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <input
+            ref={inputLocalizacaoRef}
+            type="text"
+            name="localizacao"
+            placeholder="Bairro ou Cidade"
+            value={filtros.localizacao}
+            onChange={handleInputChange}
+            className="filtro-input"
+          />
 
           <button className="filtro-buscar-btn" onClick={handleBuscar}>
             Buscar

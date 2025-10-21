@@ -191,6 +191,7 @@
 }
 
 /* Removida animação de elevação do botão "Entrar em Contato" */
+/* Updated transition and hover shadow to match Destaque button style */
 .contact-button {
   flex: 1;
   background: var(--primary-blue);
@@ -201,14 +202,14 @@
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
   font-family: "Sanchez", serif;
 }
 
 .contact-button:hover {
   background: #2a2a8f;
-  box-shadow: 0 4px 16px rgba(25, 25, 112, 0.4);
+  box-shadow: 0 2px 12px rgba(25, 25, 112, 0.35);
 }
 
 .contact-button:active {

@@ -1,4 +1,4 @@
-/* Updated to match FloatingButtonAdmin design pattern without gear animation */
+/* Updated to match FloatingButtonAdmin animations - only color and shadow, no scale */
 .user-floating-button {
   position: fixed;
   bottom: 30px;
@@ -11,8 +11,7 @@
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(25, 25, 112, 0.4);
-  transition: transform 0.3s ease, background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -28,10 +27,5 @@
 
 .user-floating-button:hover {
   background-color: #2a2a8f;
-  transform: scale(1.1);
   box-shadow: 0 6px 25px rgba(25, 25, 112, 0.6);
-}
-
-.user-floating-button:active {
-  transform: scale(1.05);
 }

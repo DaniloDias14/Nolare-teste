@@ -1,22 +1,41 @@
+"use client";
+
 import "./Footer.css";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { MdEmail, MdPhone } from "react-icons/md";
+import { Link } from "react-router-dom";
 import logo_1 from "../../assets/img/logo_1.jpg";
 
 const Footer = () => {
   const testLink = "https://www.youtube.com";
+
+  const handleSobreNosClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-logo-section">
           <div className="footer-logo-container">
-            <img src={logo_1} alt="Nolare" className="footer-logo-img" />
-            <div className="footer-logo-text">
-              <h3>Nolare</h3>
+            <Link
+              to="/sobre-nos"
+              className="footer-logo-link"
+              onClick={handleSobreNosClick}
+            >
+              <img
+                src={logo_1 || "/placeholder.svg"}
+                alt="Nolare"
+                className="footer-logo-img"
+              />
+            </Link>
+            <div className="footer-logo-text-wrapper">
+              <div className="footer-logo-text">
+                <h3>Nolare</h3>
+              </div>
+              <p className="footer-slogan">Transformando lugares em lares.</p>
             </div>
           </div>
-          <p className="footer-slogan">Transformando lugares em lares.</p>
         </div>
 
         <div className="footer-section">

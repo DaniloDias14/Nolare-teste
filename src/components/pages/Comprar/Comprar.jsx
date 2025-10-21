@@ -677,7 +677,7 @@ const Comprar = ({ usuario }) => {
                   }
                   disabled={paginaAtual === 1}
                 >
-                  ← Anterior
+                  🡰 Anterior
                 </button>
 
                 <div className="pagination-info">
@@ -691,7 +691,7 @@ const Comprar = ({ usuario }) => {
                   }
                   disabled={paginaAtual === totalPaginas}
                 >
-                  Próxima →
+                  Próxima 🡲
                 </button>
               </div>
 

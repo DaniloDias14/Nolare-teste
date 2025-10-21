@@ -202,7 +202,7 @@
   align-items: stretch;
 }
 
-/* Button animation maintained */
+/* Removed transform animation and updated to match Destaque button style, keeping original sizes */
 .contact-button {
   flex: 1;
   background: var(--primary-blue);
@@ -213,19 +213,18 @@
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
   font-family: "Sanchez", serif;
 }
 
 .contact-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
   background: #2a2a8f;
+  box-shadow: 0 2px 12px rgba(25, 25, 112, 0.35);
 }
 
 .contact-button:active {
-  transform: translateY(0);
+  background: #1f1f6e;
 }
 
 /* Heart animation maintained */

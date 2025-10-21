@@ -88,6 +88,11 @@
   width: 75%;
 }
 
+/* Added active state for persistent underline */
+.menu li a.active::after {
+  width: 75%;
+}
+
 /* Animação discreta no botão Conectar-se */
 .perfil-icon {
   background: var(--primary-blue);
@@ -112,7 +117,6 @@
 }
 
 .perfil-icon:hover {
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(25, 25, 112, 0.25);
   background: #2a2a8f;
 }
@@ -138,20 +142,26 @@
     transform: translateX(-50%);
   }
 
+  /* Improved mobile menu with smoother transition and better visual integration */
   .menu {
     position: fixed;
     top: 80px;
-    left: -300px;
-    width: 250px;
-    height: calc(100vh - 80px);
+    left: -220px;
+    width: 220px;
+    height: auto;
+    max-height: calc(100vh - 80px);
     background: var(--background-cream);
     flex-direction: column;
     align-items: flex-start;
-    padding: 2rem 0;
+    padding: 1rem 0;
     gap: 0;
-    box-shadow: 4px 0 15px rgba(25, 25, 112, 0.15);
-    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Enhanced shadow for better depth perception */
+    box-shadow: 4px 0 20px rgba(25, 25, 112, 0.2);
+    /* Smoother, more natural transition */
+    transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow-y: auto;
+    /* Add subtle border to connect with header */
+    border-right: 1px solid rgba(25, 25, 112, 0.1);
   }
 
   .menu.menu-open {
@@ -165,7 +175,7 @@
 
   .menu li a {
     display: block;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     width: 100%;
   }
 

@@ -24,15 +24,36 @@
   gap: 1rem;
 }
 
+/* Changed to horizontal layout on desktop, logo on left of text */
 .footer-logo-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 1rem;
+}
+
+/* Added link wrapper for logo */
+.footer-logo-link {
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-logo-link:hover {
+  opacity: 0.8;
 }
 
 .footer-logo-img {
   height: 50px;
   width: auto;
+}
+
+/* Added wrapper for text content */
+.footer-logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .footer-logo-text h3 {
@@ -47,6 +68,7 @@
   font-size: 0.95rem;
   line-height: 1.6;
   font-style: italic;
+  margin: 0;
 }
 
 /* Section headings with better color */
@@ -160,5 +182,42 @@
 
   .footer-logo-text h3 {
     font-size: 1.5rem;
+  }
+
+  /* On mobile, logo stays on top and centered */
+  .footer-logo-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-logo-text-wrapper {
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Centered all footer elements on mobile */
+  .footer-logo-section {
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-logo-container {
+    align-items: center;
+  }
+
+  .footer-section {
+    text-align: center;
+  }
+
+  .footer-contact {
+    align-items: center;
+  }
+
+  .footer-social {
+    justify-content: center;
+  }
+
+  .footer-legal {
+    align-items: center;
   }
 }

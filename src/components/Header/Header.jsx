@@ -2,7 +2,7 @@
 
 // Header.jsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { TiUserOutline } from "react-icons/ti";
 import LoginModal from "./LoginModal";
 import "./Header.css";
@@ -11,6 +11,7 @@ import logo_1 from "../../assets/img/logo_1.jpg";
 const Header = ({ setAdmLogged, setUser }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const location = useLocation();
 
   const handleLogoClick = (e) => {
     e.preventDefault();
@@ -21,12 +22,20 @@ const Header = ({ setAdmLogged, setUser }) => {
     setMenuOpen(false);
   };
 
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <header className="header">
       <nav className="nav">
         {/* Logo */}
         <a href="/" className="logo" onClick={handleLogoClick}>
-          <img src={logo_1} alt="Nolare" className="logo-img" />
+          <img
+            src={logo_1 || "/placeholder.svg"}
+            alt="Nolare"
+            className="logo-img"
+          />
         </a>
 
         {/* Hamburger para mobile */}
@@ -39,22 +48,38 @@ const Header = ({ setAdmLogged, setUser }) => {
         {/* Links do menu */}
         <ul className={`menu ${menuOpen ? "menu-open" : ""}`}>
           <li>
-            <Link to="/comprar" onClick={handleMenuClick}>
+            <Link
+              to="/comprar"
+              onClick={handleMenuClick}
+              className={isActive("/comprar") ? "active" : ""}
+            >
               Comprar
             </Link>
           </li>
           <li>
-            <Link to="/alugar" onClick={handleMenuClick}>
+            <Link
+              to="/alugar"
+              onClick={handleMenuClick}
+              className={isActive("/alugar") ? "active" : ""}
+            >
               Alugar
             </Link>
           </li>
           <li>
-            <Link to="/anunciar" onClick={handleMenuClick}>
+            <Link
+              to="/anunciar"
+              onClick={handleMenuClick}
+              className={isActive("/anunciar") ? "active" : ""}
+            >
               Anunciar
             </Link>
           </li>
           <li>
-            <Link to="/sobre-nos" onClick={handleMenuClick}>
+            <Link
+              to="/sobre-nos"
+              onClick={handleMenuClick}
+              className={isActive("/sobre-nos") ? "active" : ""}
+            >
               Sobre Nós
             </Link>
           </li>

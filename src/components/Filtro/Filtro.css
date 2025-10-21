@@ -356,9 +356,9 @@
   border-color: #2a2a8f;
 }
 
-/* Adicionada classe para campos mais estreitos (ID e Construtora) */
+/* Increased max-width for ID and Construtora fields */
 .filtro-group-narrow {
-  max-width: 250px;
+  max-width: 100%;
 }
 
 @media (max-width: 1024px) {
