@@ -125,6 +125,11 @@
   transform: translateY(0);
 }
 
+/* Esconder logo do menu mobile no desktop */
+.menu-logo-container {
+  display: none;
+}
+
 @media (max-width: 968px) {
   .nav {
     padding: 1rem 1.5rem;
@@ -142,25 +147,23 @@
     transform: translateX(-50%);
   }
 
-  /* Improved mobile menu with smoother transition and better visual integration */
+  /* Menu mobile agora vai até o topo do site com espaçamento adequado */
   .menu {
     position: fixed;
-    top: 80px;
-    left: -220px;
-    width: 220px;
+    top: 0;
+    left: -280px;
+    width: 280px;
     height: auto;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 2rem);
     background: var(--background-cream);
     flex-direction: column;
     align-items: flex-start;
-    padding: 1rem 0;
+    /* Espaço do topo até o começo do texto para não ficar escondido atrás do header */
+    padding: 100px 0 1rem 0;
     gap: 0;
-    /* Enhanced shadow for better depth perception */
     box-shadow: 4px 0 20px rgba(25, 25, 112, 0.2);
-    /* Smoother, more natural transition */
     transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow-y: auto;
-    /* Add subtle border to connect with header */
     border-right: 1px solid rgba(25, 25, 112, 0.1);
   }
 
@@ -181,5 +184,23 @@
 
   .perfil-icon::before {
     display: none;
+  }
+
+  /* Logo do menu mobile - posicionada no canto superior direito, sem animações */
+  .menu-logo-container {
+    display: block;
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: auto;
+    padding: 0;
+    z-index: 1003;
+    pointer-events: none; /* Remove interatividade */
+  }
+
+  .menu-logo-img {
+    height: 50px;
+    width: auto;
+    display: block;
   }
 }

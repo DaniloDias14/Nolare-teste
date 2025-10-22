@@ -7,6 +7,8 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   const [buscaAvancada, setBuscaAvancada] = useState(false);
   const localizacaoRef = useRef(null);
   const inputLocalizacaoRef = useRef(null);
+  const buscarButtonRef = useRef(null);
+  const isSecondClickRef = useRef(false);
 
   useEffect(() => {
     if (buscaAvancadaAtiva !== undefined) {
@@ -40,7 +42,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     andarTotalMin: "",
     andarTotalMax: "",
     construtora: "",
-    // Características booleanas
     acessibilidade_pcd: false,
     aceita_animais: false,
     academia: false,
@@ -135,7 +136,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Validação para campos numéricos
     const camposNumericos = [
       "identificador",
       "precoMin",
@@ -161,7 +161,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     ];
 
     if (camposNumericos.includes(name) && type !== "checkbox") {
-      // Bloqueia caracteres inválidos: letras, negativos, pontos, vírgulas, 'e'/'E'
       const apenasNumeros = value.replace(/[^0-9]/g, "");
       setFiltros((prev) => ({
         ...prev,
@@ -177,10 +176,37 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   };
 
   const handleBuscar = () => {
+    if (isSecondClickRef.current) {
+      isSecondClickRef.current = false;
+      if (buscaAvancada) {
+        setBuscaAvancada(false);
+        if (setBuscaAvancadaAtiva) {
+          setBuscaAvancadaAtiva(false);
+        }
+      }
+      onFiltrar(filtros);
+      return;
+    }
+
+    if (buscaAvancada) {
+      setBuscaAvancada(false);
+      if (setBuscaAvancadaAtiva) {
+        setBuscaAvancadaAtiva(false);
+      }
+    }
     onFiltrar(filtros);
+
+    setTimeout(() => {
+      if (buscarButtonRef.current) {
+        isSecondClickRef.current = true;
+        buscarButtonRef.current.click();
+      }
+    }, 50);
   };
 
   const handleLimpar = () => {
+    const estadoBuscaAvancada = buscaAvancada;
+
     const filtrosLimpos = {
       identificador: "",
       tipo: "",
@@ -215,6 +241,13 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
 
     setFiltros(filtrosLimpos);
     onFiltrar({});
+
+    setTimeout(() => {
+      setBuscaAvancada(estadoBuscaAvancada);
+      if (setBuscaAvancadaAtiva) {
+        setBuscaAvancadaAtiva(estadoBuscaAvancada);
+      }
+    }, 0);
   };
 
   const toggleBuscaAvancada = () => {
@@ -267,7 +300,11 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
             className="filtro-input"
           />
 
-          <button className="filtro-buscar-btn" onClick={handleBuscar}>
+          <button
+            ref={buscarButtonRef}
+            className="filtro-buscar-btn"
+            onClick={handleBuscar}
+          >
             Buscar
           </button>
         </div>

@@ -20,6 +20,8 @@ const Header = ({ setAdmLogged, setUser }) => {
 
   const handleMenuClick = () => {
     setMenuOpen(false);
+    // Rola para o topo da página
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const isActive = (path) => {
@@ -47,6 +49,13 @@ const Header = ({ setAdmLogged, setUser }) => {
 
         {/* Links do menu */}
         <ul className={`menu ${menuOpen ? "menu-open" : ""}`}>
+          <div className="menu-logo-container">
+            <img
+              src={logo_1 || "/placeholder.svg"}
+              alt="Nolare"
+              className="menu-logo-img"
+            />
+          </div>
           <li>
             <Link
               to="/comprar"
