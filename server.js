@@ -437,6 +437,7 @@ app.get("/api/imoveis", async (req, res) => {
         i.bairro,
         i.tipo,
         i.data_criacao,
+        i.map_url,
 
         json_build_object(
           'id', ic.id,
@@ -522,6 +523,7 @@ app.get("/api/imoveis/:id", async (req, res) => {
         i.bairro,
         i.tipo,
         i.data_criacao,
+        i.map_url,
 
         json_build_object(
           'id', ic.id,
@@ -605,6 +607,7 @@ app.post("/api/imoveis", async (req, res) => {
     cidade,
     bairro,
     tipo,
+    map_url,
   } = req.body;
 
   // VALIDAÇÃO: Campos obrigatórios
@@ -647,8 +650,8 @@ app.post("/api/imoveis", async (req, res) => {
     // DB QUERY: Insere novo imóvel
     const imovelResult = await pool.query(
       `INSERT INTO imoveis
-        (titulo, descricao, preco, destaque, status, finalidade, cep, area_total, area_construida, visivel, criado_por, estado, cidade, bairro, tipo)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+        (titulo, descricao, preco, destaque, status, finalidade, cep, area_total, area_construida, visivel, criado_por, estado, cidade, bairro, tipo, map_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
        RETURNING id`,
       [
         titulo,
@@ -666,6 +669,7 @@ app.post("/api/imoveis", async (req, res) => {
         cidade || null,
         bairro || null,
         tipo || null,
+        map_url || null,
       ]
     );
 
@@ -806,9 +810,10 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
 // ROTA: Upload de fotos do imóvel
 app.post(
   "/api/imoveis/:id/upload",
-  upload.array("fotos", 10),
+  upload.array("fotos", 11),
   async (req, res) => {
     const { id } = req.params;
+    const { isFotoMaps } = req.body;
 
     // VALIDAÇÃO: Verifica se arquivos foram enviados
     if (!req.files || req.files.length === 0) {
@@ -834,11 +839,21 @@ app.post(
       // DB QUERY: Insere cada foto no banco
       for (const file of req.files) {
         const caminho = `/fotos_imoveis/${file.filename}`;
-        const result = await pool.query(
-          "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
-          [id, caminho]
-        );
-        fotosInseridas.push(result.rows[0]);
+
+        // Se for foto do Google Maps, salva em caminho_foto_maps
+        if (isFotoMaps === "true") {
+          const result = await pool.query(
+            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto_maps) VALUES ($1, $2) RETURNING *",
+            [id, caminho]
+          );
+          fotosInseridas.push(result.rows[0]);
+        } else {
+          const result = await pool.query(
+            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
+            [id, caminho]
+          );
+          fotosInseridas.push(result.rows[0]);
+        }
       }
       res.status(201).json(fotosInseridas);
     } catch (err) {

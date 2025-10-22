@@ -269,6 +269,18 @@ textarea {
   background-color: #c0392b;
 }
 
+/* Added styles for Google Maps photo section */
+.foto-maps-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.foto-maps {
+  width: 300px;
+  max-width: 100%;
+}
+
 /* ================================
    Submit Button
 ================================ */

@@ -79,6 +79,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     area_total: "",
     area_construida: "",
     fotos: Array(10).fill(null),
+    map_url: "",
+    fotoMaps: null,
 
     condominio: "",
     iptu: "",
@@ -122,12 +124,89 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     na_planta: false,
   });
 
+  const formatCurrency = (value) => {
+    // Remove tudo exceto números
+    const numbers = value.replace(/\D/g, "");
+
+    const limited = numbers.slice(0, 11);
+
+    if (!limited || limited === "0" || Number.parseInt(limited) === 0) {
+      return "";
+    }
+
+    const num = Number.parseInt(limited);
+
+    // Formata com pontos de milhar e vírgula decimal
+    const intPart = Math.floor(num / 100).toString();
+    const decPart = (num % 100).toString().padStart(2, "0");
+
+    // Adiciona pontos de milhar
+    const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${formattedInt},${decPart}`;
+  };
+
+  const formatCEP = (value) => {
+    // Remove tudo exceto números
+    const numbers = value.replace(/\D/g, "");
+
+    const limited = numbers.slice(0, 8);
+
+    if (!limited || limited === "0" || Number.parseInt(limited) === 0) {
+      return "";
+    }
+
+    // Aplica máscara 00000-000
+    if (limited.length <= 5) {
+      return limited;
+    }
+    return limited.replace(/(\d{5})(\d{0,3})/, "$1-$2");
+  };
+
+  const parseCurrency = (formatted) => {
+    // Remove pontos e vírgula, converte para número
+    const numbers = formatted.replace(/\./g, "").replace(",", ".");
+    const num = Number.parseFloat(numbers);
+    return isNaN(num) ? 0 : num;
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     let newValue = type === "checkbox" ? checked : value;
 
     if (name === "cep") {
-      newValue = newValue.replace(/\D/g, "");
+      newValue = formatCEP(value);
+    }
+
+    if (name === "preco" || name === "condominio" || name === "iptu") {
+      newValue = formatCurrency(value);
+    }
+
+    if (
+      type === "number" ||
+      [
+        "area_total",
+        "area_construida",
+        "quarto",
+        "banheiro",
+        "vaga",
+        "andar",
+        "andar_total",
+        "ar_condicionado",
+      ].includes(name)
+    ) {
+      // Bloqueia entrada de 'e', 'E', '+', '-'
+      if (
+        value.includes("e") ||
+        value.includes("E") ||
+        value.includes("-") ||
+        value.includes("+")
+      ) {
+        return;
+      }
+      if (Number.parseFloat(value) < 0 || value === "0") {
+        return;
+      }
     }
 
     setFormData((prev) => ({
@@ -144,12 +223,26 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     });
   };
 
+  const handleFotoMapsChange = (file) => {
+    setFormData((prev) => ({
+      ...prev,
+      fotoMaps: file || null,
+    }));
+  };
+
   const handleRemoveFoto = (index) => {
     setFormData((prev) => {
       const newFotos = [...prev.fotos];
       newFotos[index] = null;
       return { ...prev, fotos: newFotos };
     });
+  };
+
+  const handleRemoveFotoMaps = () => {
+    setFormData((prev) => ({
+      ...prev,
+      fotoMaps: null,
+    }));
   };
 
   const handleDragStart = (index) => {
@@ -193,6 +286,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       area_total: "",
       area_construida: "",
       fotos: Array(10).fill(null),
+      map_url: "",
+      fotoMaps: null,
       condominio: "",
       iptu: "",
       quarto: "",
@@ -251,7 +346,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     if (!formData.descricao || formData.descricao.trim() === "") {
       errors.push("Descrição");
     }
-    if (!formData.preco || parseNumberOrNull(formData.preco) === null) {
+    if (!formData.preco || parseCurrency(formData.preco) === 0) {
       errors.push("Preço");
     }
 
@@ -279,7 +374,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       const imovelPayload = {
         titulo: formData.titulo || null,
         descricao: formData.descricao || null,
-        preco: parseNumberOrNull(formData.preco),
+        preco: parseCurrency(formData.preco),
         tipo: formData.tipo || null,
         status: formData.status || null,
         finalidade: formData.finalidade || null,
@@ -292,6 +387,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         area_total: parseNumberOrNull(formData.area_total),
         area_construida: parseNumberOrNull(formData.area_construida),
         criado_por: 1,
+        map_url: formData.map_url || null,
       };
 
       const createRes = await axios.post(
@@ -303,8 +399,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
 
       const caracteristicasPayload = {
         imovel_id: imovelId,
-        condominio: parseNumberOrNull(formData.condominio),
-        iptu: parseNumberOrNull(formData.iptu),
+        condominio: parseCurrency(formData.condominio),
+        iptu: parseCurrency(formData.iptu),
         quarto: parseNumberOrNull(formData.quarto),
         banheiro: parseNumberOrNull(formData.banheiro),
         vaga: parseNumberOrNull(formData.vaga),
@@ -332,6 +428,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         await axios.post(
           `http://localhost:5000/api/imoveis/${imovelId}/upload`,
           formDataFotos,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+      }
+
+      if (formData.fotoMaps) {
+        const formDataMaps = new FormData();
+        formDataMaps.append("fotos", formData.fotoMaps);
+        formDataMaps.append("isFotoMaps", "true");
+
+        await axios.post(
+          `http://localhost:5000/api/imoveis/${imovelId}/upload`,
+          formDataMaps,
           {
             headers: { "Content-Type": "multipart/form-data" },
           }
@@ -457,12 +567,12 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     />
                   </div>
 
-                  <h4>Valor</h4>
+                  <h4>Preço</h4>
                   <div className="form-row">
                     <input
-                      type="number"
+                      type="text"
                       name="preco"
-                      placeholder="Preço *"
+                      placeholder={formData.preco ? "" : "Preço"}
                       value={formData.preco}
                       onChange={handleInputChange}
                       className="full-width"
@@ -532,7 +642,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="text"
                       name="cep"
-                      placeholder="CEP"
+                      placeholder={formData.cep ? "" : "00000-000"}
                       value={formData.cep}
                       onChange={handleInputChange}
                     />
@@ -572,6 +682,17 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     />
                   </div>
 
+                  <div className="form-row">
+                    <input
+                      type="text"
+                      name="map_url"
+                      placeholder="URL do Google Maps"
+                      value={formData.map_url}
+                      onChange={handleInputChange}
+                      className="full-width"
+                    />
+                  </div>
+
                   <h4>Áreas</h4>
                   <div className="form-row">
                     <input
@@ -580,6 +701,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Área Total (m²)"
                       value={formData.area_total}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     <input
                       type="number"
@@ -587,6 +722,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Área Construída (m²)"
                       value={formData.area_construida}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -597,16 +746,16 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                   <h4>Valores</h4>
                   <div className="form-row">
                     <input
-                      type="number"
+                      type="text"
                       name="condominio"
-                      placeholder="Condomínio (R$)"
+                      placeholder={formData.condominio ? "" : "Condomíno"}
                       value={formData.condominio}
                       onChange={handleInputChange}
                     />
                     <input
-                      type="number"
+                      type="text"
                       name="iptu"
-                      placeholder="IPTU (R$)"
+                      placeholder={formData.iptu ? "" : "IPTU"}
                       value={formData.iptu}
                       onChange={handleInputChange}
                     />
@@ -620,6 +769,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Quartos"
                       value={formData.quarto}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     <input
                       type="number"
@@ -627,6 +790,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Banheiros"
                       value={formData.banheiro}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
 
@@ -637,6 +814,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Vagas de Garagem"
                       value={formData.vaga}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     <input
                       type="number"
@@ -644,6 +835,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Ar Condicionado"
                       value={formData.ar_condicionado}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
 
@@ -654,6 +859,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Andar"
                       value={formData.andar}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     <input
                       type="number"
@@ -661,6 +880,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Total de Andares"
                       value={formData.andar_total}
                       onChange={handleInputChange}
+                      min="1"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "e" ||
+                          e.key === "E" ||
+                          e.key === "-" ||
+                          e.key === "+"
+                        ) {
+                          e.preventDefault();
+                        }
+                        if (e.key === "0" && !e.target.value) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
 
@@ -700,6 +933,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
 
               {activeTab === 3 && (
                 <div className="tab-content">
+                  <h4>Fotos do Imóvel</h4>
                   <div className="fotos-grid">
                     {formData.fotos.map((foto, idx) => (
                       <div
@@ -741,6 +975,46 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                         )}
                       </div>
                     ))}
+                  </div>
+
+                  <h4 style={{ marginTop: "30px" }}>Foto Google Maps</h4>
+                  <div className="foto-maps-container">
+                    <div
+                      className={`foto-item foto-maps ${
+                        formData.fotoMaps ? "has-photo" : ""
+                      }`}
+                    >
+                      {formData.fotoMaps ? (
+                        <>
+                          <img
+                            src={
+                              URL.createObjectURL(formData.fotoMaps) ||
+                              "/placeholder.svg"
+                            }
+                            alt="foto-maps"
+                          />
+                          <button
+                            type="button"
+                            className="remove-foto-btn"
+                            onClick={handleRemoveFotoMaps}
+                          >
+                            ×
+                          </button>
+                        </>
+                      ) : (
+                        <label className="foto-upload-label">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFotoMapsChange(e.target.files[0])
+                            }
+                            style={{ display: "none" }}
+                          />
+                          <span>+</span>
+                        </label>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
