@@ -152,6 +152,17 @@ textarea {
   font-family: inherit;
 }
 
+/* Remove spinners from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* ================================
    Checkboxes
 ================================ */
@@ -312,6 +323,120 @@ textarea {
 }
 
 /* ================================
+   Confirmation Popup
+================================ */
+.confirmation-popup {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.confirmation-popup h3 {
+  margin-bottom: 20px;
+  color: #191970;
+  font-size: 24px;
+}
+
+.confirmation-popup p {
+  margin-bottom: 30px;
+  color: #666;
+  font-size: 16px;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.confirm-btn,
+.cancel-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirm-btn {
+  background-color: #191970;
+  color: white;
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
+}
+
+.confirm-btn:hover {
+  background-color: #2a2a8f;
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.4);
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #d0d0d0;
+}
+
+/* ================================
+   Success Popup
+================================ */
+.success-popup {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-popup h3 {
+  margin-bottom: 20px;
+  color: #191970;
+  font-size: 24px;
+}
+
+.success-popup p {
+  margin-bottom: 30px;
+  color: #666;
+  font-size: 16px;
+}
+
+.success-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.go-to-imovel-btn {
+  padding: 12px 30px;
+  background-color: #191970;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
+}
+
+.go-to-imovel-btn:hover {
+  background-color: #2a2a8f;
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.4);
+}
+
+/* ================================
    Error Messages
 ================================ */
 .error-msg {
@@ -324,10 +449,79 @@ textarea {
   border-left: 4px solid #e74c3c;
 }
 
+/* Adjusted field error message positioning to appear directly below fields */
+.field-error-msg {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  padding-left: 5px;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Added error state for input fields */
+.input-error {
+  border-color: #e74c3c !important;
+  background-color: #fff5f5;
+}
+
+.input-error:focus {
+  border-color: #c0392b !important;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Added error indicator for tabs */
+.tab.has-error {
+  position: relative;
+}
+
+.tab.has-error::after {
+  content: "!";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ================================
    Responsive Design
 ================================ */
 @media (max-width: 768px) {
+  /* ================================
+     Responsive Design for Popups
+  ================================ */
+  .confirmation-popup,
+  .success-popup {
+    width: 95%;
+    padding: 30px 20px;
+  }
+
+  .confirmation-popup h3,
+  .success-popup h3 {
+    font-size: 20px;
+  }
+
+  .confirmation-buttons,
+  .success-buttons {
+    flex-direction: column;
+  }
+
+  .confirm-btn,
+  .cancel-btn,
+  .go-to-imovel-btn {
+    width: 100%;
+  }
+
   .popup {
     width: 95%;
     padding: 20px;

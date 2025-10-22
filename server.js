@@ -14,6 +14,7 @@ const PORT = process.env.BACKEND_PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use("/fotos_imoveis", express.static("public/fotos_imoveis"));
+app.use("/fotos_imoveis_maps", express.static("public/fotos_imoveis_maps"));
 
 // =========================
 // ROTAS DE AUTENTICAÇÃO
@@ -386,12 +387,19 @@ app.get("/api/estatisticas/imoveis", async (req, res) => {
 // =========================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = "public/fotos_imoveis";
+    const isFotoMaps = req.body.isFotoMaps === "true";
+    const dir = isFotoMaps
+      ? "public/fotos_imoveis_maps"
+      : "public/fotos_imoveis";
+
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    const dir = "public/fotos_imoveis";
+    const isFotoMaps = req.body.isFotoMaps === "true";
+    const dir = isFotoMaps
+      ? "public/fotos_imoveis_maps"
+      : "public/fotos_imoveis";
     const files = fs.readdirSync(dir);
     let maxNumber = 0;
 
@@ -838,7 +846,9 @@ app.post(
       const fotosInseridas = [];
       // DB QUERY: Insere cada foto no banco
       for (const file of req.files) {
-        const caminho = `/fotos_imoveis/${file.filename}`;
+        const folder =
+          isFotoMaps === "true" ? "fotos_imoveis_maps" : "fotos_imoveis";
+        const caminho = `/${folder}/${file.filename}`;
 
         // Se for foto do Google Maps, salva em caminho_foto_maps
         if (isFotoMaps === "true") {
