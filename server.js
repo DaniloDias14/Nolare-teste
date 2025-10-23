@@ -387,36 +387,38 @@ app.get("/api/estatisticas/imoveis", async (req, res) => {
 // =========================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const isFotoMaps = req.body.isFotoMaps === "true";
-    const dir = isFotoMaps
-      ? "public/fotos_imoveis_maps"
-      : "public/fotos_imoveis";
-
+    // Se o campo for "fotoMaps", salva em fotos_imoveis_maps, senão em fotos_imoveis
+    const dir =
+      file.fieldname === "fotoMaps"
+        ? "public/fotos_imoveis_maps"
+        : "public/fotos_imoveis";
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    const isFotoMaps = req.body.isFotoMaps === "true";
-    const dir = isFotoMaps
-      ? "public/fotos_imoveis_maps"
-      : "public/fotos_imoveis";
-    const files = fs.readdirSync(dir);
-    let maxNumber = 0;
-
-    files.forEach((f) => {
-      const match = f.match(/^(\d+)-(\d+)\./);
-      if (match) {
-        const num = Number.parseInt(match[2]);
-        if (num > maxNumber) maxNumber = num;
-      }
-    });
-
-    const nextNumber = maxNumber + 1;
-    cb(null, `${Date.now()}-${nextNumber}${path.extname(file.originalname)}`);
+    cb(
+      null,
+      `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(
+        file.originalname
+      )}`
+    );
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
+  fileFilter: (req, file, cb) => {
+    // Aceita apenas imagens
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Apenas arquivos de imagem são permitidos"));
+    }
+  },
+});
 
 // =========================
 // ROTAS DE IMÓVEIS
@@ -789,13 +791,26 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "estudio",
   ];
 
-  const values = campos.map((c) =>
-    req.body[c] !== undefined
+  const values = campos.map((c) => {
+    if (c === "condominio" || c === "iptu") {
+      const valor = req.body[c];
+      // Se for zero, undefined ou null, salva como NULL
+      if (
+        valor === undefined ||
+        valor === null ||
+        valor === 0 ||
+        valor === "0"
+      ) {
+        return null;
+      }
+      return valor;
+    }
+    return req.body[c] !== undefined
       ? req.body[c]
       : camposBooleanos.includes(c)
       ? false
-      : null
-  );
+      : null;
+  });
 
   try {
     // DB QUERY: Insere características do imóvel
@@ -818,13 +833,19 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
 // ROTA: Upload de fotos do imóvel
 app.post(
   "/api/imoveis/:id/upload",
-  upload.array("fotos", 11),
+  upload.fields([
+    { name: "fotos", maxCount: 10 },
+    { name: "fotoMaps", maxCount: 1 },
+  ]),
   async (req, res) => {
     const { id } = req.params;
-    const { isFotoMaps } = req.body;
 
     // VALIDAÇÃO: Verifica se arquivos foram enviados
-    if (!req.files || req.files.length === 0) {
+    if (
+      !req.files ||
+      ((!req.files.fotos || req.files.fotos.length === 0) &&
+        (!req.files.fotoMaps || req.files.fotoMaps.length === 0))
+    ) {
       return res.status(400).json({ error: "Arquivos não enviados" });
     }
 
@@ -844,27 +865,31 @@ app.post(
 
     try {
       const fotosInseridas = [];
-      // DB QUERY: Insere cada foto no banco
-      for (const file of req.files) {
-        const folder =
-          isFotoMaps === "true" ? "fotos_imoveis_maps" : "fotos_imoveis";
-        const caminho = `/${folder}/${file.filename}`;
 
-        // Se for foto do Google Maps, salva em caminho_foto_maps
-        if (isFotoMaps === "true") {
+      // Processa fotos normais
+      if (req.files.fotos) {
+        for (const file of req.files.fotos) {
+          const caminho = `/fotos_imoveis/${file.filename}`;
           const result = await pool.query(
-            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto_maps) VALUES ($1, $2) RETURNING *",
-            [id, caminho]
-          );
-          fotosInseridas.push(result.rows[0]);
-        } else {
-          const result = await pool.query(
-            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
-            [id, caminho]
+            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto, caminho_foto_maps) VALUES ($1, $2, $3) RETURNING *",
+            [id, caminho, ""]
           );
           fotosInseridas.push(result.rows[0]);
         }
       }
+
+      // Processa foto do Google Maps
+      if (req.files.fotoMaps) {
+        for (const file of req.files.fotoMaps) {
+          const caminho = `/fotos_imoveis_maps/${file.filename}`;
+          const result = await pool.query(
+            "INSERT INTO fotos_imoveis (imovel_id, caminho_foto, caminho_foto_maps) VALUES ($1, $2, $3) RETURNING *",
+            [id, "", caminho]
+          );
+          fotosInseridas.push(result.rows[0]);
+        }
+      }
+
       res.status(201).json(fotosInseridas);
     } catch (err) {
       console.error("Erro ao salvar fotos no banco:", err);
@@ -872,6 +897,25 @@ app.post(
     }
   }
 );
+
+// =========================
+// MIDDLEWARE DE TRATAMENTO DE ERROS DO MULTER
+// =========================
+
+// Middleware de tratamento de erros do multer
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res
+        .status(400)
+        .json({ error: "Arquivo muito grande. O tamanho máximo é 10MB." });
+    }
+    return res.status(400).json({ error: `Erro no upload: ${err.message}` });
+  } else if (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  next();
+});
 
 // Inicia o servidor
 app.listen(PORT, () => {

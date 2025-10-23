@@ -68,6 +68,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [newImovelId, setNewImovelId] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [dragOverMaps, setDragOverMaps] = useState(false);
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -199,6 +201,14 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       ...prev,
       [name]: newValue,
     }));
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleFotoChange = (index, file) => {
@@ -251,11 +261,88 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     setDraggedIndex(null);
   };
 
+  const handleFileDragEnter = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverIndex(index);
+  };
+
+  const handleFileDragLeave = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Verifica se realmente saiu do elemento
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setDragOverIndex(null);
+  };
+
+  const handleFileDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleFileDrop = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverIndex(null);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Valida se é uma imagem
+      if (file.type.startsWith("image/")) {
+        handleFotoChange(index, file);
+      } else {
+        setErrorMsg(
+          "Por favor, arraste apenas arquivos de imagem (JPG, PNG, etc.)"
+        );
+        setTimeout(() => setErrorMsg(""), 3000);
+      }
+    }
+  };
+
+  const handleMapsDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverMaps(true);
+  };
+
+  const handleMapsDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setDragOverMaps(false);
+  };
+
+  const handleMapsDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleMapsDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverMaps(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Valida se é uma imagem
+      if (file.type.startsWith("image/")) {
+        handleFotoMapsChange(file);
+      } else {
+        setErrorMsg(
+          "Por favor, arraste apenas arquivos de imagem (JPG, PNG, etc.)"
+        );
+        setTimeout(() => setErrorMsg(""), 3000);
+      }
+    }
+  };
+
   const handleClosePopup = () => {
     setShowPopup(false);
     setActiveTab(1);
     setErrorMsg("");
-    setFieldErrors({}); // Reset field errors on close
+    setFieldErrors({});
     setFormData({
       titulo: "",
       descricao: "",
@@ -327,7 +414,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     const errors = {};
     let firstErrorTab = null;
 
-    // Tab 1 - Informações Básicas
+    // Validar apenas os campos obrigatórios: Título, Descrição e Preço
     if (!formData.titulo || formData.titulo.trim() === "") {
       errors.titulo = "O campo Título é obrigatório";
       if (!firstErrorTab) firstErrorTab = 1;
@@ -339,62 +426,13 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     }
 
     if (!formData.preco || parseCurrency(formData.preco) === 0) {
-      errors.preco = "O campo Preço é obrigatório e deve ser maior que zero";
+      errors.preco = "O campo Preço é obrigatório";
       if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.tipo || formData.tipo === "") {
-      errors.tipo = "Selecione o Tipo do imóvel";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.status || formData.status === "") {
-      errors.status = "Selecione o Status do imóvel";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.finalidade || formData.finalidade === "") {
-      errors.finalidade = "Selecione a Finalidade do imóvel";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.cep || formData.cep.trim() === "") {
-      errors.cep = "O campo CEP é obrigatório";
-      if (!firstErrorTab) firstErrorTab = 1;
-    } else if (formData.cep.replace(/\D/g, "").length !== 8) {
-      errors.cep = "CEP deve conter exatamente 8 dígitos";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.estado || formData.estado === "") {
-      errors.estado = "Selecione o Estado";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.cidade || formData.cidade === "") {
-      errors.cidade = "Selecione a Cidade";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    if (!formData.bairro || formData.bairro.trim() === "") {
-      errors.bairro = "O campo Bairro é obrigatório";
-      if (!firstErrorTab) firstErrorTab = 1;
-    }
-
-    // Tab 3 - Fotos
-    const hasAtLeastOnePhoto = formData.fotos.some((foto) => foto !== null);
-    if (!hasAtLeastOnePhoto) {
-      errors.fotos = "Adicione pelo menos uma foto do imóvel";
-      if (!firstErrorTab) firstErrorTab = 3;
     }
 
     setFieldErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      // Navigate to the first tab with errors
-      if (firstErrorTab) {
-        setActiveTab(firstErrorTab);
-      }
       setErrorMsg("Por favor, corrija os erros destacados nos campos abaixo");
       return false;
     }
@@ -443,10 +481,13 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       if (!imovelId)
         throw new Error("ID do imóvel não retornado pelo servidor");
 
+      const condominioValue = parseCurrency(formData.condominio);
+      const iptuValue = parseCurrency(formData.iptu);
+
       const caracteristicasPayload = {
         imovel_id: imovelId,
-        condominio: parseCurrency(formData.condominio),
-        iptu: parseCurrency(formData.iptu),
+        condominio: condominioValue === 0 ? null : condominioValue,
+        iptu: iptuValue === 0 ? null : iptuValue,
         quarto: parseNumberOrNull(formData.quarto),
         banheiro: parseNumberOrNull(formData.banheiro),
         vaga: parseNumberOrNull(formData.vaga),
@@ -489,8 +530,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
 
       if (formData.fotoMaps) {
         const formDataMaps = new FormData();
-        formDataMaps.append("fotos", formData.fotoMaps);
-        formDataMaps.append("isFotoMaps", "true");
+        formDataMaps.append("fotoMaps", formData.fotoMaps);
+
         try {
           await axios.post(
             `http://localhost:5000/api/imoveis/${imovelId}/upload`,
@@ -509,6 +550,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
           );
         }
       }
+
       setNewImovelId(imovelId);
       setShowSuccessPopup(true);
     } catch (err) {
@@ -530,7 +572,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       }
 
       setErrorMsg(errorMessage);
-      setActiveTab(1); // Go back to first tab to show error
+      setActiveTab(1);
     }
   };
 
@@ -584,46 +626,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
   };
 
   const handleTabClick = (tabNumber) => {
-    // Validate current tab before switching
-    if (tabNumber === 2 && activeTab === 1) {
-      const currentErrors = {};
-      if (!formData.titulo || formData.titulo.trim() === "")
-        currentErrors.titulo = "O campo Título é obrigatório";
-      if (!formData.descricao || formData.descricao.trim() === "")
-        currentErrors.descricao = "O campo Descrição é obrigatório";
-      if (!formData.preco || parseCurrency(formData.preco) === 0)
-        currentErrors.preco =
-          "O campo Preço é obrigatório e deve ser maior que zero";
-      if (!formData.tipo || formData.tipo === "")
-        currentErrors.tipo = "Selecione o Tipo do imóvel";
-      if (!formData.status || formData.status === "")
-        currentErrors.status = "Selecione o Status do imóvel";
-      if (!formData.finalidade || formData.finalidade === "")
-        currentErrors.finalidade = "Selecione a Finalidade do imóvel";
-      if (!formData.cep || formData.cep.trim() === "") {
-        currentErrors.cep = "O campo CEP é obrigatório";
-      } else if (formData.cep.replace(/\D/g, "").length !== 8) {
-        currentErrors.cep = "CEP deve conter exatamente 8 dígitos";
-      }
-      if (!formData.estado || formData.estado === "")
-        currentErrors.estado = "Selecione o Estado";
-      if (!formData.cidade || formData.cidade === "")
-        currentErrors.cidade = "Selecione a Cidade";
-      if (!formData.bairro || formData.bairro.trim() === "")
-        currentErrors.bairro = "O campo Bairro é obrigatório";
-
-      if (Object.keys(currentErrors).length > 0) {
-        setFieldErrors(currentErrors);
-        setErrorMsg("Por favor, corrija os erros destacados nos campos abaixo");
-        return;
-      }
-    }
-    if (tabNumber === 3 && activeTab === 2) {
-      // Add validation for tab 2 if needed before switching to tab 3
-    }
     setActiveTab(tabNumber);
-    setErrorMsg(""); // Clear general error message on tab switch
-    // Don't clear field errors here, let validateForm handle it
   };
 
   useEffect(() => {
@@ -650,18 +653,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
               <button
                 className={`tab ${activeTab === 1 ? "active" : ""} ${
                   Object.keys(fieldErrors).some((key) =>
-                    [
-                      "titulo",
-                      "descricao",
-                      "preco",
-                      "tipo",
-                      "status",
-                      "finalidade",
-                      "cep",
-                      "estado",
-                      "cidade",
-                      "bairro",
-                    ].includes(key)
+                    ["titulo", "descricao", "preco"].includes(key)
                   )
                     ? "has-error"
                     : ""
@@ -679,9 +671,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                 Características
               </button>
               <button
-                className={`tab ${activeTab === 3 ? "active" : ""} ${
-                  fieldErrors.fotos ? "has-error" : ""
-                }`}
+                className={`tab ${activeTab === 3 ? "active" : ""}`}
                 onClick={() => handleTabClick(3)}
                 type="button"
               >
@@ -729,7 +719,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="text"
                       name="preco"
-                      placeholder={formData.preco ? "" : "Preço*"}
+                      placeholder={formData.preco ? "" : "Preço *"}
                       value={formData.preco}
                       onChange={handleInputChange}
                       className={`full-width ${
@@ -747,7 +737,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       name="tipo"
                       value={formData.tipo}
                       onChange={handleInputChange}
-                      className={fieldErrors.tipo ? "input-error" : ""}
                     >
                       <option value="">Selecione o Tipo</option>
                       <option value="Apartamento">Apartamento</option>
@@ -765,28 +754,18 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
-                      className={fieldErrors.status ? "input-error" : ""}
                     >
                       <option value="">Selecione o Status</option>
                       <option value="disponivel">Disponível</option>
                       <option value="vendido">Vendido</option>
                     </select>
                   </div>
-                  {fieldErrors.tipo && (
-                    <p className="field-error-msg">{fieldErrors.tipo}</p>
-                  )}
-                  {fieldErrors.status && (
-                    <p className="field-error-msg">{fieldErrors.status}</p>
-                  )}
 
                   <div className="form-row">
                     <select
                       name="finalidade"
                       value={formData.finalidade}
                       onChange={handleInputChange}
-                      className={`${
-                        fieldErrors.finalidade ? "input-error" : ""
-                      }`}
                     >
                       <option value="">Selecione a Finalidade</option>
                       {finalidades.map((f) => (
@@ -796,9 +775,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       ))}
                     </select>
                   </div>
-                  {fieldErrors.finalidade && (
-                    <p className="field-error-msg">{fieldErrors.finalidade}</p>
-                  )}
 
                   <h4>Destaque</h4>
                   <div className="form-row">
@@ -817,16 +793,14 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="text"
                       name="cep"
-                      placeholder={formData.cep ? "" : "CEP *"}
+                      placeholder="CEP"
                       value={formData.cep}
                       onChange={handleInputChange}
-                      className={fieldErrors.cep ? "input-error" : ""}
                     />
                     <select
                       name="estado"
                       value={formData.estado}
                       onChange={handleInputChange}
-                      className={fieldErrors.estado ? "input-error" : ""}
                     >
                       <option value="">Selecione o Estado</option>
                       {estados.map((f) => (
@@ -836,19 +810,12 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       ))}
                     </select>
                   </div>
-                  {fieldErrors.cep && (
-                    <p className="field-error-msg">{fieldErrors.cep}</p>
-                  )}
-                  {fieldErrors.estado && (
-                    <p className="field-error-msg">{fieldErrors.estado}</p>
-                  )}
 
                   <div className="form-row">
                     <select
                       name="cidade"
                       value={formData.cidade}
                       onChange={handleInputChange}
-                      className={fieldErrors.cidade ? "input-error" : ""}
                     >
                       <option value="">Selecione a Cidade</option>
                       {cidades.map((f) => (
@@ -863,15 +830,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       placeholder="Bairro"
                       value={formData.bairro}
                       onChange={handleInputChange}
-                      className={fieldErrors.bairro ? "input-error" : ""}
                     />
                   </div>
-                  {fieldErrors.cidade && (
-                    <p className="field-error-msg">{fieldErrors.cidade}</p>
-                  )}
-                  {fieldErrors.bairro && (
-                    <p className="field-error-msg">{fieldErrors.bairro}</p>
-                  )}
 
                   <div className="form-row">
                     <input
@@ -1117,18 +1077,20 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
               {activeTab === 3 && (
                 <div className="tab-content">
                   <h4>Fotos do Imóvel</h4>
-                  {fieldErrors.fotos && (
-                    <p className="field-error-msg">{fieldErrors.fotos}</p>
-                  )}
                   <div className="fotos-grid">
                     {formData.fotos.map((foto, idx) => (
                       <div
                         key={idx}
-                        className={`foto-item ${foto ? "has-photo" : ""}`}
+                        className={`foto-item ${foto ? "has-photo" : ""} ${
+                          dragOverIndex === idx ? "drag-over" : ""
+                        }`}
                         draggable={!!foto}
                         onDragStart={() => handleDragStart(idx)}
                         onDragOver={handleDragOver}
                         onDrop={() => handleDrop(idx)}
+                        onDragEnter={(e) => handleFileDragEnter(e, idx)}
+                        onDragLeave={(e) => handleFileDragLeave(e, idx)}
+                        onDropCapture={(e) => handleFileDrop(e, idx)}
                       >
                         {foto ? (
                           <>
@@ -1167,7 +1129,11 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <div
                       className={`foto-item foto-maps ${
                         formData.fotoMaps ? "has-photo" : ""
-                      }`}
+                      } ${dragOverMaps ? "drag-over" : ""}`}
+                      onDragEnter={handleMapsDragEnter}
+                      onDragLeave={handleMapsDragLeave}
+                      onDragOver={handleMapsDragOver}
+                      onDrop={handleMapsDrop}
                     >
                       {formData.fotoMaps ? (
                         <>

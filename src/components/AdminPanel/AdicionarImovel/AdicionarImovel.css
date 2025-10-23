@@ -233,6 +233,14 @@ input[type="number"] {
   cursor: grabbing;
 }
 
+/* Adicionado estilo visual para drag over */
+.foto-item.drag-over {
+  border-color: #191970;
+  background-color: #e8e8ff;
+  border-width: 3px;
+  transform: scale(1.02);
+}
+
 .foto-item img {
   width: 100%;
   height: 100%;
@@ -449,12 +457,12 @@ input[type="number"] {
   border-left: 4px solid #e74c3c;
 }
 
-/* Adjusted field error message positioning to appear directly below fields */
+/* Mensagens de erro posicionadas mais próximas dos campos */
 .field-error-msg {
   color: #e74c3c;
   font-size: 13px;
-  margin-top: 5px;
-  margin-bottom: 15px;
+  margin-top: -10px;
+  margin-bottom: 10px;
   padding-left: 5px;
   display: block;
   line-height: 1.4;
@@ -471,7 +479,7 @@ input[type="number"] {
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
 }
 
-/* Added error indicator for tabs */
+/* Indicador visual de erro nas abas mantido */
 .tab.has-error {
   position: relative;
 }

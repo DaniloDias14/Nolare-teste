@@ -41,6 +41,7 @@ const ImovelModal = ({
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
+  const fotoMaps = fotos.find((f) => f.caminho_foto_maps)?.caminho_foto_maps;
   const curtido = !!curtidas[imovel.id ?? imovel.imovel_id];
 
   const handlePrev = () => {
@@ -182,7 +183,7 @@ const ImovelModal = ({
           onClick={handleShare}
           title="Compartilhar imóvel"
         >
-          <img src={compartilhar} alt="Compartilhar" />
+          <img src={compartilhar || "/placeholder.svg"} alt="Compartilhar" />
         </button>
 
         {showCopyMessage && <div className="copy-message">Link copiado!</div>}
@@ -263,6 +264,48 @@ const ImovelModal = ({
                 </div>
               )}
             </div>
+            {imovel.map_url && (
+              <div style={{ marginTop: "15px" }}>
+                {fotoMaps ? (
+                  <div
+                    onClick={() => window.open(imovel.map_url, "_blank")}
+                    style={{
+                      cursor: "pointer",
+                      display: "inline-block",
+                      border: "2px solid #191970",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      transition: "transform 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                    title="Clique para abrir no Google Maps"
+                  >
+                    <img
+                      src={`http://localhost:5000${fotoMaps}`}
+                      alt="Localização no Google Maps"
+                      style={{
+                        width: "100%",
+                        maxWidth: "400px",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className="modal-contact-btn"
+                    onClick={() => window.open(imovel.map_url, "_blank")}
+                    style={{ marginTop: "10px" }}
+                  >
+                    Ver no Google Maps
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="modal-section">
@@ -302,6 +345,12 @@ const ImovelModal = ({
               <div className="modal-features">
                 {Object.entries(caracteristicas).map(([key, value]) => {
                   if (key === "id" || key === "imovel_id") return null;
+                  if (
+                    (key === "condominio" || key === "iptu") &&
+                    (!value || value === 0)
+                  ) {
+                    return null;
+                  }
                   if (key === "mobiliado" && value === false) {
                     return (
                       <span key={key} className="modal-feature-tag">
