@@ -41,8 +41,35 @@ const ImovelModal = ({
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
-  const fotoMaps = fotos.find((f) => f.caminho_foto_maps)?.caminho_foto_maps;
   const curtido = !!curtidas[imovel.id ?? imovel.imovel_id];
+
+  const extractCoordinates = (input) => {
+    if (!input) return null;
+    const cleaned = input.trim();
+    const pattern = /(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/;
+    const match = cleaned.match(pattern);
+
+    if (match) {
+      return {
+        lat: Number.parseFloat(match[1]),
+        lng: Number.parseFloat(match[2]),
+      };
+    }
+
+    return null;
+  };
+
+  const getMapEmbedUrl = () => {
+    if (!imovel.coordenadas) return null;
+
+    const coords = extractCoordinates(imovel.coordenadas);
+    if (!coords) return null;
+
+    if (coords.lat < -90 || coords.lat > 90) return null;
+    if (coords.lng < -180 || coords.lng > 180) return null;
+
+    return `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`;
+  };
 
   const handlePrev = () => {
     setFotoIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
@@ -170,6 +197,7 @@ const ImovelModal = ({
   };
 
   const imovelId = imovel.id ?? imovel.imovel_id;
+  const mapEmbedUrl = getMapEmbedUrl();
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -264,46 +292,21 @@ const ImovelModal = ({
                 </div>
               )}
             </div>
-            {imovel.map_url && (
+            {mapEmbedUrl && (
               <div style={{ marginTop: "15px" }}>
-                {fotoMaps ? (
-                  <div
-                    onClick={() => window.open(imovel.map_url, "_blank")}
-                    style={{
-                      cursor: "pointer",
-                      display: "inline-block",
-                      border: "2px solid #191970",
-                      borderRadius: "8px",
-                      overflow: "hidden",
-                      transition: "transform 0.2s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                    title="Clique para abrir no Google Maps"
-                  >
-                    <img
-                      src={`http://localhost:5000${fotoMaps}`}
-                      alt="Localização no Google Maps"
-                      style={{
-                        width: "100%",
-                        maxWidth: "400px",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    className="modal-contact-btn"
-                    onClick={() => window.open(imovel.map_url, "_blank")}
-                    style={{ marginTop: "10px" }}
-                  >
-                    Ver no Google Maps
-                  </button>
-                )}
+                <iframe
+                  src={mapEmbedUrl}
+                  style={{
+                    width: "100%",
+                    height: "400px",
+                    border: "none",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                  }}
+                  allowFullScreen
+                  loading="lazy"
+                  title="Localização do imóvel"
+                />
               </div>
             )}
           </div>

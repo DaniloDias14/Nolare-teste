@@ -87,8 +87,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     area_total: "",
     area_construida: "",
     fotos: Array(10).fill(null),
-    map_url: "",
-    fotoMaps: null,
+    coordenadas: "",
 
     condominio: "",
     iptu: "",
@@ -219,26 +218,12 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     });
   };
 
-  const handleFotoMapsChange = (file) => {
-    setFormData((prev) => ({
-      ...prev,
-      fotoMaps: file || null,
-    }));
-  };
-
   const handleRemoveFoto = (index) => {
     setFormData((prev) => {
       const newFotos = [...prev.fotos];
       newFotos[index] = null;
       return { ...prev, fotos: newFotos };
     });
-  };
-
-  const handleRemoveFotoMaps = () => {
-    setFormData((prev) => ({
-      ...prev,
-      fotoMaps: null,
-    }));
   };
 
   const handleDragStart = (index) => {
@@ -300,44 +285,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     }
   };
 
-  const handleMapsDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverMaps(true);
-  };
-
-  const handleMapsDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.currentTarget.contains(e.relatedTarget)) return;
-    setDragOverMaps(false);
-  };
-
-  const handleMapsDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleMapsDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverMaps(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      // Valida se é uma imagem
-      if (file.type.startsWith("image/")) {
-        handleFotoMapsChange(file);
-      } else {
-        setErrorMsg(
-          "Por favor, arraste apenas arquivos de imagem (JPG, PNG, etc.)"
-        );
-        setTimeout(() => setErrorMsg(""), 3000);
-      }
-    }
-  };
-
   const handleClosePopup = () => {
     setShowPopup(false);
     setActiveTab(1);
@@ -359,8 +306,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       area_total: "",
       area_construida: "",
       fotos: Array(10).fill(null),
-      map_url: "",
-      fotoMaps: null,
+      coordenadas: "",
       condominio: "",
       iptu: "",
       quarto: "",
@@ -470,7 +416,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         area_total: parseNumberOrNull(formData.area_total),
         area_construida: parseNumberOrNull(formData.area_construida),
         criado_por: 1,
-        map_url: formData.map_url || null,
+        coordenadas: formData.coordenadas || null,
       };
 
       const createRes = await axios.post(
@@ -524,29 +470,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
           console.error("Erro ao fazer upload das fotos:", uploadErr);
           throw new Error(
             "Erro ao fazer upload das fotos do imóvel. Verifique o tamanho e formato das imagens."
-          );
-        }
-      }
-
-      if (formData.fotoMaps) {
-        const formDataMaps = new FormData();
-        formDataMaps.append("fotoMaps", formData.fotoMaps);
-
-        try {
-          await axios.post(
-            `http://localhost:5000/api/imoveis/${imovelId}/upload`,
-            formDataMaps,
-            {
-              headers: { "Content-Type": "multipart/form-data" },
-            }
-          );
-        } catch (uploadErr) {
-          console.error(
-            "Erro ao fazer upload da foto do Google Maps:",
-            uploadErr
-          );
-          throw new Error(
-            "Erro ao fazer upload da foto do Google Maps. Verifique o tamanho e formato da imagem."
           );
         }
       }
@@ -836,9 +759,9 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                   <div className="form-row">
                     <input
                       type="text"
-                      name="map_url"
-                      placeholder="URL do Google Maps"
-                      value={formData.map_url}
+                      name="coordenadas"
+                      placeholder="Coordenadas (ex: -28.643052, -49.501214)"
+                      value={formData.coordenadas}
                       onChange={handleInputChange}
                       className="full-width"
                     />
@@ -1123,49 +1046,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                         )}
                       </div>
                     ))}
-                  </div>
-                  <h4 style={{ marginTop: "30px" }}>Foto Google Maps</h4>
-                  <div className="foto-maps-container">
-                    <div
-                      className={`foto-item foto-maps ${
-                        formData.fotoMaps ? "has-photo" : ""
-                      } ${dragOverMaps ? "drag-over" : ""}`}
-                      onDragEnter={handleMapsDragEnter}
-                      onDragLeave={handleMapsDragLeave}
-                      onDragOver={handleMapsDragOver}
-                      onDrop={handleMapsDrop}
-                    >
-                      {formData.fotoMaps ? (
-                        <>
-                          <img
-                            src={
-                              URL.createObjectURL(formData.fotoMaps) ||
-                              "/placeholder.svg"
-                            }
-                            alt="foto-maps"
-                          />
-                          <button
-                            type="button"
-                            className="remove-foto-btn"
-                            onClick={handleRemoveFotoMaps}
-                          >
-                            ×
-                          </button>
-                        </>
-                      ) : (
-                        <label className="foto-upload-label">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              handleFotoMapsChange(e.target.files[0])
-                            }
-                            style={{ display: "none" }}
-                          />
-                          <span>+</span>
-                        </label>
-                      )}
-                    </div>
                   </div>
                 </div>
               )}
