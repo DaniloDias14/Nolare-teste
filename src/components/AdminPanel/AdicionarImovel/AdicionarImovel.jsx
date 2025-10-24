@@ -760,7 +760,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                     <input
                       type="text"
                       name="coordenadas"
-                      placeholder="Coordenadas (ex: -28.643052, -49.501214)"
+                      placeholder="Coordenadas"
                       value={formData.coordenadas}
                       onChange={handleInputChange}
                       className="full-width"

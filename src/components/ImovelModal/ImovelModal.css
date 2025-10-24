@@ -1,4 +1,5 @@
-/* Complete redesign with modern, clean layout */
+/* Updated modal design with larger size, original close button, and consistent styling */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -10,105 +11,92 @@
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
   padding: 20px;
 }
 
+/* Increased modal size from 1100px to 1400px */
 .modal-content-wrapper {
-  background: var(--white);
+  background: #fff;
   width: 100%;
-  max-width: 1200px;
-  height: 85vh;
-  max-height: 85vh;
-  border-radius: 24px;
+  max-width: 1400px;
+  max-height: 90vh;
+  border-radius: 16px;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  font-family: "Sanchez", serif;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-.modal-close-btn {
+/* Restored original close-popup-btn styling from AdicionarImovel */
+.close-popup-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--primary-blue);
-  border: 2px solid var(--primary-blue);
-  font-size: 36px;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: color 0.2s;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  font-weight: 400;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
-  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.modal-close-btn:hover {
-  background: var(--primary-blue);
-  color: var(--white);
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.4);
+.close-popup-btn:hover {
+  color: #e74c3c;
+  background: #fff;
 }
 
-/* Added share button styling */
-.modal-share-btn {
+/* Updated share button to match close button styling */
+.share-btn {
   position: absolute;
-  top: 20px;
-  right: 80px;
+  top: 15px;
+  right: 65px;
   background: rgba(255, 255, 255, 0.95);
-  border: 2px solid var(--primary-blue);
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
-  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  transition: color 0.2s;
 }
 
-.modal-share-btn:hover {
-  background: var(--primary-blue);
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.4);
-  transform: scale(1.05);
+.share-btn:hover {
+  background: #fff;
 }
 
-.modal-share-btn img {
+.share-btn img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: brightness(0) saturate(100%) invert(12%) sepia(100%) saturate(2878%)
-    hue-rotate(230deg) brightness(94%) contrast(101%);
-  transition: filter 0.3s ease;
 }
 
-.modal-share-btn:hover img {
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%)
-    hue-rotate(0deg) brightness(100%) contrast(100%);
-}
-
-/* Added copy message notification */
 .copy-message {
   position: absolute;
-  top: 80px;
-  right: 20px;
-  background: var(--primary-blue);
-  color: var(--white);
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.95rem;
+  top: 65px;
+  right: 15px;
+  background: #191970;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
-  z-index: 11;
+  z-index: 101;
   box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
   animation: slideIn 0.3s ease;
 }
@@ -124,267 +112,318 @@
   }
 }
 
+/* Gallery optimized for square images */
 .modal-gallery {
   position: relative;
-  background: var(--background-cream);
+  background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  aspect-ratio: 1 / 1;
 }
 
 .modal-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  aspect-ratio: 1 / 1;
 }
 
-.modal-no-image {
+.no-image,
+.image-error {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--primary-blue);
-  font-size: 1.2rem;
-  font-weight: 600;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-.modal-nav-btn {
+/* Restored Unicode arrows with destaque-carousel-btn animation */
+.modal-carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
-  color: white;
+  color: #fff;
   border: none;
-  font-size: 2.5rem;
-  width: 50px;
-  height: 50px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  font-size: 1.4rem;
   font-weight: 700;
 }
 
-.modal-nav-btn:hover {
-  color: var(--primary-blue);
-  transform: translateY(-50%) scale(1.2);
+.modal-carousel-btn:hover {
+  color: #191970;
+  transform: translateY(-50%) scale(1.15);
 }
 
-.modal-prev {
-  left: 20px;
+.modal-carousel-btn.prev {
+  left: 12px;
 }
 
-.modal-next {
-  right: 20px;
+.modal-carousel-btn.next {
+  right: 12px;
 }
 
-.modal-dots-container {
+/* Redesigned navigation dots */
+.dots-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  gap: 8px;
   z-index: 5;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 20px;
 }
 
-.modal-dot {
-  width: 12px;
-  height: 12px;
+.dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
-  border: 2px solid white;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   padding: 0;
 }
 
-.modal-dot.active {
-  background: var(--primary-blue);
-  border-color: var(--primary-blue);
-  transform: scale(1.3);
+.dot.active {
+  background: #fff;
+  width: 24px;
+  border-radius: 4px;
 }
 
-.modal-dot:hover {
+.dot:hover {
   background: rgba(255, 255, 255, 0.8);
-  transform: scale(1.2);
 }
 
+/* Removed inline maxHeight, added proper scroll with site's default styling */
 .modal-info {
-  padding: 40px;
+  padding: 30px;
   overflow-y: auto;
-  background: var(--white);
+  background: #fff;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  gap: 20px;
+/* Updated scrollbar to match site's default (removed blue color) */
+.modal-info::-webkit-scrollbar {
+  width: 8px;
 }
 
-.modal-title {
-  font-size: 2rem;
-  color: var(--primary-blue);
-  font-weight: 700;
-  margin: 0;
-  flex: 1;
-  line-height: 1.3;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
+.modal-info::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
 }
 
-.modal-id {
-  font-size: 1.2rem;
-  color: rgba(25, 25, 112, 0.6);
-  font-weight: 600;
+.modal-info::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
 }
 
-.modal-price {
-  font-size: 2.5rem;
-  color: var(--primary-blue);
-  font-weight: 700;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 3px solid var(--background-cream);
+.modal-info::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
-.modal-section {
-  margin-bottom: 30px;
-}
-
-.modal-section h3 {
-  font-size: 1.3rem;
-  color: var(--primary-blue);
-  font-weight: 700;
+.header-section {
   margin-bottom: 15px;
 }
 
-.modal-section p {
-  color: var(--primary-blue);
-  line-height: 1.8;
-  font-size: 1rem;
+.title {
+  font-size: 1.5rem;
+  color: #191970;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.modal-grid {
+.id-badge {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.price-section {
+  font-size: 1.8rem;
+  color: #191970;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.content-section {
+  margin-bottom: 20px;
+}
+
+.content-section h3 {
+  font-size: 1.1rem;
+  color: #191970;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.content-section p {
+  color: #333;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
-.modal-item {
-  color: var(--primary-blue);
-  font-size: 0.95rem;
-  line-height: 1.6;
+.info-item {
+  color: #333;
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
-.modal-item strong {
-  font-weight: 700;
-  margin-right: 6px;
+.info-item strong {
+  font-weight: 600;
+  color: #191970;
+  margin-right: 4px;
 }
 
-.modal-features {
+/* Rectangular map container */
+.map-container {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-iframe {
+  width: 100%;
+  height: 250px;
+  border: none;
+}
+
+.features-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-.modal-feature-tag {
-  background: var(--background-cream);
-  color: var(--primary-blue);
-  padding: 10px 18px;
-  border-radius: 50px;
-  font-size: 0.9rem;
+.feature-tag {
+  background: #f0f0f0;
+  color: #191970;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
-  border: 2px solid var(--primary-blue);
-  transition: all 0.3s ease;
+  border: 1px solid #d0d0d0;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.modal-feature-tag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
+.feature-tag:hover {
+  background: #e8e8e8;
+  transform: translateY(-1px);
 }
 
-.modal-actions {
+.actions-section {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   align-items: center;
-  margin-top: 30px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
 }
 
+/* Adjusted button sizes to be consistent */
 .modal-contact-btn {
   flex: 1;
-  background: var(--primary-blue);
-  color: var(--white);
+  background: #191970;
+  color: #fff;
   border: none;
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 1.1rem;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Sanchez", serif;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.3);
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
 }
 
 .modal-contact-btn:hover {
   background: #2a2a8f;
-  box-shadow: 0 6px 20px rgba(25, 25, 112, 0.5);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.4);
 }
 
 .modal-like-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px;
-  transition: transform 0.3s ease;
+  padding: 14px;
+  transition: transform 0.2s ease;
   border-radius: 50%;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-like-btn:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
   background: rgba(25, 25, 112, 0.05);
 }
 
+/* Responsive design for mobile */
 @media (max-width: 968px) {
   .modal-content-wrapper {
     grid-template-columns: 1fr;
-    height: 85vh;
-    max-height: 85vh;
+    max-height: 95vh;
   }
 
   .modal-gallery {
     height: 40vh;
     min-height: 300px;
+    aspect-ratio: auto;
   }
 
   .modal-info {
-    padding: 30px 25px;
+    padding: 25px 20px;
+    max-height: 55vh;
   }
 
-  .modal-title {
-    font-size: 1.6rem;
+  .title {
+    font-size: 1.3rem;
   }
 
-  .modal-id {
-    font-size: 1rem;
+  .id-badge {
+    font-size: 0.8rem;
   }
 
-  .modal-price {
-    font-size: 2rem;
+  .price-section {
+    font-size: 1.5rem;
   }
 
-  .modal-grid {
+  .info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .map-iframe {
+    height: 200px;
   }
 }
 
@@ -394,7 +433,7 @@
   }
 
   .modal-content-wrapper {
-    border-radius: 16px;
+    border-radius: 12px;
   }
 
   .modal-gallery {
@@ -403,64 +442,60 @@
   }
 
   .modal-info {
-    padding: 25px 20px;
+    padding: 20px 15px;
+    max-height: 60vh;
   }
 
-  .modal-title {
-    font-size: 1.4rem;
+  .title {
+    font-size: 1.2rem;
   }
 
-  .modal-id {
-    font-size: 0.9rem;
+  .price-section {
+    font-size: 1.3rem;
   }
 
-  .modal-price {
-    font-size: 1.8rem;
+  .content-section h3 {
+    font-size: 1rem;
   }
 
-  .modal-section h3 {
-    font-size: 1.1rem;
+  .modal-carousel-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
   }
 
-  .modal-nav-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 30px;
-  }
-
-  .modal-prev {
+  .modal-carousel-btn.prev {
     left: 10px;
   }
 
-  .modal-next {
+  .modal-carousel-btn.next {
     right: 10px;
   }
 
-  .modal-close-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 28px;
-    top: 15px;
-    right: 15px;
+  /* Restored mobile responsive styles for close and share buttons */
+  .close-popup-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    top: 12px;
+    right: 12px;
   }
 
-  /* Adjusted share button position for mobile */
-  .modal-share-btn {
-    width: 44px;
-    height: 44px;
-    top: 15px;
-    right: 70px;
+  .share-btn {
+    width: 36px;
+    height: 36px;
+    top: 12px;
+    right: 58px;
   }
 
   .copy-message {
-    top: 70px;
-    right: 15px;
-    font-size: 0.85rem;
-    padding: 10px 20px;
+    top: 58px;
+    right: 12px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
 
-  .modal-dot {
-    width: 10px;
-    height: 10px;
+  .map-iframe {
+    height: 180px;
   }
 }

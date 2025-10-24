@@ -17,6 +17,7 @@ const ImovelModal = ({
   const [fotoIndex, setFotoIndex] = useState(0);
   const [caracteristicas, setCaracteristicas] = useState(null);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -38,10 +39,35 @@ const ImovelModal = ({
       .catch((err) => console.error("Erro ao buscar características:", err));
   }, [imovel]);
 
+  useEffect(() => {
+    setImageError(false);
+  }, [fotoIndex]);
+
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
   const curtido = !!curtidas[imovel.id ?? imovel.imovel_id];
+
+  const formatPrice = (value) => {
+    if (!value || value === 0) return "0,00";
+
+    const numValue =
+      typeof value === "string" ? Number.parseFloat(value) : value;
+
+    // Convert to cents
+    const cents = Math.round(numValue * 100);
+
+    // Separate integer and decimal parts
+    const intPart = Math.floor(cents / 100);
+    const decPart = (cents % 100).toString().padStart(2, "0");
+
+    // Format integer part with dots
+    const formattedInt = intPart
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${formattedInt},${decPart}`;
+  };
 
   const extractCoordinates = (input) => {
     if (!input) return null;
@@ -202,12 +228,12 @@ const ImovelModal = ({
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content-wrapper">
-        <button className="modal-close-btn" onClick={onClose}>
+        <button className="close-popup-btn" onClick={onClose}>
           ×
         </button>
 
         <button
-          className="modal-share-btn"
+          className="share-btn"
           onClick={handleShare}
           title="Compartilhar imóvel"
         >
@@ -219,24 +245,35 @@ const ImovelModal = ({
         <div className="modal-gallery">
           {fotos.length > 0 ? (
             <>
-              <button className="modal-nav-btn modal-prev" onClick={handlePrev}>
+              <button
+                className="modal-carousel-btn prev"
+                onClick={handlePrev}
+                aria-label="Foto anterior"
+              >
                 🡰
               </button>
               <img
                 src={`http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`}
                 alt={`Foto ${fotoIndex + 1}`}
                 className="modal-image"
+                onError={() => setImageError(true)}
+                style={{ display: imageError ? "none" : "block" }}
               />
-              <button className="modal-nav-btn modal-next" onClick={handleNext}>
+              {imageError && (
+                <div className="image-error">Erro ao carregar imagem</div>
+              )}
+              <button
+                className="modal-carousel-btn next"
+                onClick={handleNext}
+                aria-label="Próxima foto"
+              >
                 🡲
               </button>
-              <div className="modal-dots-container">
+              <div className="dots-container">
                 {fotos.map((_, index) => (
                   <button
                     key={index}
-                    className={`modal-dot ${
-                      index === fotoIndex ? "active" : ""
-                    }`}
+                    className={`dot ${index === fotoIndex ? "active" : ""}`}
                     onClick={() => setFotoIndex(index)}
                     aria-label={`Ir para foto ${index + 1}`}
                   />
@@ -244,65 +281,91 @@ const ImovelModal = ({
               </div>
             </>
           ) : (
-            <div className="modal-no-image">Sem imagens disponíveis</div>
+            <div className="no-image">Sem imagens disponíveis</div>
           )}
         </div>
 
         <div className="modal-info">
-          <div className="modal-header">
-            <h2 className="modal-title">
-              {imovel.titulo} <span className="modal-id">#{imovelId}</span>
+          {/* Título e ID */}
+          <div className="header-section">
+            <h2 className="title">
+              {imovel.titulo} <span className="id-badge">#{imovelId}</span>
             </h2>
           </div>
 
-          <div className="modal-price">
-            R${" "}
-            {(imovel.preco || 0).toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+          {/* Valor */}
+          <div className="price-section">R$ {formatPrice(imovel.preco)}</div>
+
+          {/* Descrição */}
+          {imovel.descricao && (
+            <div className="content-section">
+              <h3>Descrição</h3>
+              <p>{imovel.descricao}</p>
+            </div>
+          )}
+
+          {/* Informações Gerais */}
+          <div className="content-section">
+            <h3>Informações Gerais</h3>
+            <div className="info-grid">
+              {imovel.tipo && (
+                <div className="info-item">
+                  <strong>Tipo:</strong> {imovel.tipo}
+                </div>
+              )}
+              {imovel.finalidade && (
+                <div className="info-item">
+                  <strong>Finalidade:</strong> {imovel.finalidade}
+                </div>
+              )}
+              {imovel.status && (
+                <div className="info-item">
+                  <strong>Status:</strong> {imovel.status}
+                </div>
+              )}
+              {imovel.area_total && (
+                <div className="info-item">
+                  <strong>Área Total:</strong> {imovel.area_total} m²
+                </div>
+              )}
+              {imovel.area_construida && (
+                <div className="info-item">
+                  <strong>Área Construída:</strong> {imovel.area_construida} m²
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="modal-section">
-            <h3>Descrição</h3>
-            <p>{imovel.descricao || "Sem descrição disponível"}</p>
-          </div>
-
-          <div className="modal-section">
+          {/* Localização */}
+          <div className="content-section">
             <h3>Localização</h3>
-            <div className="modal-grid">
+            <div className="info-grid">
               {imovel.cep && (
-                <div className="modal-item">
+                <div className="info-item">
                   <strong>CEP:</strong> {imovel.cep}
                 </div>
               )}
               {imovel.estado && (
-                <div className="modal-item">
+                <div className="info-item">
                   <strong>Estado:</strong> {imovel.estado}
                 </div>
               )}
               {imovel.cidade && (
-                <div className="modal-item">
+                <div className="info-item">
                   <strong>Cidade:</strong> {imovel.cidade}
                 </div>
               )}
               {imovel.bairro && (
-                <div className="modal-item">
+                <div className="info-item">
                   <strong>Bairro:</strong> {imovel.bairro}
                 </div>
               )}
             </div>
             {mapEmbedUrl && (
-              <div style={{ marginTop: "15px" }}>
+              <div className="map-container">
                 <iframe
                   src={mapEmbedUrl}
-                  style={{
-                    width: "100%",
-                    height: "400px",
-                    border: "none",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                  }}
+                  className="map-iframe"
                   allowFullScreen
                   loading="lazy"
                   title="Localização do imóvel"
@@ -311,41 +374,11 @@ const ImovelModal = ({
             )}
           </div>
 
-          <div className="modal-section">
-            <h3>Informações Gerais</h3>
-            <div className="modal-grid">
-              {imovel.tipo && (
-                <div className="modal-item">
-                  <strong>Tipo:</strong> {imovel.tipo}
-                </div>
-              )}
-              {imovel.finalidade && (
-                <div className="modal-item">
-                  <strong>Finalidade:</strong> {imovel.finalidade}
-                </div>
-              )}
-              {imovel.status && (
-                <div className="modal-item">
-                  <strong>Status:</strong> {imovel.status}
-                </div>
-              )}
-              {imovel.area_total && (
-                <div className="modal-item">
-                  <strong>Área Total:</strong> {imovel.area_total} m²
-                </div>
-              )}
-              {imovel.area_construida && (
-                <div className="modal-item">
-                  <strong>Área Construída:</strong> {imovel.area_construida} m²
-                </div>
-              )}
-            </div>
-          </div>
-
+          {/* Características */}
           {caracteristicas && Object.keys(caracteristicas).length > 0 && (
-            <div className="modal-section">
+            <div className="content-section">
               <h3>Características</h3>
-              <div className="modal-features">
+              <div className="features-container">
                 {Object.entries(caracteristicas).map(([key, value]) => {
                   if (key === "id" || key === "imovel_id") return null;
                   if (
@@ -356,7 +389,7 @@ const ImovelModal = ({
                   }
                   if (key === "mobiliado" && value === false) {
                     return (
-                      <span key={key} className="modal-feature-tag">
+                      <span key={key} className="feature-tag">
                         Não Mobiliado
                       </span>
                     );
@@ -369,7 +402,7 @@ const ImovelModal = ({
 
                   if (typeof value === "boolean" && value === true) {
                     return (
-                      <span key={key} className="modal-feature-tag">
+                      <span key={key} className="feature-tag">
                         {label}
                       </span>
                     );
@@ -380,7 +413,7 @@ const ImovelModal = ({
                     (typeof value === "string" && value.trim() !== "")
                   ) {
                     return (
-                      <span key={key} className="modal-feature-tag">
+                      <span key={key} className="feature-tag">
                         {label}: {value}
                       </span>
                     );
@@ -392,7 +425,8 @@ const ImovelModal = ({
             </div>
           )}
 
-          <div className="modal-actions">
+          {/* Entrar em Contato e Botão de Curtir */}
+          <div className="actions-section">
             <button
               className="modal-contact-btn"
               onClick={() => window.open("https://www.youtube.com", "_blank")}
