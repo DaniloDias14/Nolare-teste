@@ -29,7 +29,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-/* Restored original close-popup-btn styling from AdicionarImovel */
+/* Both buttons now have same top: 15px for alignment */
 .close-popup-btn {
   position: absolute;
   top: 15px;
@@ -37,47 +37,41 @@
   font-size: 28px;
   font-weight: bold;
   color: #333;
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   border: none;
   cursor: pointer;
   transition: color 0.2s;
   z-index: 100;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .close-popup-btn:hover {
   color: #e74c3c;
-  background: #fff;
 }
 
-/* Updated share button to match close button styling */
 .share-btn {
   position: absolute;
   top: 15px;
   right: 65px;
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   border: none;
   cursor: pointer;
   z-index: 100;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   padding: 8px;
-  transition: color 0.2s;
+  transition: opacity 0.2s;
 }
 
 .share-btn:hover {
-  background: #fff;
+  opacity: 0.7;
 }
 
 .share-btn img {
@@ -112,7 +106,7 @@
   }
 }
 
-/* Gallery optimized for square images */
+/* Added aspect-ratio 1/1 for square images */
 .modal-gallery {
   position: relative;
   background: #f5f5f5;
@@ -121,12 +115,15 @@
   justify-content: center;
   overflow: hidden;
   aspect-ratio: 1 / 1;
+  touch-action: pan-y pinch-zoom;
 }
 
 .modal-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .no-image,
@@ -140,7 +137,7 @@
   font-weight: 500;
 }
 
-/* Restored Unicode arrows with destaque-carousel-btn animation */
+/* Increased transparency to opacity: 0.5 */
 .modal-carousel-btn {
   position: absolute;
   top: 50%;
@@ -159,11 +156,13 @@
   justify-content: center;
   font-size: 1.4rem;
   font-weight: 700;
+  opacity: 0.5;
 }
 
 .modal-carousel-btn:hover {
   color: #191970;
   transform: translateY(-50%) scale(1.15);
+  opacity: 1;
 }
 
 .modal-carousel-btn.prev {
@@ -174,7 +173,7 @@
   right: 12px;
 }
 
-/* Redesigned navigation dots */
+/* Redesigned dots to be smaller and more subtle */
 .dots-container {
   position: absolute;
   bottom: 15px;
@@ -183,7 +182,7 @@
   display: flex;
   gap: 8px;
   z-index: 5;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   padding: 8px 12px;
   border-radius: 20px;
 }
@@ -195,7 +194,7 @@
   background: rgba(255, 255, 255, 0.5);
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   padding: 0;
 }
 
@@ -209,14 +208,16 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
-/* Removed inline maxHeight, added proper scroll with site's default styling */
+/* Ensured proper scrolling on desktop */
 .modal-info {
   padding: 30px;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #fff;
+  max-height: 90vh;
 }
 
-/* Updated scrollbar to match site's default (removed blue color) */
+/* Updated scrollbar to match site's default */
 .modal-info::-webkit-scrollbar {
   width: 8px;
 }
@@ -235,8 +236,10 @@
   background: #555;
 }
 
+/* Ensured title and ID are left-aligned */
 .header-section {
   margin-bottom: 15px;
+  text-align: left;
 }
 
 .title {
@@ -249,6 +252,7 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  text-align: left;
 }
 
 .id-badge {
@@ -344,43 +348,44 @@
 .actions-section {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: stretch;
   margin-top: 25px;
   padding-top: 20px;
   border-top: 2px solid #e0e0e0;
 }
 
-/* Adjusted button sizes to be consistent */
+/* Updated button styles to match Destaque component exactly */
 .modal-contact-btn {
   flex: 1;
   background: #191970;
   color: #fff;
   border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 0.8rem 1.3rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3);
+  box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
+  font-family: "Sanchez", serif;
 }
 
 .modal-contact-btn:hover {
   background: #2a2a8f;
-  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.4);
+  box-shadow: 0 2px 12px rgba(25, 25, 112, 0.35);
 }
 
 .modal-like-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 14px;
-  transition: transform 0.2s ease;
+  padding: 0.4rem;
   border-radius: 50%;
-  flex-shrink: 0;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 46px;
 }
 
 .modal-like-btn:hover {
@@ -396,9 +401,8 @@
   }
 
   .modal-gallery {
-    height: 40vh;
+    aspect-ratio: 1 / 1;
     min-height: 300px;
-    aspect-ratio: auto;
   }
 
   .modal-info {
@@ -437,7 +441,7 @@
   }
 
   .modal-gallery {
-    height: 35vh;
+    aspect-ratio: 1 / 1;
     min-height: 250px;
   }
 
@@ -472,13 +476,13 @@
     right: 10px;
   }
 
-  /* Restored mobile responsive styles for close and share buttons */
   .close-popup-btn {
     width: 36px;
     height: 36px;
     font-size: 24px;
     top: 12px;
     right: 12px;
+    background: transparent;
   }
 
   .share-btn {
@@ -486,6 +490,7 @@
     height: 36px;
     top: 12px;
     right: 58px;
+    background: transparent;
   }
 
   .copy-message {

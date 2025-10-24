@@ -14,6 +14,21 @@ const Curtidas = ({ usuario }) => {
 
   const navigate = useNavigate();
 
+  const formatPrice = (value) => {
+    if (!value || value === 0) return "0,00";
+
+    const numValue =
+      typeof value === "string" ? Number.parseFloat(value) : value;
+    const cents = Math.round(numValue * 100);
+    const intPart = Math.floor(cents / 100);
+    const decPart = (cents % 100).toString().padStart(2, "0");
+    const formattedInt = intPart
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${formattedInt},${decPart}`;
+  };
+
   useEffect(() => {
     if (!usuario || usuario.tipo_usuario === "adm") return;
 
@@ -199,7 +214,7 @@ const Curtidas = ({ usuario }) => {
                 <div className="property-header">
                   <h3 className="property-title">{imovel.titulo}</h3>
                   <div className="property-price">
-                    R$ {(imovel.preco || 0).toLocaleString("pt-BR")}
+                    R$ {formatPrice(imovel.preco)}
                   </div>
                 </div>
 

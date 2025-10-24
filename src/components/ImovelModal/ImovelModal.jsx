@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import compartilhar from "../../assets/img/compartilhar.jpg";
@@ -18,6 +18,11 @@ const ImovelModal = ({
   const [caracteristicas, setCaracteristicas] = useState(null);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const [touchOffset, setTouchOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const galleryRef = useRef(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -103,6 +108,43 @@ const ImovelModal = ({
 
   const handleNext = () => {
     setFotoIndex((prev) => (prev === fotos.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(e.targetTouches[0].clientX);
+    setIsSwiping(true);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isSwiping) return;
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+    const offset = currentTouch - touchStart;
+    setTouchOffset(offset);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping) return;
+
+    const distance = touchStart - touchEnd;
+    const threshold = 50; // minimum swipe distance to change image
+
+    if (Math.abs(distance) > threshold) {
+      if (distance > 0) {
+        // Swiped left - next image
+        handleNext();
+      } else {
+        // Swiped right - previous image
+        handlePrev();
+      }
+    }
+
+    // Reset swipe state
+    setIsSwiping(false);
+    setTouchStart(0);
+    setTouchEnd(0);
+    setTouchOffset(0);
   };
 
   const handleOverlayClick = (e) => {
@@ -242,7 +284,13 @@ const ImovelModal = ({
 
         {showCopyMessage && <div className="copy-message">Link copiado!</div>}
 
-        <div className="modal-gallery">
+        <div
+          className="modal-gallery"
+          ref={galleryRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {fotos.length > 0 ? (
             <>
               <button
@@ -257,7 +305,13 @@ const ImovelModal = ({
                 alt={`Foto ${fotoIndex + 1}`}
                 className="modal-image"
                 onError={() => setImageError(true)}
-                style={{ display: imageError ? "none" : "block" }}
+                style={{
+                  display: imageError ? "none" : "block",
+                  transform: isSwiping
+                    ? `translateX(${touchOffset}px)`
+                    : "translateX(0)",
+                  transition: isSwiping ? "none" : "transform 0.3s ease",
+                }}
               />
               {imageError && (
                 <div className="image-error">Erro ao carregar imagem</div>
@@ -286,17 +340,14 @@ const ImovelModal = ({
         </div>
 
         <div className="modal-info">
-          {/* Título e ID */}
           <div className="header-section">
             <h2 className="title">
               {imovel.titulo} <span className="id-badge">#{imovelId}</span>
             </h2>
           </div>
 
-          {/* Valor */}
           <div className="price-section">R$ {formatPrice(imovel.preco)}</div>
 
-          {/* Descrição */}
           {imovel.descricao && (
             <div className="content-section">
               <h3>Descrição</h3>
@@ -304,7 +355,6 @@ const ImovelModal = ({
             </div>
           )}
 
-          {/* Informações Gerais */}
           <div className="content-section">
             <h3>Informações Gerais</h3>
             <div className="info-grid">
@@ -336,7 +386,6 @@ const ImovelModal = ({
             </div>
           </div>
 
-          {/* Localização */}
           <div className="content-section">
             <h3>Localização</h3>
             <div className="info-grid">
@@ -374,7 +423,6 @@ const ImovelModal = ({
             )}
           </div>
 
-          {/* Características */}
           {caracteristicas && Object.keys(caracteristicas).length > 0 && (
             <div className="content-section">
               <h3>Características</h3>
@@ -425,7 +473,6 @@ const ImovelModal = ({
             </div>
           )}
 
-          {/* Entrar em Contato e Botão de Curtir */}
           <div className="actions-section">
             <button
               className="modal-contact-btn"
@@ -435,9 +482,9 @@ const ImovelModal = ({
             </button>
             <button className="modal-like-btn" onClick={toggleCurtida}>
               {curtido ? (
-                <AiFillHeart size={32} color="#191970" />
+                <AiFillHeart size={26} color="#191970" />
               ) : (
-                <AiOutlineHeart size={32} color="#191970" />
+                <AiOutlineHeart size={26} color="#191970" />
               )}
             </button>
           </div>

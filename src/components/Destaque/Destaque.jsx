@@ -156,6 +156,21 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
     setIsDragging(false);
   };
 
+  const formatPrice = (value) => {
+    if (!value || value === 0) return "0,00";
+
+    const numValue =
+      typeof value === "string" ? Number.parseFloat(value) : value;
+    const cents = Math.round(numValue * 100);
+    const intPart = Math.floor(cents / 100);
+    const decPart = (cents % 100).toString().padStart(2, "0");
+    const formattedInt = intPart
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${formattedInt},${decPart}`;
+  };
+
   if (imoveisDestaque.length === 0) {
     return null;
   }
@@ -228,14 +243,14 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                 <div className="destaque-header">
                   <h3 className="destaque-title-card">{imovel.titulo}</h3>
                   <div className="destaque-price">
-                    R$ {(imovel.preco || 0).toLocaleString("pt-BR")}
+                    R$ {formatPrice(imovel.preco)}
                   </div>
                 </div>
 
                 <div className="destaque-details">
                   <div>
                     📍 {imovel.cidade || "Cidade não informada"} -{" "}
-                    {imovel.bairro || "Bairro não informado"}
+                    {imovel.bairro || "Bairro não informada"}
                   </div>
                 </div>
 
