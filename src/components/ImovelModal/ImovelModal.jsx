@@ -54,6 +54,18 @@ const ImovelModal = ({
 
     const fotos = imovel.fotos;
 
+    // Pré-carregar todas as imagens
+    fotos.forEach((foto) => {
+      const img = new Image();
+      img.src = `http://localhost:5000${foto.caminho_foto}`;
+    });
+  }, [imovel]);
+
+  useEffect(() => {
+    if (!imovel || !imovel.fotos || imovel.fotos.length === 0) return;
+
+    const fotos = imovel.fotos;
+
     // Pré-carregar imagem atual
     const currentImg = new Image();
     currentImg.src = `http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`;

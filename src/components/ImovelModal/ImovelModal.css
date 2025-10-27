@@ -12,17 +12,15 @@
   align-items: center;
   z-index: 10000;
   backdrop-filter: blur(5px);
-  padding: 20px;
+  padding: 0;
   overflow-y: auto;
 }
 
-/* Increased modal size from 1100px to 1400px */
 .modal-content-wrapper {
   background: #fff;
   width: 100%;
-  max-width: 1400px;
-  max-height: 90vh;
-  border-radius: 16px;
+  height: 100%;
+  border-radius: 0;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -151,6 +149,7 @@
 }
 
 /* Increased transparency to opacity: 0.5 */
+/* Reposicionando setas para as bordas como no Destaque, mantendo centralização vertical */
 .modal-carousel-btn {
   position: absolute;
   top: 50%;
@@ -186,7 +185,6 @@
   right: 12px;
 }
 
-/* Dots container - visível apenas no mobile */
 .dots-container {
   position: absolute;
   bottom: 15px;
@@ -224,8 +222,8 @@
 /* Container de miniaturas otimizado para uma única linha sem wrap */
 .thumbnails-container {
   display: flex;
-  gap: 6px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 12px;
   background: #fff;
   overflow-x: visible;
   flex-wrap: nowrap;
@@ -233,11 +231,11 @@
   align-items: center;
 }
 
-/* Tamanho reduzido para caber todas as 10 miniaturas em uma linha */
+/* Tamanho otimizado para 10 miniaturas quadradas */
 .thumbnail {
   flex-shrink: 0;
-  width: 55px;
-  height: 55px;
+  width: 60px;
+  height: 60px;
   border: 2px solid transparent;
   border-radius: 6px;
   overflow: hidden;
@@ -265,13 +263,12 @@
     0 2px 12px rgba(25, 25, 112, 0.3);
 }
 
-/* modal-info agora usa flexbox para manter botões sempre no final */
 .modal-info {
   padding: 30px;
   overflow-y: auto;
   overflow-x: hidden;
   background: #fff;
-  max-height: 90vh;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -494,12 +491,16 @@
     grid-template-columns: 1fr;
     max-height: none;
     min-height: 100vh;
+    height: 100%;
     border-radius: 0;
     margin: 0;
   }
 
-  /* Garantir que a galeria seja visível no mobile */
+  /* Galeria fixa no topo ao scrollar no mobile */
   .modal-gallery {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     min-height: 350px;
     flex-shrink: 0;
   }
@@ -516,25 +517,27 @@
     overflow-y: visible;
   }
 
-  /* Botões flutuantes no mobile - fixos na tela */
+  /* Remover fundo dos botões de fechar e compartilhar no mobile */
   .close-popup-btn {
     position: fixed;
     top: 12px;
     right: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
     border-radius: 50%;
+    z-index: 100;
   }
 
   .share-btn {
     position: fixed;
     top: 12px;
     right: 58px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
     border-radius: 50%;
+    z-index: 100;
   }
 
   /* Esconder miniaturas no mobile */
@@ -566,6 +569,12 @@
   .map-iframe {
     height: 200px;
   }
+
+  /* Aumentar espaçamento dos botões Curtir e Entrar em Contato no mobile */
+  .actions-section {
+    margin-top: 60px;
+    padding-top: 25px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -593,6 +602,7 @@
     font-size: 1rem;
   }
 
+  /* Ajustando setas no mobile para ficarem nas bordas */
   .modal-carousel-btn {
     width: 35px;
     height: 35px;
@@ -600,11 +610,15 @@
   }
 
   .modal-carousel-btn.prev {
-    left: 10px;
+    left: 8px;
   }
 
   .modal-carousel-btn.next {
-    right: 10px;
+    right: 8px;
+  }
+
+  .modal-carousel-btn:hover {
+    transform: translateY(-50%) scale(1.15);
   }
 
   .close-popup-btn {
@@ -627,6 +641,12 @@
 
   .map-iframe {
     height: 180px;
+  }
+
+  /* Aumentar ainda mais o espaçamento em telas muito pequenas */
+  .actions-section {
+    margin-top: 70px;
+    padding-top: 30px;
   }
 }
 
