@@ -22,6 +22,7 @@ const ImovelModal = ({
   const [touchEnd, setTouchEnd] = useState(0);
   const [touchOffset, setTouchOffset] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const galleryRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +48,34 @@ const ImovelModal = ({
   useEffect(() => {
     setImageError(false);
   }, [fotoIndex]);
+
+  useEffect(() => {
+    if (!imovel || !imovel.fotos || imovel.fotos.length === 0) return;
+
+    const fotos = imovel.fotos;
+
+    // Pré-carregar imagem atual
+    const currentImg = new Image();
+    currentImg.src = `http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`;
+
+    // Pré-carregar imagem anterior
+    const prevIndex = fotoIndex - 1 >= 0 ? fotoIndex - 1 : fotos.length - 1;
+    const prevImg = new Image();
+    prevImg.src = `http://localhost:5000${fotos[prevIndex]?.caminho_foto}`;
+
+    // Pré-carregar próxima imagem
+    const nextIndex = fotoIndex + 1 < fotos.length ? fotoIndex + 1 : 0;
+    const nextImg = new Image();
+    nextImg.src = `http://localhost:5000${fotos[nextIndex]?.caminho_foto}`;
+
+    // Pré-carregar também a segunda próxima imagem para scroll mais rápido
+    const nextNextIndex =
+      fotoIndex + 2 < fotos.length
+        ? fotoIndex + 2
+        : (fotoIndex + 2) % fotos.length;
+    const nextNextImg = new Image();
+    nextNextImg.src = `http://localhost:5000${fotos[nextNextIndex]?.caminho_foto}`;
+  }, [fotoIndex, imovel]);
 
   if (!imovel) return null;
 
@@ -128,19 +157,16 @@ const ImovelModal = ({
     if (!isSwiping) return;
 
     const distance = touchStart - touchEnd;
-    const threshold = 50; // minimum swipe distance to change image
+    const threshold = 50;
 
     if (Math.abs(distance) > threshold) {
       if (distance > 0) {
-        // Swiped left - next image
         handleNext();
       } else {
-        // Swiped right - previous image
         handlePrev();
       }
     }
 
-    // Reset swipe state
     setIsSwiping(false);
     setTouchStart(0);
     setTouchEnd(0);
@@ -165,6 +191,8 @@ const ImovelModal = ({
     }
 
     try {
+      const estaCurtido = curtidas[imovel.id ?? imovel.imovel_id];
+
       const res = await fetch(
         `http://localhost:5000/api/curtidas/${usuario.id}/${
           imovel.id ?? imovel.imovel_id
@@ -174,6 +202,11 @@ const ImovelModal = ({
         }
       );
       if (!res.ok) throw new Error("Erro ao alternar curtida");
+
+      if (!estaCurtido) {
+        setIsHeartAnimating(true);
+        setTimeout(() => setIsHeartAnimating(false), 600);
+      }
 
       setCurtidas((prev) => {
         const atualizado = {
@@ -300,22 +333,24 @@ const ImovelModal = ({
               >
                 🡰
               </button>
-              <img
-                src={`http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`}
-                alt={`Foto ${fotoIndex + 1}`}
-                className="modal-image"
-                onError={() => setImageError(true)}
-                style={{
-                  display: imageError ? "none" : "block",
-                  transform: isSwiping
-                    ? `translateX(${touchOffset}px)`
-                    : "translateX(0)",
-                  transition: isSwiping ? "none" : "transform 0.3s ease",
-                }}
-              />
-              {imageError && (
-                <div className="image-error">Erro ao carregar imagem</div>
-              )}
+              <div className="modal-image-container">
+                <img
+                  src={`http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`}
+                  alt={`Foto ${fotoIndex + 1}`}
+                  className="modal-image"
+                  onError={() => setImageError(true)}
+                  style={{
+                    display: imageError ? "none" : "block",
+                    transform: isSwiping
+                      ? `translateX(${touchOffset}px)`
+                      : "translateX(0)",
+                    transition: isSwiping ? "none" : "transform 0.3s ease",
+                  }}
+                />
+                {imageError && (
+                  <div className="image-error">Erro ao carregar imagem</div>
+                )}
+              </div>
               <button
                 className="modal-carousel-btn next"
                 onClick={handleNext}
@@ -333,6 +368,23 @@ const ImovelModal = ({
                   />
                 ))}
               </div>
+              <div className="thumbnails-container">
+                {fotos.map((foto, index) => (
+                  <button
+                    key={index}
+                    className={`thumbnail ${
+                      index === fotoIndex ? "active" : ""
+                    }`}
+                    onClick={() => setFotoIndex(index)}
+                    aria-label={`Ver foto ${index + 1}`}
+                  >
+                    <img
+                      src={`http://localhost:5000${foto.caminho_foto}`}
+                      alt={`Miniatura ${index + 1}`}
+                    />
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
             <div className="no-image">Sem imagens disponíveis</div>
@@ -340,138 +392,145 @@ const ImovelModal = ({
         </div>
 
         <div className="modal-info">
-          <div className="header-section">
-            <h2 className="title">
-              {imovel.titulo} <span className="id-badge">#{imovelId}</span>
-            </h2>
-          </div>
+          <div className="modal-info-content">
+            <div className="header-section">
+              <h2 className="title">
+                {imovel.titulo} <span className="id-badge">#{imovelId}</span>
+              </h2>
+            </div>
 
-          <div className="price-section">R$ {formatPrice(imovel.preco)}</div>
+            <div className="price-section">R$ {formatPrice(imovel.preco)}</div>
 
-          {imovel.descricao && (
+            {imovel.descricao && (
+              <div className="content-section">
+                <h3>Descrição</h3>
+                <p>{imovel.descricao}</p>
+              </div>
+            )}
+
             <div className="content-section">
-              <h3>Descrição</h3>
-              <p>{imovel.descricao}</p>
+              <h3>Informações Gerais</h3>
+              <div className="info-grid">
+                {imovel.tipo && (
+                  <div className="info-item">
+                    <strong>Tipo:</strong> {imovel.tipo}
+                  </div>
+                )}
+                {imovel.finalidade && (
+                  <div className="info-item">
+                    <strong>Finalidade:</strong> {imovel.finalidade}
+                  </div>
+                )}
+                {imovel.status && (
+                  <div className="info-item">
+                    <strong>Status:</strong> {imovel.status}
+                  </div>
+                )}
+                {imovel.area_total && (
+                  <div className="info-item">
+                    <strong>Área Total:</strong> {imovel.area_total} m²
+                  </div>
+                )}
+                {imovel.area_construida && (
+                  <div className="info-item">
+                    <strong>Área Construída:</strong> {imovel.area_construida}{" "}
+                    m²
+                  </div>
+                )}
+              </div>
             </div>
-          )}
 
-          <div className="content-section">
-            <h3>Informações Gerais</h3>
-            <div className="info-grid">
-              {imovel.tipo && (
-                <div className="info-item">
-                  <strong>Tipo:</strong> {imovel.tipo}
-                </div>
-              )}
-              {imovel.finalidade && (
-                <div className="info-item">
-                  <strong>Finalidade:</strong> {imovel.finalidade}
-                </div>
-              )}
-              {imovel.status && (
-                <div className="info-item">
-                  <strong>Status:</strong> {imovel.status}
-                </div>
-              )}
-              {imovel.area_total && (
-                <div className="info-item">
-                  <strong>Área Total:</strong> {imovel.area_total} m²
-                </div>
-              )}
-              {imovel.area_construida && (
-                <div className="info-item">
-                  <strong>Área Construída:</strong> {imovel.area_construida} m²
+            <div className="content-section">
+              <h3>Localização</h3>
+              <div className="info-grid">
+                {imovel.cep && (
+                  <div className="info-item">
+                    <strong>CEP:</strong> {imovel.cep}
+                  </div>
+                )}
+                {imovel.estado && (
+                  <div className="info-item">
+                    <strong>Estado:</strong> {imovel.estado}
+                  </div>
+                )}
+                {imovel.cidade && (
+                  <div className="info-item">
+                    <strong>Cidade:</strong> {imovel.cidade}
+                  </div>
+                )}
+                {imovel.bairro && (
+                  <div className="info-item">
+                    <strong>Bairro:</strong> {imovel.bairro}
+                  </div>
+                )}
+              </div>
+              {mapEmbedUrl && (
+                <div className="map-container">
+                  <iframe
+                    src={mapEmbedUrl}
+                    className="map-iframe"
+                    allowFullScreen
+                    loading="lazy"
+                    title="Localização do imóvel"
+                  />
                 </div>
               )}
             </div>
-          </div>
 
-          <div className="content-section">
-            <h3>Localização</h3>
-            <div className="info-grid">
-              {imovel.cep && (
-                <div className="info-item">
-                  <strong>CEP:</strong> {imovel.cep}
+            {caracteristicas && Object.keys(caracteristicas).length > 0 && (
+              <div className="content-section">
+                <h3>Características</h3>
+                <div className="features-container">
+                  {Object.entries(caracteristicas).map(([key, value]) => {
+                    if (key === "id" || key === "imovel_id") return null;
+                    if (
+                      (key === "condominio" || key === "iptu") &&
+                      (!value || value === 0)
+                    ) {
+                      return null;
+                    }
+                    if (key === "mobiliado" && value === false) {
+                      return (
+                        <span key={key} className="feature-tag">
+                          Não Mobiliado
+                        </span>
+                      );
+                    }
+                    if (
+                      value === null ||
+                      value === undefined ||
+                      value === false
+                    )
+                      return null;
+
+                    const label = formatLabel(key);
+                    if (!label) return null;
+
+                    if (typeof value === "boolean" && value === true) {
+                      return (
+                        <span key={key} className="feature-tag">
+                          {label}
+                        </span>
+                      );
+                    }
+
+                    if (
+                      typeof value === "number" ||
+                      (typeof value === "string" && value.trim() !== "")
+                    ) {
+                      return (
+                        <span key={key} className="feature-tag">
+                          {label}: {value}
+                        </span>
+                      );
+                    }
+
+                    return null;
+                  })}
                 </div>
-              )}
-              {imovel.estado && (
-                <div className="info-item">
-                  <strong>Estado:</strong> {imovel.estado}
-                </div>
-              )}
-              {imovel.cidade && (
-                <div className="info-item">
-                  <strong>Cidade:</strong> {imovel.cidade}
-                </div>
-              )}
-              {imovel.bairro && (
-                <div className="info-item">
-                  <strong>Bairro:</strong> {imovel.bairro}
-                </div>
-              )}
-            </div>
-            {mapEmbedUrl && (
-              <div className="map-container">
-                <iframe
-                  src={mapEmbedUrl}
-                  className="map-iframe"
-                  allowFullScreen
-                  loading="lazy"
-                  title="Localização do imóvel"
-                />
               </div>
             )}
           </div>
-
-          {caracteristicas && Object.keys(caracteristicas).length > 0 && (
-            <div className="content-section">
-              <h3>Características</h3>
-              <div className="features-container">
-                {Object.entries(caracteristicas).map(([key, value]) => {
-                  if (key === "id" || key === "imovel_id") return null;
-                  if (
-                    (key === "condominio" || key === "iptu") &&
-                    (!value || value === 0)
-                  ) {
-                    return null;
-                  }
-                  if (key === "mobiliado" && value === false) {
-                    return (
-                      <span key={key} className="feature-tag">
-                        Não Mobiliado
-                      </span>
-                    );
-                  }
-                  if (value === null || value === undefined || value === false)
-                    return null;
-
-                  const label = formatLabel(key);
-                  if (!label) return null;
-
-                  if (typeof value === "boolean" && value === true) {
-                    return (
-                      <span key={key} className="feature-tag">
-                        {label}
-                      </span>
-                    );
-                  }
-
-                  if (
-                    typeof value === "number" ||
-                    (typeof value === "string" && value.trim() !== "")
-                  ) {
-                    return (
-                      <span key={key} className="feature-tag">
-                        {label}: {value}
-                      </span>
-                    );
-                  }
-
-                  return null;
-                })}
-              </div>
-            </div>
-          )}
 
           <div className="actions-section">
             <button
@@ -480,7 +539,12 @@ const ImovelModal = ({
             >
               Entrar em Contato
             </button>
-            <button className="modal-like-btn" onClick={toggleCurtida}>
+            <button
+              className={`modal-like-btn ${
+                isHeartAnimating ? "heart-burst" : ""
+              }`}
+              onClick={toggleCurtida}
+            >
               {curtido ? (
                 <AiFillHeart size={26} color="#191970" />
               ) : (
