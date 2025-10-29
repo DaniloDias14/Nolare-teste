@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import "./ImovelModal.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import compartilhar from "../../assets/img/compartilhar.jpg";
+import {
+  IoClose,
+  IoShareSocialOutline,
+  IoLocationOutline,
+  IoHomeOutline,
+} from "react-icons/io5";
 
 const ImovelModal = ({
   imovel,
@@ -18,14 +23,13 @@ const ImovelModal = ({
   const [caracteristicas, setCaracteristicas] = useState(null);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentTranslate, setCurrentTranslate] = useState(0);
   const [prevTranslate, setPrevTranslate] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const galleryRef = useRef(null);
-  const trackRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -101,17 +105,10 @@ const ImovelModal = ({
   }, [fotoIndex, imovel]);
 
   useEffect(() => {
-    setPositionByIndex();
-  }, [fotoIndex]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (galleryRef.current) {
-        setPositionByIndex();
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (!galleryRef.current) return;
+    const width = galleryRef.current.clientWidth;
+    setCurrentTranslate(-fotoIndex * width);
+    setPrevTranslate(-fotoIndex * width);
   }, [fotoIndex]);
 
   if (!imovel) return null;
@@ -168,112 +165,55 @@ const ImovelModal = ({
     return `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`;
   };
 
-  const setPositionByIndex = () => {
-    if (!galleryRef.current) return;
-    const width = galleryRef.current.clientWidth;
-    const newTranslate = -fotoIndex * width;
-    setCurrentTranslate(newTranslate);
-    setPrevTranslate(newTranslate);
-  };
-
   const handlePrev = () => {
-    if (fotoIndex > 0) {
-      setFotoIndex((prev) => prev - 1);
-    }
+    if (fotoIndex === 0) return;
+    setFotoIndex((prev) => prev - 1);
   };
 
   const handleNext = () => {
-    if (fotoIndex < fotos.length - 1) {
-      setFotoIndex((prev) => prev + 1);
-    }
+    if (fotoIndex === fotos.length - 1) return;
+    setFotoIndex((prev) => prev + 1);
   };
 
-  const handleStart = (clientX) => {
-    if (!isMobile) return;
+  const handleStart = (e) => {
+    if (!isMobile || !galleryRef.current) return;
     setIsDragging(true);
-    setStartX(clientX);
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    setStartX(x);
     setPrevTranslate(currentTranslate);
   };
 
-  const handleMove = (clientX) => {
-    if (!isDragging || !isMobile || !galleryRef.current) return;
-
-    const diff = clientX - startX;
-    const width = galleryRef.current.clientWidth;
-
-    // Apply resistance at edges
-    const isAtFirst = fotoIndex === 0 && diff > 0;
-    const isAtLast = fotoIndex === fotos.length - 1 && diff < 0;
-
-    if (isAtFirst || isAtLast) {
-      setCurrentTranslate(prevTranslate + diff * 0.15);
-    } else {
-      setCurrentTranslate(prevTranslate + diff);
-    }
+  const handleMove = (e) => {
+    if (!isMobile || !isDragging || !galleryRef.current) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const diff = x - startX;
+    setCurrentTranslate(prevTranslate + diff);
   };
 
   const handleEnd = () => {
-    if (!isDragging || !isMobile || !galleryRef.current) return;
+    if (!isMobile || !isDragging || !galleryRef.current) return;
     setIsDragging(false);
 
     const width = galleryRef.current.clientWidth;
     const movedBy = currentTranslate - -fotoIndex * width;
 
-    // Check if should change slide
+    // Threshold of 50px to trigger slide change
+    // Block swipe right if at last image
     if (movedBy < -50 && fotoIndex < fotos.length - 1) {
       setFotoIndex(fotoIndex + 1);
-    } else if (movedBy > 50 && fotoIndex > 0) {
+    }
+    // Block swipe left if at first image
+    else if (movedBy > 50 && fotoIndex > 0) {
       setFotoIndex(fotoIndex - 1);
     } else {
-      // Elastic bounce effect at edges
-      const isAtFirst = fotoIndex === 0 && movedBy > 50;
-      const isAtLast = fotoIndex === fotos.length - 1 && movedBy < -50;
-
-      if (isAtFirst || isAtLast) {
-        const offset = isAtFirst ? 35 : -35;
-        setCurrentTranslate(-fotoIndex * width + offset);
-        setTimeout(() => {
-          setCurrentTranslate(-fotoIndex * width);
-          setPrevTranslate(-fotoIndex * width);
-        }, 200);
-      } else {
-        setPositionByIndex();
-      }
-    }
-  };
-
-  const handleTouchStart = (e) => {
-    handleStart(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e) => {
-    handleMove(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    handleEnd();
-  };
-
-  const handleMouseDown = (e) => {
-    handleStart(e.clientX);
-  };
-
-  const handleMouseMove = (e) => {
-    handleMove(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    handleEnd();
-  };
-
-  const handleMouseLeave = () => {
-    if (isDragging) {
-      handleEnd();
+      // Snap back to current position
+      setCurrentTranslate(-fotoIndex * width);
+      setPrevTranslate(-fotoIndex * width);
     }
   };
 
   const handleOverlayClick = (e) => {
-    if (e.target.className === "modal-overlay") {
+    if (e.target.className === "imovel-modal-overlay") {
       onClose();
     }
   };
@@ -400,102 +340,138 @@ const ImovelModal = ({
   const mapEmbedUrl = getMapEmbedUrl();
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content-wrapper">
-        <button className="close-popup-btn" onClick={onClose}>
-          ×
-        </button>
+    <div className="imovel-modal-overlay" onClick={handleOverlayClick}>
+      <div className="imovel-modal-container">
+        {/* Header with close and share buttons */}
+        <div className="imovel-modal-header">
+          <button
+            className="imovel-modal-share-btn"
+            onClick={handleShare}
+            title="Compartilhar"
+          >
+            <IoShareSocialOutline size={22} />
+          </button>
+          <button
+            className="imovel-modal-close-btn"
+            onClick={onClose}
+            title="Fechar"
+          >
+            <IoClose size={28} />
+          </button>
+        </div>
 
-        <button
-          className="share-btn"
-          onClick={handleShare}
-          title="Compartilhar imóvel"
-        >
-          <img src={compartilhar || "/placeholder.svg"} alt="Compartilhar" />
-        </button>
+        {showCopyMessage && (
+          <div className="imovel-copy-notification">Link copiado!</div>
+        )}
 
-        {showCopyMessage && <div className="copy-message">Link copiado!</div>}
-
-        <div
-          className="modal-gallery"
-          ref={galleryRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-        >
-          {fotos.length > 0 ? (
-            <>
-              <button
-                className={`modal-carousel-btn prev ${
-                  fotoIndex === 0 ? "disabled" : ""
-                }`}
-                onClick={handlePrev}
-                disabled={fotoIndex === 0}
-                aria-label="Foto anterior"
-              >
-                🡰
-              </button>
-              <div
-                className="modal-image-track"
-                ref={trackRef}
-                style={{
-                  transform: `translateX(${currentTranslate}px)`,
-                  transition: isDragging
-                    ? "none"
-                    : currentTranslate !==
-                      -fotoIndex * (galleryRef.current?.clientWidth || 0)
-                    ? "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)"
-                    : "transform 0.32s cubic-bezier(0.22, 0.9, 0.2, 1)",
-                }}
-              >
-                {fotos.map((foto, index) => (
-                  <div key={index} className="modal-image-container">
-                    <img
-                      src={`http://localhost:5000${foto.caminho_foto}`}
-                      alt={`Foto ${index + 1}`}
-                      className="modal-image"
-                      onError={() => index === fotoIndex && setImageError(true)}
-                      style={{
-                        display:
-                          imageError && index === fotoIndex ? "none" : "block",
-                      }}
-                      draggable="false"
-                    />
-                    {imageError && index === fotoIndex && (
-                      <div className="image-error">Erro ao carregar imagem</div>
-                    )}
+        <div className="imovel-modal-content">
+          {/* Gallery Section */}
+          <div className="imovel-gallery-section">
+            <div
+              className="imovel-gallery-main"
+              ref={galleryRef}
+              onTouchStart={handleStart}
+              onTouchMove={handleMove}
+              onTouchEnd={handleEnd}
+            >
+              {fotos.length > 0 ? (
+                <>
+                  <div
+                    className="imovel-gallery-track"
+                    style={{
+                      transform: `translateX(${currentTranslate}px)`,
+                      transition: isDragging
+                        ? "none"
+                        : "transform 0.32s cubic-bezier(0.22, 0.9, 0.2, 1)",
+                    }}
+                  >
+                    {fotos.map((foto, index) => (
+                      <div key={index} className="imovel-gallery-slide">
+                        <img
+                          src={`http://localhost:5000${foto.caminho_foto}`}
+                          alt={`Foto ${index + 1}`}
+                          className="imovel-gallery-image"
+                          onError={() =>
+                            index === fotoIndex && setImageError(true)
+                          }
+                          style={{
+                            display:
+                              imageError && index === fotoIndex
+                                ? "none"
+                                : "block",
+                          }}
+                        />
+                        {imageError && index === fotoIndex && (
+                          <div className="imovel-image-error">
+                            Erro ao carregar imagem
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className={`modal-carousel-btn next ${
-                  fotoIndex === fotos.length - 1 ? "disabled" : ""
-                }`}
-                onClick={handleNext}
-                disabled={fotoIndex === fotos.length - 1}
-                aria-label="Próxima foto"
-              >
-                🡲
-              </button>
-              <div className="dots-container">
-                {fotos.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`dot ${index === fotoIndex ? "active" : ""}`}
-                    onClick={() => setFotoIndex(index)}
-                    aria-label={`Ir para foto ${index + 1}`}
-                  />
-                ))}
-              </div>
-              <div className="thumbnails-container">
+
+                  {/* Navigation arrows - desktop only */}
+                  {!isMobile && (
+                    <>
+                      <button
+                        className={`imovel-gallery-arrow imovel-gallery-arrow-prev ${
+                          fotoIndex === 0 ? "disabled" : ""
+                        }`}
+                        onClick={handlePrev}
+                        disabled={fotoIndex === 0}
+                        aria-label="Foto anterior"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        className={`imovel-gallery-arrow imovel-gallery-arrow-next ${
+                          fotoIndex === fotos.length - 1 ? "disabled" : ""
+                        }`}
+                        onClick={handleNext}
+                        disabled={fotoIndex === fotos.length - 1}
+                        aria-label="Próxima foto"
+                      >
+                        ›
+                      </button>
+                    </>
+                  )}
+
+                  {/* Photo counter */}
+                  <div className="imovel-photo-counter">
+                    {fotoIndex + 1} / {fotos.length}
+                  </div>
+
+                  {/* Dots indicator - mobile only */}
+                  {isMobile && (
+                    <div className="imovel-gallery-dots">
+                      {fotos.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`imovel-gallery-dot ${
+                            index === fotoIndex ? "active" : ""
+                          }`}
+                          onClick={() => setFotoIndex(index)}
+                          aria-label={`Ir para foto ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="imovel-no-photos">
+                  <IoHomeOutline size={48} />
+                  <p>Sem fotos disponíveis</p>
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnails - desktop only */}
+            {!isMobile && fotos.length > 0 && (
+              <div className="imovel-gallery-thumbnails">
                 {fotos.map((foto, index) => (
                   <button
                     key={index}
-                    className={`thumbnail ${
+                    className={`imovel-thumbnail ${
                       index === fotoIndex ? "active" : ""
                     }`}
                     onClick={() => setFotoIndex(index)}
@@ -508,172 +484,190 @@ const ImovelModal = ({
                   </button>
                 ))}
               </div>
-            </>
-          ) : (
-            <div className="no-image">Sem imagens disponíveis</div>
-          )}
-        </div>
-
-        <div className="modal-info">
-          <div className="modal-info-content">
-            <div className="header-section">
-              <h2 className="title">
-                {imovel.titulo} <span className="id-badge">#{imovelId}</span>
-              </h2>
-            </div>
-
-            <div className="price-section">R$ {formatPrice(imovel.preco)}</div>
-
-            {imovel.descricao && (
-              <div className="content-section">
-                <h3>Descrição</h3>
-                <p>{imovel.descricao}</p>
-              </div>
-            )}
-
-            <div className="content-section">
-              <h3>Informações Gerais</h3>
-              <div className="info-grid">
-                {imovel.tipo && (
-                  <div className="info-item">
-                    <strong>Tipo:</strong> {imovel.tipo}
-                  </div>
-                )}
-                {imovel.finalidade && (
-                  <div className="info-item">
-                    <strong>Finalidade:</strong> {imovel.finalidade}
-                  </div>
-                )}
-                {imovel.status && (
-                  <div className="info-item">
-                    <strong>Status:</strong> {imovel.status}
-                  </div>
-                )}
-                {imovel.area_total && (
-                  <div className="info-item">
-                    <strong>Área Total:</strong> {imovel.area_total} m²
-                  </div>
-                )}
-                {imovel.area_construida && (
-                  <div className="info-item">
-                    <strong>Área Construída:</strong> {imovel.area_construida}{" "}
-                    m²
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="content-section">
-              <h3>Localização</h3>
-              <div className="info-grid">
-                {imovel.cep && (
-                  <div className="info-item">
-                    <strong>CEP:</strong> {imovel.cep}
-                  </div>
-                )}
-                {imovel.estado && (
-                  <div className="info-item">
-                    <strong>Estado:</strong> {imovel.estado}
-                  </div>
-                )}
-                {imovel.cidade && (
-                  <div className="info-item">
-                    <strong>Cidade:</strong> {imovel.cidade}
-                  </div>
-                )}
-                {imovel.bairro && (
-                  <div className="info-item">
-                    <strong>Bairro:</strong> {imovel.bairro}
-                  </div>
-                )}
-              </div>
-              {mapEmbedUrl && (
-                <div className="map-container">
-                  <iframe
-                    src={mapEmbedUrl}
-                    className="map-iframe"
-                    allowFullScreen
-                    loading="lazy"
-                    title="Localização do imóvel"
-                  />
-                </div>
-              )}
-            </div>
-
-            {caracteristicas && Object.keys(caracteristicas).length > 0 && (
-              <div className="content-section">
-                <h3>Características</h3>
-                <div className="features-container">
-                  {Object.entries(caracteristicas).map(([key, value]) => {
-                    if (key === "id" || key === "imovel_id") return null;
-                    if (
-                      (key === "condominio" || key === "iptu") &&
-                      (!value || value === 0)
-                    ) {
-                      return null;
-                    }
-                    if (key === "mobiliado" && value === false) {
-                      return (
-                        <span key={key} className="feature-tag">
-                          Não Mobiliado
-                        </span>
-                      );
-                    }
-                    if (
-                      value === null ||
-                      value === undefined ||
-                      value === false
-                    )
-                      return null;
-
-                    const label = formatLabel(key);
-                    if (!label) return null;
-
-                    if (typeof value === "boolean" && value === true) {
-                      return (
-                        <span key={key} className="feature-tag">
-                          {label}
-                        </span>
-                      );
-                    }
-
-                    if (
-                      typeof value === "number" ||
-                      (typeof value === "string" && value.trim() !== "")
-                    ) {
-                      return (
-                        <span key={key} className="feature-tag">
-                          {label}: {value}
-                        </span>
-                      );
-                    }
-
-                    return null;
-                  })}
-                </div>
-              </div>
             )}
           </div>
 
-          <div className="actions-section">
-            <button
-              className="modal-contact-btn"
-              onClick={() => window.open("https://www.youtube.com", "_blank")}
-            >
-              Entrar em Contato
-            </button>
-            <button
-              className={`modal-like-btn ${
-                isHeartAnimating ? "heart-burst" : ""
-              }`}
-              onClick={toggleCurtida}
-            >
-              {curtido ? (
-                <AiFillHeart size={26} color="#191970" />
-              ) : (
-                <AiOutlineHeart size={26} color="#191970" />
+          {/* Info Section */}
+          <div className="imovel-info-section">
+            <div className="imovel-info-scroll">
+              {/* Title and Price */}
+              <div className="imovel-header-card">
+                <div className="imovel-title-row">
+                  <h1 className="imovel-title">{imovel.titulo}</h1>
+                  <span className="imovel-id-badge">#{imovelId}</span>
+                </div>
+                <div className="imovel-price">
+                  R$ {formatPrice(imovel.preco)}
+                </div>
+                <div className="imovel-meta-tags">
+                  {imovel.tipo && (
+                    <span className="imovel-meta-tag">{imovel.tipo}</span>
+                  )}
+                  {imovel.finalidade && (
+                    <span className="imovel-meta-tag">{imovel.finalidade}</span>
+                  )}
+                  {imovel.status && (
+                    <span className="imovel-meta-tag">{imovel.status}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Info */}
+              {(imovel.area_total || imovel.area_construida) && (
+                <div className="imovel-info-card">
+                  <h3 className="imovel-card-title">Área</h3>
+                  <div className="imovel-info-grid">
+                    {imovel.area_total && (
+                      <div className="imovel-info-item">
+                        <span className="imovel-info-label">Total</span>
+                        <span className="imovel-info-value">
+                          {imovel.area_total} m²
+                        </span>
+                      </div>
+                    )}
+                    {imovel.area_construida && (
+                      <div className="imovel-info-item">
+                        <span className="imovel-info-label">Construída</span>
+                        <span className="imovel-info-value">
+                          {imovel.area_construida} m²
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
+
+              {/* Description */}
+              {imovel.descricao && (
+                <div className="imovel-info-card">
+                  <h3 className="imovel-card-title">Descrição</h3>
+                  <p className="imovel-description">{imovel.descricao}</p>
+                </div>
+              )}
+
+              {/* Characteristics */}
+              {caracteristicas && Object.keys(caracteristicas).length > 0 && (
+                <div className="imovel-info-card">
+                  <h3 className="imovel-card-title">Características</h3>
+                  <div className="imovel-features-grid">
+                    {Object.entries(caracteristicas).map(([key, value]) => {
+                      if (key === "id" || key === "imovel_id") return null;
+                      if (
+                        (key === "condominio" || key === "iptu") &&
+                        (!value || value === 0)
+                      ) {
+                        return null;
+                      }
+                      if (key === "mobiliado" && value === false) {
+                        return (
+                          <span key={key} className="imovel-feature-badge">
+                            Não Mobiliado
+                          </span>
+                        );
+                      }
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === false
+                      )
+                        return null;
+
+                      const label = formatLabel(key);
+                      if (!label) return null;
+
+                      if (typeof value === "boolean" && value === true) {
+                        return (
+                          <span key={key} className="imovel-feature-badge">
+                            {label}
+                          </span>
+                        );
+                      }
+
+                      if (
+                        typeof value === "number" ||
+                        (typeof value === "string" && value.trim() !== "")
+                      ) {
+                        return (
+                          <span key={key} className="imovel-feature-badge">
+                            {label}: {value}
+                          </span>
+                        );
+                      }
+
+                      return null;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Location */}
+              <div className="imovel-info-card">
+                <h3 className="imovel-card-title">
+                  <IoLocationOutline size={20} />
+                  Localização
+                </h3>
+                <div className="imovel-location-grid">
+                  {imovel.cep && (
+                    <div className="imovel-location-item">
+                      <span className="imovel-info-label">CEP</span>
+                      <span className="imovel-info-value">{imovel.cep}</span>
+                    </div>
+                  )}
+                  {imovel.cidade && (
+                    <div className="imovel-location-item">
+                      <span className="imovel-info-label">Cidade</span>
+                      <span className="imovel-info-value">{imovel.cidade}</span>
+                    </div>
+                  )}
+                  {imovel.bairro && (
+                    <div className="imovel-location-item">
+                      <span className="imovel-info-label">Bairro</span>
+                      <span className="imovel-info-value">{imovel.bairro}</span>
+                    </div>
+                  )}
+                  {imovel.estado && (
+                    <div className="imovel-location-item">
+                      <span className="imovel-info-label">Estado</span>
+                      <span className="imovel-info-value">{imovel.estado}</span>
+                    </div>
+                  )}
+                </div>
+                {mapEmbedUrl && (
+                  <div className="imovel-map-container">
+                    <iframe
+                      src={mapEmbedUrl}
+                      className="imovel-map-iframe"
+                      allowFullScreen
+                      loading="lazy"
+                      title="Localização do imóvel"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="imovel-actions">
+              <button
+                className="imovel-contact-btn"
+                onClick={() => window.open("https://www.youtube.com", "_blank")}
+              >
+                Entrar em Contato
+              </button>
+              <button
+                className={`imovel-like-btn ${curtido ? "liked" : ""} ${
+                  isHeartAnimating ? "animating" : ""
+                }`}
+                onClick={toggleCurtida}
+                title={curtido ? "Descurtir" : "Curtir"}
+              >
+                {curtido ? (
+                  <AiFillHeart size={24} />
+                ) : (
+                  <AiOutlineHeart size={24} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
