@@ -18,12 +18,23 @@ const ImovelModal = ({
   const [caracteristicas, setCaracteristicas] = useState(null);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  const [touchOffset, setTouchOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [currentTranslate, setCurrentTranslate] = useState(0);
+  const [prevTranslate, setPrevTranslate] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const galleryRef = useRef(null);
+  const trackRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 968);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -89,6 +100,20 @@ const ImovelModal = ({
     nextNextImg.src = `http://localhost:5000${fotos[nextNextIndex]?.caminho_foto}`;
   }, [fotoIndex, imovel]);
 
+  useEffect(() => {
+    setPositionByIndex();
+  }, [fotoIndex]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (galleryRef.current) {
+        setPositionByIndex();
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [fotoIndex]);
+
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
@@ -143,46 +168,108 @@ const ImovelModal = ({
     return `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`;
   };
 
+  const setPositionByIndex = () => {
+    if (!galleryRef.current) return;
+    const width = galleryRef.current.clientWidth;
+    const newTranslate = -fotoIndex * width;
+    setCurrentTranslate(newTranslate);
+    setPrevTranslate(newTranslate);
+  };
+
   const handlePrev = () => {
-    setFotoIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
+    if (fotoIndex > 0) {
+      setFotoIndex((prev) => prev - 1);
+    }
   };
 
   const handleNext = () => {
-    setFotoIndex((prev) => (prev === fotos.length - 1 ? 0 : prev + 1));
+    if (fotoIndex < fotos.length - 1) {
+      setFotoIndex((prev) => prev + 1);
+    }
+  };
+
+  const handleStart = (clientX) => {
+    if (!isMobile) return;
+    setIsDragging(true);
+    setStartX(clientX);
+    setPrevTranslate(currentTranslate);
+  };
+
+  const handleMove = (clientX) => {
+    if (!isDragging || !isMobile || !galleryRef.current) return;
+
+    const diff = clientX - startX;
+    const width = galleryRef.current.clientWidth;
+
+    // Apply resistance at edges
+    const isAtFirst = fotoIndex === 0 && diff > 0;
+    const isAtLast = fotoIndex === fotos.length - 1 && diff < 0;
+
+    if (isAtFirst || isAtLast) {
+      setCurrentTranslate(prevTranslate + diff * 0.15);
+    } else {
+      setCurrentTranslate(prevTranslate + diff);
+    }
+  };
+
+  const handleEnd = () => {
+    if (!isDragging || !isMobile || !galleryRef.current) return;
+    setIsDragging(false);
+
+    const width = galleryRef.current.clientWidth;
+    const movedBy = currentTranslate - -fotoIndex * width;
+
+    // Check if should change slide
+    if (movedBy < -50 && fotoIndex < fotos.length - 1) {
+      setFotoIndex(fotoIndex + 1);
+    } else if (movedBy > 50 && fotoIndex > 0) {
+      setFotoIndex(fotoIndex - 1);
+    } else {
+      // Elastic bounce effect at edges
+      const isAtFirst = fotoIndex === 0 && movedBy > 50;
+      const isAtLast = fotoIndex === fotos.length - 1 && movedBy < -50;
+
+      if (isAtFirst || isAtLast) {
+        const offset = isAtFirst ? 35 : -35;
+        setCurrentTranslate(-fotoIndex * width + offset);
+        setTimeout(() => {
+          setCurrentTranslate(-fotoIndex * width);
+          setPrevTranslate(-fotoIndex * width);
+        }, 200);
+      } else {
+        setPositionByIndex();
+      }
+    }
   };
 
   const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX);
-    setTouchEnd(e.targetTouches[0].clientX);
-    setIsSwiping(true);
+    handleStart(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e) => {
-    if (!isSwiping) return;
-    const currentTouch = e.targetTouches[0].clientX;
-    setTouchEnd(currentTouch);
-    const offset = currentTouch - touchStart;
-    setTouchOffset(offset);
+    handleMove(e.touches[0].clientX);
   };
 
   const handleTouchEnd = () => {
-    if (!isSwiping) return;
+    handleEnd();
+  };
 
-    const distance = touchStart - touchEnd;
-    const threshold = 50;
+  const handleMouseDown = (e) => {
+    handleStart(e.clientX);
+  };
 
-    if (Math.abs(distance) > threshold) {
-      if (distance > 0) {
-        handleNext();
-      } else {
-        handlePrev();
-      }
+  const handleMouseMove = (e) => {
+    handleMove(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    handleEnd();
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      handleEnd();
     }
-
-    setIsSwiping(false);
-    setTouchStart(0);
-    setTouchEnd(0);
-    setTouchOffset(0);
   };
 
   const handleOverlayClick = (e) => {
@@ -335,37 +422,61 @@ const ImovelModal = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
         >
           {fotos.length > 0 ? (
             <>
               <button
-                className="modal-carousel-btn prev"
+                className={`modal-carousel-btn prev ${
+                  fotoIndex === 0 ? "disabled" : ""
+                }`}
                 onClick={handlePrev}
+                disabled={fotoIndex === 0}
                 aria-label="Foto anterior"
               >
                 🡰
               </button>
-              <div className="modal-image-container">
-                <img
-                  src={`http://localhost:5000${fotos[fotoIndex]?.caminho_foto}`}
-                  alt={`Foto ${fotoIndex + 1}`}
-                  className="modal-image"
-                  onError={() => setImageError(true)}
-                  style={{
-                    display: imageError ? "none" : "block",
-                    transform: isSwiping
-                      ? `translateX(${touchOffset}px)`
-                      : "translateX(0)",
-                    transition: isSwiping ? "none" : "transform 0.3s ease",
-                  }}
-                />
-                {imageError && (
-                  <div className="image-error">Erro ao carregar imagem</div>
-                )}
+              <div
+                className="modal-image-track"
+                ref={trackRef}
+                style={{
+                  transform: `translateX(${currentTranslate}px)`,
+                  transition: isDragging
+                    ? "none"
+                    : currentTranslate !==
+                      -fotoIndex * (galleryRef.current?.clientWidth || 0)
+                    ? "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)"
+                    : "transform 0.32s cubic-bezier(0.22, 0.9, 0.2, 1)",
+                }}
+              >
+                {fotos.map((foto, index) => (
+                  <div key={index} className="modal-image-container">
+                    <img
+                      src={`http://localhost:5000${foto.caminho_foto}`}
+                      alt={`Foto ${index + 1}`}
+                      className="modal-image"
+                      onError={() => index === fotoIndex && setImageError(true)}
+                      style={{
+                        display:
+                          imageError && index === fotoIndex ? "none" : "block",
+                      }}
+                      draggable="false"
+                    />
+                    {imageError && index === fotoIndex && (
+                      <div className="image-error">Erro ao carregar imagem</div>
+                    )}
+                  </div>
+                ))}
               </div>
               <button
-                className="modal-carousel-btn next"
+                className={`modal-carousel-btn next ${
+                  fotoIndex === fotos.length - 1 ? "disabled" : ""
+                }`}
                 onClick={handleNext}
+                disabled={fotoIndex === fotos.length - 1}
                 aria-label="Próxima foto"
               >
                 🡲

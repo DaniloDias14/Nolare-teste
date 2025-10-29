@@ -105,7 +105,7 @@
   }
 }
 
-/* Ajustada galeria para manter proporção quadrada no desktop */
+/* Updated gallery to support track-based animation */
 .modal-gallery {
   position: relative;
   background: #f5f5f5;
@@ -115,9 +115,17 @@
   touch-action: pan-y pinch-zoom;
 }
 
+/* New track container for smooth sliding */
+.modal-image-track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
 /* Container para garantir proporção quadrada da imagem principal */
 .modal-image-container {
   width: 100%;
+  min-width: 100%;
   aspect-ratio: 1 / 1;
   position: relative;
   overflow: hidden;
@@ -125,6 +133,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 /* Imagem principal com object-fit cover para preencher o container quadrado */
@@ -148,8 +157,7 @@
   font-weight: 500;
 }
 
-/* Increased transparency to opacity: 0.5 */
-/* Reposicionando setas para as bordas como no Destaque, mantendo centralização vertical */
+/* Updated arrow buttons with disabled state */
 .modal-carousel-btn {
   position: absolute;
   top: 50%;
@@ -171,10 +179,17 @@
   opacity: 0.5;
 }
 
-.modal-carousel-btn:hover {
+.modal-carousel-btn:hover:not(.disabled) {
   color: #191970;
   transform: translateY(-50%) scale(1.15);
   opacity: 1;
+}
+
+/* Disabled state for arrows at limits */
+.modal-carousel-btn.disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .modal-carousel-btn.prev {
@@ -479,7 +494,7 @@
   }
 }
 
-/* Responsive design for mobile */
+/* Mobile-specific styles - enable swipe only on mobile */
 @media (max-width: 968px) {
   /* Ajustes para mobile: permitir scroll completo e exibir foto */
   .modal-overlay {
@@ -503,6 +518,11 @@
     z-index: 50;
     min-height: 350px;
     flex-shrink: 0;
+    cursor: grab;
+  }
+
+  .modal-gallery:active {
+    cursor: grabbing;
   }
 
   .modal-image-container {
@@ -617,7 +637,7 @@
     right: 8px;
   }
 
-  .modal-carousel-btn:hover {
+  .modal-carousel-btn:hover:not(.disabled) {
     transform: translateY(-50%) scale(1.15);
   }
 
@@ -650,7 +670,7 @@
   }
 }
 
-/* Esconder dots no desktop, mostrar miniaturas */
+/* Desktop-specific styles - disable swipe, enable arrow limits */
 @media (min-width: 969px) {
   .dots-container {
     display: none;
@@ -658,5 +678,10 @@
 
   .thumbnails-container {
     display: flex;
+  }
+
+  /* Disable drag cursor on desktop */
+  .modal-gallery {
+    cursor: default;
   }
 }
