@@ -421,7 +421,7 @@ const ImovelModal = ({
                         disabled={fotoIndex === 0}
                         aria-label="Foto anterior"
                       >
-                        ‹
+                        🡰
                       </button>
                       <button
                         className={`imovel-gallery-arrow imovel-gallery-arrow-next ${
@@ -431,7 +431,7 @@ const ImovelModal = ({
                         disabled={fotoIndex === fotos.length - 1}
                         aria-label="Próxima foto"
                       >
-                        ›
+                        🡲
                       </button>
                     </>
                   )}
@@ -550,52 +550,58 @@ const ImovelModal = ({
                 <div className="imovel-info-card">
                   <h3 className="imovel-card-title">Características</h3>
                   <div className="imovel-features-grid">
-                    {Object.entries(caracteristicas).map(([key, value]) => {
-                      if (key === "id" || key === "imovel_id") return null;
-                      if (
-                        (key === "condominio" || key === "iptu") &&
-                        (!value || value === 0)
-                      ) {
+                    {Object.entries(caracteristicas)
+                      .sort(([keyA], [keyB]) => {
+                        const labelA = formatLabel(keyA) || "";
+                        const labelB = formatLabel(keyB) || "";
+                        return labelA.localeCompare(labelB);
+                      })
+                      .map(([key, value]) => {
+                        if (key === "id" || key === "imovel_id") return null;
+                        if (
+                          (key === "condominio" || key === "iptu") &&
+                          (!value || value === 0)
+                        ) {
+                          return null;
+                        }
+                        if (key === "mobiliado" && value === false) {
+                          return (
+                            <span key={key} className="imovel-feature-badge">
+                              Não Mobiliado
+                            </span>
+                          );
+                        }
+                        if (
+                          value === null ||
+                          value === undefined ||
+                          value === false
+                        )
+                          return null;
+
+                        const label = formatLabel(key);
+                        if (!label) return null;
+
+                        if (typeof value === "boolean" && value === true) {
+                          return (
+                            <span key={key} className="imovel-feature-badge">
+                              {label}
+                            </span>
+                          );
+                        }
+
+                        if (
+                          typeof value === "number" ||
+                          (typeof value === "string" && value.trim() !== "")
+                        ) {
+                          return (
+                            <span key={key} className="imovel-feature-badge">
+                              {label}: {value}
+                            </span>
+                          );
+                        }
+
                         return null;
-                      }
-                      if (key === "mobiliado" && value === false) {
-                        return (
-                          <span key={key} className="imovel-feature-badge">
-                            Não Mobiliado
-                          </span>
-                        );
-                      }
-                      if (
-                        value === null ||
-                        value === undefined ||
-                        value === false
-                      )
-                        return null;
-
-                      const label = formatLabel(key);
-                      if (!label) return null;
-
-                      if (typeof value === "boolean" && value === true) {
-                        return (
-                          <span key={key} className="imovel-feature-badge">
-                            {label}
-                          </span>
-                        );
-                      }
-
-                      if (
-                        typeof value === "number" ||
-                        (typeof value === "string" && value.trim() !== "")
-                      ) {
-                        return (
-                          <span key={key} className="imovel-feature-badge">
-                            {label}: {value}
-                          </span>
-                        );
-                      }
-
-                      return null;
-                    })}
+                      })}
                   </div>
                 </div>
               )}
