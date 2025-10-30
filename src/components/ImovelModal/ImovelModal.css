@@ -167,7 +167,7 @@
   font-size: 0.875rem;
 }
 
-/* Setas com text-shadow ao invés de drop-shadow para melhor visibilidade */
+/* Setas sem contorno no estado normal, apenas transparência */
 .imovel-gallery-arrow {
   position: absolute;
   top: 50%;
@@ -187,14 +187,17 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
   opacity: 0.5;
-  text-shadow: 0 0 8px rgba(25, 25, 112, 0.6);
 }
 
-/* Sombra das setas BEM FORTE no hover */
+/* Diminuir bastante a intensidade da sombra das setas */
 .imovel-gallery-arrow:hover:not(.disabled) {
   opacity: 1;
-  text-shadow: 0 0 30px rgba(25, 25, 112, 1), 0 0 50px rgba(25, 25, 112, 1),
-    0 0 70px rgba(25, 25, 112, 0.9);
+  text-shadow: 0 0 4px rgba(25, 25, 112, 0.2),
+    1px 1px 6px rgba(25, 25, 112, 0.2), -1px -1px 6px rgba(25, 25, 112, 0.2),
+    1px -1px 6px rgba(25, 25, 112, 0.2), -1px 1px 6px rgba(25, 25, 112, 0.2),
+    2px 0 6px rgba(25, 25, 112, 0.2), -2px 0 6px rgba(25, 25, 112, 0.2),
+    0 2px 6px rgba(25, 25, 112, 0.2), 0 -2px 6px rgba(25, 25, 112, 0.2),
+    0 0 12px rgba(25, 25, 112, 0.15);
   transform: translateY(-50%) scale(1.15);
 }
 
@@ -244,7 +247,7 @@
   box-shadow: 0 0 8px rgba(25, 25, 112, 0.4);
 }
 
-/* Miniaturas com sombra mais forte (0 0 16px) */
+/* Miniaturas com altura fixa, linha cinza no topo e separador à direita */
 .imovel-gallery-thumbnails {
   display: flex;
   gap: 8px;
@@ -255,19 +258,9 @@
   scrollbar-width: thin;
   scrollbar-color: #cbd5e0 #f8f9fa;
   scroll-behavior: smooth;
-}
-
-.imovel-gallery-thumbnails::-webkit-scrollbar {
-  height: 6px;
-}
-
-.imovel-gallery-thumbnails::-webkit-scrollbar-track {
-  background: #f8f9fa;
-}
-
-.imovel-gallery-thumbnails::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 3px;
+  border-top: 2px solid #e9ecef;
+  height: 98px;
+  align-items: center;
 }
 
 .imovel-thumbnail {
@@ -294,10 +287,10 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Miniatura ativa sem borda branca, apenas sombra azul */
+/* Miniatura ativa com sombra mais suave */
 .imovel-thumbnail.active {
   border: none;
-  box-shadow: 0 0 16px rgba(25, 25, 112, 0.7);
+  box-shadow: 0 0 8px rgba(25, 25, 112, 0.7), 0 0 16px rgba(25, 25, 112, 0.6);
 }
 
 /* Info Section */
@@ -494,10 +487,12 @@
 .imovel-actions {
   display: flex;
   gap: 12px;
-  padding: 20px 28px;
+  padding: 16px 28px;
   background: #ffffff;
   border-top: 2px solid #e9ecef;
   flex-shrink: 0;
+  height: 98px; /* Altura fixa ao invés de min-height */
+  align-items: center;
 }
 
 /* Botão de contato com flex: 1 para ocupar espaço até ficar perto do botão curtir */
