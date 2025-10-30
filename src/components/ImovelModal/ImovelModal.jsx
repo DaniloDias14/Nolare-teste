@@ -30,6 +30,7 @@ const ImovelModal = ({
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const galleryRef = useRef(null);
+  const thumbnailsRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -111,6 +112,30 @@ const ImovelModal = ({
     setPrevTranslate(-fotoIndex * width);
   }, [fotoIndex]);
 
+  useEffect(() => {
+    if (!thumbnailsRef.current || isMobile) return;
+
+    const thumbnailElements =
+      thumbnailsRef.current.querySelectorAll(".imovel-thumbnail");
+    if (thumbnailElements[fotoIndex]) {
+      const thumbnail = thumbnailElements[fotoIndex];
+      const container = thumbnailsRef.current;
+
+      // Calcula a posição para centralizar a miniatura
+      const thumbnailLeft = thumbnail.offsetLeft;
+      const thumbnailWidth = thumbnail.offsetWidth;
+      const containerWidth = container.offsetWidth;
+
+      const scrollPosition =
+        thumbnailLeft - containerWidth / 2 + thumbnailWidth / 2;
+
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: "smooth",
+      });
+    }
+  }, [fotoIndex, isMobile]);
+
   if (!imovel) return null;
 
   const fotos = imovel.fotos || [];
@@ -187,7 +212,27 @@ const ImovelModal = ({
     if (!isMobile || !isDragging || !galleryRef.current) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const diff = x - startX;
-    setCurrentTranslate(prevTranslate + diff);
+    const width = galleryRef.current.clientWidth;
+
+    // Calcular a nova posição
+    let newTranslate = prevTranslate + diff;
+
+    // Aplicar resistência nas bordas
+    const maxTranslate = 0; // Primeira imagem
+    const minTranslate = -(fotos.length - 1) * width; // Última imagem
+
+    // Se tentar arrastar além da primeira imagem (para a direita)
+    if (fotoIndex === 0 && diff > 0) {
+      // Aplicar resistência: quanto mais arrasta, menor o movimento
+      newTranslate = prevTranslate + diff * 0.3;
+    }
+    // Se tentar arrastar além da última imagem (para a esquerda)
+    else if (fotoIndex === fotos.length - 1 && diff < 0) {
+      // Aplicar resistência: quanto mais arrasta, menor o movimento
+      newTranslate = prevTranslate + diff * 0.3;
+    }
+
+    setCurrentTranslate(newTranslate);
   };
 
   const handleEnd = () => {
@@ -336,6 +381,72 @@ const ImovelModal = ({
     return labels[key] || key.replace(/_/g, " ");
   };
 
+  const getCaracteristicaOrder = (key) => {
+    const order = {
+      mobiliado: 1,
+
+      // Informações básicas
+      quarto: 2,
+      suite: 3,
+      banheiro: 4,
+      vaga: 5,
+
+      // Estrutura
+      andar: 6,
+      andar_total: 7,
+      na_planta: 8,
+
+      // Comodidades internas
+      ar_condicionado: 9,
+      closet: 10,
+      escritorio: 11,
+      lareira: 12,
+      lavanderia: 13,
+      estudio: 14,
+
+      // Comodidades do condomínio
+      piscina: 15,
+      churrasqueira: 16,
+      salao_de_festa: 17,
+      academia: 18,
+      playground: 19,
+      quadra: 20,
+      sala_jogos: 21,
+      brinquedoteca: 22,
+
+      // Áreas externas
+      jardim: 23,
+      varanda: 24,
+      pomar: 25,
+      lago: 26,
+
+      // Segurança
+      portaria_24h: 27,
+      interfone: 28,
+      alarme: 29,
+      camera_vigilancia: 30,
+
+      // Acessibilidade e facilidades
+      elevador: 31,
+      acessibilidade_pcd: 32,
+      bicicletario: 33,
+      aceita_animais: 34,
+
+      // Sustentabilidade
+      energia_solar: 35,
+      carregador_carro_eletrico: 36,
+      gerador_energia: 37,
+
+      // Custos
+      condominio: 38,
+      iptu: 39,
+
+      // Outros
+      construtora: 40,
+    };
+    return order[key] || 999;
+  };
+
   const imovelId = imovel.id ?? imovel.imovel_id;
   const mapEmbedUrl = getMapEmbedUrl();
 
@@ -445,13 +556,11 @@ const ImovelModal = ({
                   {isMobile && (
                     <div className="imovel-gallery-dots">
                       {fotos.map((_, index) => (
-                        <button
+                        <div
                           key={index}
                           className={`imovel-gallery-dot ${
                             index === fotoIndex ? "active" : ""
                           }`}
-                          onClick={() => setFotoIndex(index)}
-                          aria-label={`Ir para foto ${index + 1}`}
                         />
                       ))}
                     </div>
@@ -467,7 +576,7 @@ const ImovelModal = ({
 
             {/* Thumbnails - desktop only */}
             {!isMobile && fotos.length > 0 && (
-              <div className="imovel-gallery-thumbnails">
+              <div className="imovel-gallery-thumbnails" ref={thumbnailsRef}>
                 {fotos.map((foto, index) => (
                   <button
                     key={index}
@@ -493,8 +602,10 @@ const ImovelModal = ({
               {/* Title and Price */}
               <div className="imovel-header-card">
                 <div className="imovel-title-row">
-                  <h1 className="imovel-title">{imovel.titulo}</h1>
-                  <span className="imovel-id-badge">#{imovelId}</span>
+                  <h1 className="imovel-title">
+                    {imovel.titulo}
+                    <span className="imovel-id-inline">#{imovelId}</span>
+                  </h1>
                 </div>
                 <div className="imovel-price">
                   R$ {formatPrice(imovel.preco)}
@@ -511,6 +622,14 @@ const ImovelModal = ({
                   )}
                 </div>
               </div>
+
+              {/* Description */}
+              {imovel.descricao && (
+                <div className="imovel-info-card">
+                  <h3 className="imovel-card-title">Descrição</h3>
+                  <p className="imovel-description">{imovel.descricao}</p>
+                </div>
+              )}
 
               {/* Quick Info */}
               {(imovel.area_total || imovel.area_construida) && (
@@ -537,14 +656,6 @@ const ImovelModal = ({
                 </div>
               )}
 
-              {/* Description */}
-              {imovel.descricao && (
-                <div className="imovel-info-card">
-                  <h3 className="imovel-card-title">Descrição</h3>
-                  <p className="imovel-description">{imovel.descricao}</p>
-                </div>
-              )}
-
               {/* Characteristics */}
               {caracteristicas && Object.keys(caracteristicas).length > 0 && (
                 <div className="imovel-info-card">
@@ -552,9 +663,10 @@ const ImovelModal = ({
                   <div className="imovel-features-grid">
                     {Object.entries(caracteristicas)
                       .sort(([keyA], [keyB]) => {
-                        const labelA = formatLabel(keyA) || "";
-                        const labelB = formatLabel(keyB) || "";
-                        return labelA.localeCompare(labelB);
+                        return (
+                          getCaracteristicaOrder(keyA) -
+                          getCaracteristicaOrder(keyB)
+                        );
                       })
                       .map(([key, value]) => {
                         if (key === "id" || key === "imovel_id") return null;
@@ -662,15 +774,15 @@ const ImovelModal = ({
               </button>
               <button
                 className={`imovel-like-btn ${curtido ? "liked" : ""} ${
-                  isHeartAnimating ? "animating" : ""
+                  isHeartAnimating ? "heart-burst" : ""
                 }`}
                 onClick={toggleCurtida}
                 title={curtido ? "Descurtir" : "Curtir"}
               >
                 {curtido ? (
-                  <AiFillHeart size={24} />
+                  <AiFillHeart size={26} color="#191970" />
                 ) : (
-                  <AiOutlineHeart size={24} />
+                  <AiOutlineHeart size={26} color="#191970" />
                 )}
               </button>
             </div>
