@@ -40,14 +40,14 @@
   cursor: pointer;
   display: none;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: 4px; /* Updated gap */
+  padding: 6px; /* Updated padding */
   z-index: 1001;
 }
 
 .hamburger-line {
-  width: 28px;
-  height: 3px;
+  width: 22px; /* Updated width */
+  height: 2.5px; /* Updated height */
   background-color: var(--primary-blue);
   transition: all 0.3s ease;
   border-radius: 2px;
@@ -100,15 +100,19 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.2rem; /* Updated padding */
   border-radius: 50px;
   border: none;
   cursor: pointer;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.9rem; /* Updated font size */
   font-family: "Sanchez", serif;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
+  width: auto;
+  height: auto;
+  min-width: 40px; /* Added min-width */
+  min-height: 40px; /* Added min-height */
 }
 
 .perfil-icon::before {
