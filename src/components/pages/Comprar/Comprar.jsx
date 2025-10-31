@@ -620,8 +620,21 @@ const Comprar = ({ usuario }) => {
                 <div className="property-content">
                   <div className="property-header">
                     <h3 className="property-title">{imovel.titulo}</h3>
-                    <div className="property-price-single">
-                      R$ {formatPrice(imovel.preco)}
+                    <div className="property-price-container">
+                      {imovel.preco_destaque && imovel.preco_destaque > 0 ? (
+                        <>
+                          <div className="property-price-original">
+                            R$ {formatPrice(imovel.preco)}
+                          </div>
+                          <div className="property-price-discount">
+                            R$ {formatPrice(imovel.preco_destaque)}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="property-price-single">
+                          R$ {formatPrice(imovel.preco)}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -630,6 +643,20 @@ const Comprar = ({ usuario }) => {
                       📍 {imovel.cidade || "Cidade não informada"} -{" "}
                       {imovel.bairro || "Bairro não informado"}
                     </div>
+                    {imovel.caracteristicas?.lancamento && (
+                      <div className="property-lancamento">🏗️ Lançamento</div>
+                    )}
+                    {imovel.caracteristicas?.data_entrega && (
+                      <div className="property-entrega">
+                        📅 Entrega:{" "}
+                        {new Date(
+                          imovel.caracteristicas.data_entrega
+                        ).toLocaleDateString("pt-BR", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </div>
+                    )}
                     {renderTypeSpecific(imovel)}
                   </div>
 

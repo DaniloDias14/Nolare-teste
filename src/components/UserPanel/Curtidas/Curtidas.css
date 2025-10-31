@@ -58,6 +58,8 @@
   transition: box-shadow 0.3s ease;
   cursor: pointer;
   box-shadow: 0 10px 28px rgba(25, 25, 112, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
 .property-card:hover {
@@ -118,7 +120,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
@@ -138,6 +140,9 @@
 .property-content {
   padding: 1.5rem;
   font-family: "Sanchez", serif;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .property-header {
@@ -157,10 +162,33 @@
   font-family: "Sanchez", serif;
 }
 
+/* Adicionados estilos para container de preço com desconto */
+.property-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
 .property-price {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--primary-blue);
+  font-family: "Sanchez", serif;
+}
+
+.property-price-original {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #666;
+  text-decoration: line-through;
+  font-family: "Sanchez", serif;
+}
+
+.property-price-discount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #dc3545;
   font-family: "Sanchez", serif;
 }
 
@@ -176,6 +204,17 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Adicionados estilos para lançamento e entrega */
+.property-lancamento {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.property-entrega {
+  color: var(--primary-blue);
+  font-weight: 500;
 }
 
 .property-features {
@@ -200,6 +239,7 @@
   display: flex;
   gap: 0.75rem;
   align-items: stretch;
+  margin-top: auto;
 }
 
 /* Removed transform animation and updated to match Destaque button style, keeping original sizes */
@@ -208,10 +248,10 @@
   background: var(--primary-blue);
   color: var(--white);
   border: none;
-  padding: 0.9rem 1.5rem;
+  padding: 0.8rem 1.3rem;
   border-radius: 50px;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);

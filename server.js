@@ -17,7 +17,9 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // =========================
+
 // ROTAS DE AUTENTICAÇÃO
+
 // =========================
 
 // ROTA: Login de usuário
@@ -131,7 +133,9 @@ app.post("/api/register", async (req, res) => {
 });
 
 // =========================
+
 // ROTAS DE SESSÕES (Dashboard)
+
 // =========================
 
 // ROTA: Conta usuários ativos
@@ -190,7 +194,9 @@ app.get("/api/sessoes/pico/:data", async (req, res) => {
 });
 
 // =========================
+
 // ROTAS DE CURTIDAS
+
 // =========================
 
 // ROTA: Busca curtidas de um usuário
@@ -261,7 +267,9 @@ app.post("/api/curtidas/:usuario_id/:imovel_id", async (req, res) => {
 });
 
 // =========================
+
 // ROTAS DE ESTATÍSTICAS (Dashboard)
+
 // =========================
 
 // ROTA: Estatísticas de usuários
@@ -383,8 +391,11 @@ app.get("/api/estatisticas/imoveis", async (req, res) => {
 });
 
 // =========================
+
 // CONFIGURAÇÃO MULTER (Upload de arquivos)
+
 // =========================
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = "public/fotos_imoveis";
@@ -417,7 +428,9 @@ const upload = multer({
 });
 
 // =========================
+
 // ROTAS DE IMÓVEIS
+
 // =========================
 
 // ROTA: Busca todos os imóveis visíveis
@@ -430,6 +443,7 @@ app.get("/api/imoveis", async (req, res) => {
         i.titulo,
         i.descricao,
         i.preco,
+        i.preco_destaque,
         i.destaque,
         i.status,
         i.finalidade,
@@ -486,7 +500,9 @@ app.get("/api/imoveis", async (req, res) => {
           'carregador_carro_eletrico', ic.carregador_carro_eletrico,
           'gerador_energia', ic.gerador_energia,
           'estudio', ic.estudio,
-          'construtora', ic.construtora
+          'construtora', ic.construtora,
+          'lancamento', ic.lancamento,
+          'data_entrega', ic.data_entrega
         ) AS caracteristicas,
 
         COALESCE(json_agg(f) FILTER (WHERE f.id IS NOT NULL), '[]') AS fotos
@@ -516,6 +532,7 @@ app.get("/api/imoveis/:id", async (req, res) => {
         i.titulo,
         i.descricao,
         i.preco,
+        i.preco_destaque,
         i.destaque,
         i.status,
         i.finalidade,
@@ -572,7 +589,9 @@ app.get("/api/imoveis/:id", async (req, res) => {
           'carregador_carro_eletrico', ic.carregador_carro_eletrico,
           'gerador_energia', ic.gerador_energia,
           'estudio', ic.estudio,
-          'construtora', ic.construtora
+          'construtora', ic.construtora,
+          'lancamento', ic.lancamento,
+          'data_entrega', ic.data_entrega
         ) AS caracteristicas,
 
         COALESCE(json_agg(f) FILTER (WHERE f.id IS NOT NULL), '[]') AS fotos
@@ -601,6 +620,7 @@ app.post("/api/imoveis", async (req, res) => {
     titulo,
     descricao,
     preco,
+    preco_destaque,
     destaque,
     status,
     finalidade,
@@ -656,13 +676,14 @@ app.post("/api/imoveis", async (req, res) => {
     // DB QUERY: Insere novo imóvel
     const imovelResult = await pool.query(
       `INSERT INTO imoveis
-        (titulo, descricao, preco, destaque, status, finalidade, cep, area_total, area_construida, visivel, criado_por, estado, cidade, bairro, tipo, coordenadas)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        (titulo, descricao, preco, preco_destaque, destaque, status, finalidade, cep, area_total, area_construida, visivel, criado_por, estado, cidade, bairro, tipo, coordenadas)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        RETURNING id`,
       [
         titulo,
         descricao || "",
         preco,
+        preco_destaque || null,
         destaque || false,
         status || null,
         finalidade || null,
@@ -731,6 +752,8 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "gerador_energia",
     "estudio",
     "construtora",
+    "lancamento",
+    "data_entrega",
   ];
 
   // VALIDAÇÃO: Campo obrigatório
@@ -765,6 +788,7 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "interfone",
     "acessibilidade_pcd",
     "mobiliado",
+    "ar_condicionado",
     "energia_solar",
     "quadra",
     "lavanderia",
@@ -785,6 +809,7 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
     "carregador_carro_eletrico",
     "gerador_energia",
     "estudio",
+    "lancamento",
   ];
 
   const values = campos.map((c) => {
@@ -874,7 +899,9 @@ app.post(
 );
 
 // =========================
+
 // MIDDLEWARE DE TRATAMENTO DE ERROS DO MULTER
+
 // =========================
 
 // Middleware de tratamento de erros do multer

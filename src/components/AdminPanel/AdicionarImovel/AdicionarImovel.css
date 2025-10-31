@@ -26,28 +26,30 @@
   position: relative;
 }
 
-/* Removed background and border-radius from close-popup-btn */
+/* Atualizado close-popup-btn para seguir o design do ImovelModal */
 .close-popup-btn {
   position: absolute;
   top: 15px;
   right: 15px;
   font-size: 28px;
   font-weight: bold;
-  color: #333;
+  color: #191970;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
   z-index: 100;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
 }
 
 .close-popup-btn:hover {
-  color: #e74c3c;
+  transform: scale(1.15);
+  background: rgba(128, 128, 128, 0.15);
 }
 
 /* ================================
@@ -272,26 +274,29 @@ input[type="number"] {
   color: #999;
 }
 
+/* Atualizado remove-foto-btn para seguir o design do ImovelModal */
 .remove-foto-btn {
   position: absolute;
   top: 5px;
   right: 5px;
   width: 28px;
   height: 28px;
-  background-color: rgba(231, 76, 60, 0.9);
-  color: white;
+  background: transparent;
+  color: #191970;
   border: none;
   border-radius: 50%;
   font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
 }
 
 .remove-foto-btn:hover {
-  background-color: #c0392b;
+  transform: scale(1.15);
+  background: rgba(128, 128, 128, 0.15);
 }
 
 /* Added styles for Google Maps photo section */
@@ -317,13 +322,13 @@ input[type="number"] {
   justify-content: center;
 }
 
-/* Updated button animation - only color change + subtle shadow */
+/* Atualizado submit-btn para ter bordas arredondadas como o botão de contato do ImovelModal */
 .submit-btn {
   padding: 14px 40px;
   background-color: #191970;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;

@@ -37,6 +37,7 @@ const booleanFields = [
   "salao_de_festa",
   "suite",
   "varanda",
+  "lancamento",
 ];
 
 const estados = ["Santa Catarina"];
@@ -75,6 +76,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     titulo: "",
     descricao: "",
     preco: "",
+    preco_destaque: "",
     tipo: "",
     status: "",
     finalidade: "",
@@ -88,7 +90,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     area_construida: "",
     fotos: Array(10).fill(null),
     coordenadas: "",
-
     condominio: "",
     iptu: "",
     quarto: "",
@@ -129,6 +130,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     gerador_energia: false,
     estudio: false,
     na_planta: false,
+    lancamento: false,
+    data_entrega: "",
   });
 
   const formatCurrency = (value) => {
@@ -168,7 +171,12 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     if (name === "cep") {
       newValue = formatCEP(value);
     }
-    if (name === "preco" || name === "condominio" || name === "iptu") {
+    if (
+      name === "preco" ||
+      name === "condominio" ||
+      name === "iptu" ||
+      name === "preco_destaque"
+    ) {
       newValue = formatCurrency(value);
     }
     if (
@@ -226,7 +234,15 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     });
   };
 
-  const handleDragStart = (index) => {
+  const handleDragStart = (e, index) => {
+    // Só permite drag se houver uma foto
+    if (!formData.fotos[index]) {
+      e.preventDefault();
+      return;
+    }
+    // Marca que é um drag interno
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
     setDraggedIndex(index);
   };
 
@@ -234,16 +250,50 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     e.preventDefault();
   };
 
-  const handleDrop = (index) => {
-    if (draggedIndex === null || draggedIndex === index) return;
-    setFormData((prev) => {
-      const newFotos = [...prev.fotos];
-      const temp = newFotos[draggedIndex];
-      newFotos[draggedIndex] = newFotos[index];
-      newFotos[index] = temp;
-      return { ...prev, fotos: newFotos };
-    });
-    setDraggedIndex(null);
+  const handleDrop = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Verifica se é um drag interno (movendo fotos)
+    const draggedIndexStr = e.dataTransfer.getData("text/plain");
+
+    // Se tem dados de texto, é um drag interno
+    if (draggedIndexStr !== "" && draggedIndex !== null) {
+      const draggedIdx = Number.parseInt(draggedIndexStr, 10);
+
+      if (draggedIdx === index) {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+        return;
+      }
+
+      // Troca as fotos de posição
+      setFormData((prev) => {
+        const newFotos = [...prev.fotos];
+        const temp = newFotos[draggedIdx];
+        newFotos[draggedIdx] = newFotos[index];
+        newFotos[index] = temp;
+        return { ...prev, fotos: newFotos };
+      });
+
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    } else {
+      // Se não tem dados de texto, é um arquivo externo
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith("image/")) {
+          handleFotoChange(index, file);
+        } else {
+          setErrorMsg(
+            "Por favor, arraste apenas arquivos de imagem (JPG, PNG, etc.)"
+          );
+          setTimeout(() => setErrorMsg(""), 3000);
+        }
+      }
+      setDragOverIndex(null);
+    }
   };
 
   const handleFileDragEnter = (e, index) => {
@@ -265,26 +315,6 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
     e.stopPropagation();
   };
 
-  const handleFileDrop = (e, index) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverIndex(null);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      // Valida se é uma imagem
-      if (file.type.startsWith("image/")) {
-        handleFotoChange(index, file);
-      } else {
-        setErrorMsg(
-          "Por favor, arraste apenas arquivos de imagem (JPG, PNG, etc.)"
-        );
-        setTimeout(() => setErrorMsg(""), 3000);
-      }
-    }
-  };
-
   const handleClosePopup = () => {
     setShowPopup(false);
     setActiveTab(1);
@@ -294,6 +324,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       titulo: "",
       descricao: "",
       preco: "",
+      preco_destaque: "",
       tipo: "",
       status: "",
       finalidade: "",
@@ -347,6 +378,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       gerador_energia: false,
       estudio: false,
       na_planta: false,
+      lancamento: false,
+      data_entrega: "",
     });
   };
 
@@ -400,13 +433,37 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
   const handleConfirmSubmit = async () => {
     setShowConfirmPopup(false);
     try {
+      const precoDestaqueValue = parseCurrency(formData.preco_destaque);
+
+      const capitalizeFirst = (str) => {
+        if (!str) return null;
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      };
+
+      const formatStatus = (status) => {
+        if (!status) return null;
+        if (status.toLowerCase() === "disponivel") return "Disponível";
+        if (status.toLowerCase() === "vendido") return "Vendido";
+        return capitalizeFirst(status);
+      };
+
+      const formatDataEntrega = (dataEntrega) => {
+        if (!dataEntrega || dataEntrega.trim() === "") return null;
+        // Se já está no formato YYYY-MM, adiciona -01
+        if (/^\d{4}-\d{2}$/.test(dataEntrega)) {
+          return `${dataEntrega}-01`;
+        }
+        return dataEntrega;
+      };
+
       const imovelPayload = {
         titulo: formData.titulo || null,
         descricao: formData.descricao || null,
         preco: parseCurrency(formData.preco),
+        preco_destaque: precoDestaqueValue === 0 ? null : precoDestaqueValue,
         tipo: formData.tipo || null,
-        status: formData.status || null,
-        finalidade: formData.finalidade || null,
+        status: formatStatus(formData.status),
+        finalidade: capitalizeFirst(formData.finalidade),
         destaque: !!formData.destaque,
         visivel: formData.visivel ?? true,
         cep: formData.cep || null,
@@ -441,6 +498,8 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         andar_total: parseNumberOrNull(formData.andar_total),
         ar_condicionado: parseNumberOrNull(formData.ar_condicionado),
         construtora: formData.construtora?.trim() || null,
+        lancamento: !!formData.lancamento,
+        data_entrega: formatDataEntrega(formData.data_entrega),
         ...booleanFields.reduce((acc, f) => {
           acc[f] = !!formData[f];
           return acc;
@@ -531,6 +590,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
       interfone: "Interfone",
       jardim: "Jardim",
       lago: "Lago",
+      lancamento: "Lançamento",
       lareira: "Lareira",
       lavanderia: "Lavanderia",
       mobiliado: "Mobiliado",
@@ -653,6 +713,21 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                   {fieldErrors.preco && (
                     <p className="field-error-msg">{fieldErrors.preco}</p>
                   )}
+
+                  <div className="form-row">
+                    <input
+                      type="text"
+                      name="preco_destaque"
+                      placeholder={
+                        formData.preco_destaque
+                          ? ""
+                          : "Preço Destaque (opcional)"
+                      }
+                      value={formData.preco_destaque}
+                      onChange={handleInputChange}
+                      className="full-width"
+                    />
+                  </div>
 
                   <h4>Classificação</h4>
                   <div className="form-row">
@@ -981,6 +1056,17 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                       ))}
                     </select>
                   </div>
+                  <h4>Entrega</h4>
+                  <div className="form-row">
+                    <input
+                      type="month"
+                      name="data_entrega"
+                      placeholder="Data de Entrega"
+                      value={formData.data_entrega}
+                      onChange={handleInputChange}
+                      className="full-width"
+                    />
+                  </div>
                   <h4>Características</h4>
                   <div className="caracteristicas-grid">
                     {booleanFields.map((f) => (
@@ -1008,12 +1094,11 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                           dragOverIndex === idx ? "drag-over" : ""
                         }`}
                         draggable={!!foto}
-                        onDragStart={() => handleDragStart(idx)}
+                        onDragStart={(e) => handleDragStart(e, idx)}
                         onDragOver={handleDragOver}
-                        onDrop={() => handleDrop(idx)}
+                        onDrop={(e) => handleDrop(e, idx)}
                         onDragEnter={(e) => handleFileDragEnter(e, idx)}
                         onDragLeave={(e) => handleFileDragLeave(e, idx)}
-                        onDropCapture={(e) => handleFileDrop(e, idx)}
                       >
                         {foto ? (
                           <>

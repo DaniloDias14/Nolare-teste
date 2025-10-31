@@ -242,8 +242,21 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
               <div className="destaque-content">
                 <div className="destaque-header">
                   <h3 className="destaque-title-card">{imovel.titulo}</h3>
-                  <div className="destaque-price">
-                    R$ {formatPrice(imovel.preco)}
+                  <div className="destaque-price-container">
+                    {imovel.preco_destaque && imovel.preco_destaque > 0 ? (
+                      <>
+                        <div className="destaque-price-original">
+                          R$ {formatPrice(imovel.preco)}
+                        </div>
+                        <div className="destaque-price-discount">
+                          R$ {formatPrice(imovel.preco_destaque)}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="destaque-price">
+                        R$ {formatPrice(imovel.preco)}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -252,6 +265,20 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                     📍 {imovel.cidade || "Cidade não informada"} -{" "}
                     {imovel.bairro || "Bairro não informada"}
                   </div>
+                  {imovel.caracteristicas?.lancamento && (
+                    <div className="destaque-lancamento">🏗️ Lançamento</div>
+                  )}
+                  {imovel.caracteristicas?.data_entrega && (
+                    <div className="destaque-entrega">
+                      📅 Entrega:{" "}
+                      {new Date(
+                        imovel.caracteristicas.data_entrega
+                      ).toLocaleDateString("pt-BR", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="destaque-features">

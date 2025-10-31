@@ -377,6 +377,8 @@ const ImovelModal = ({
       sala_jogos: "Sala de Jogos",
       salao_de_festa: "Salão de Festa",
       varanda: "Varanda",
+      lancamento: "Lançamento",
+      data_entrega: "Data de Entrega",
     };
     return labels[key] || key.replace(/_/g, " ");
   };
@@ -395,54 +397,56 @@ const ImovelModal = ({
       andar: 6,
       andar_total: 7,
       na_planta: 8,
+      lancamento: 9,
+      data_entrega: 10,
 
       // Comodidades internas
-      ar_condicionado: 9,
-      closet: 10,
-      escritorio: 11,
-      lareira: 12,
-      lavanderia: 13,
-      estudio: 14,
+      ar_condicionado: 11,
+      closet: 12,
+      escritorio: 13,
+      lareira: 14,
+      lavanderia: 15,
+      estudio: 16,
 
       // Comodidades do condomínio
-      piscina: 15,
-      churrasqueira: 16,
-      salao_de_festa: 17,
-      academia: 18,
-      playground: 19,
-      quadra: 20,
-      sala_jogos: 21,
-      brinquedoteca: 22,
+      piscina: 17,
+      churrasqueira: 18,
+      salao_de_festa: 19,
+      academia: 20,
+      playground: 21,
+      quadra: 22,
+      sala_jogos: 23,
+      brinquedoteca: 24,
 
       // Áreas externas
-      jardim: 23,
-      varanda: 24,
-      pomar: 25,
-      lago: 26,
+      jardim: 25,
+      varanda: 26,
+      pomar: 27,
+      lago: 28,
 
       // Segurança
-      portaria_24h: 27,
-      interfone: 28,
-      alarme: 29,
-      camera_vigilancia: 30,
+      portaria_24h: 29,
+      interfone: 30,
+      alarme: 31,
+      camera_vigilancia: 32,
 
       // Acessibilidade e facilidades
-      elevador: 31,
-      acessibilidade_pcd: 32,
-      bicicletario: 33,
-      aceita_animais: 34,
+      elevador: 33,
+      acessibilidade_pcd: 34,
+      bicicletario: 35,
+      aceita_animais: 36,
 
       // Sustentabilidade
-      energia_solar: 35,
-      carregador_carro_eletrico: 36,
-      gerador_energia: 37,
+      energia_solar: 37,
+      carregador_carro_eletrico: 38,
+      gerador_energia: 39,
 
       // Custos
-      condominio: 38,
-      iptu: 39,
+      condominio: 40,
+      iptu: 41,
 
       // Outros
-      construtora: 40,
+      construtora: 42,
     };
     return order[key] || 999;
   };
@@ -607,8 +611,21 @@ const ImovelModal = ({
                     <span className="imovel-id-inline">#{imovelId}</span>
                   </h1>
                 </div>
-                <div className="imovel-price">
-                  R$ {formatPrice(imovel.preco)}
+                <div className="imovel-price-container">
+                  {imovel.preco_destaque && imovel.preco_destaque > 0 ? (
+                    <>
+                      <div className="imovel-price-original">
+                        R$ {formatPrice(imovel.preco)}
+                      </div>
+                      <div className="imovel-price-discount">
+                        R$ {formatPrice(imovel.preco_destaque)}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="imovel-price">
+                      R$ {formatPrice(imovel.preco)}
+                    </div>
+                  )}
                 </div>
                 <div className="imovel-meta-tags">
                   {imovel.tipo && (
@@ -620,7 +637,24 @@ const ImovelModal = ({
                   {imovel.status && (
                     <span className="imovel-meta-tag">{imovel.status}</span>
                   )}
+                  {caracteristicas?.lancamento && (
+                    <span className="imovel-meta-tag imovel-meta-lancamento">
+                      🏗️ Lançamento
+                    </span>
+                  )}
                 </div>
+                {caracteristicas?.data_entrega && (
+                  <div className="imovel-entrega-info">
+                    📅 Previsão de entrega:{" "}
+                    {new Date(caracteristicas.data_entrega).toLocaleDateString(
+                      "pt-BR",
+                      {
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Description */}
@@ -669,7 +703,13 @@ const ImovelModal = ({
                         );
                       })
                       .map(([key, value]) => {
-                        if (key === "id" || key === "imovel_id") return null;
+                        if (
+                          key === "id" ||
+                          key === "imovel_id" ||
+                          key === "lancamento" ||
+                          key === "data_entrega"
+                        )
+                          return null;
                         if (
                           (key === "condominio" || key === "iptu") &&
                           (!value || value === 0)

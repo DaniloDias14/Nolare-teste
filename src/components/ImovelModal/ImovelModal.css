@@ -359,11 +359,33 @@
   border-radius: 20px;
 }
 
+/* Adicionados estilos para container de preço com desconto */
+.imovel-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
 .imovel-price {
   font-size: 2rem;
   font-weight: 700;
   color: #191970;
   margin-bottom: 12px;
+}
+
+.imovel-price-original {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
+.imovel-price-discount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #dc3545;
 }
 
 /* ID ao lado do título */
@@ -381,6 +403,30 @@
   font-size: 0.8125rem;
   font-weight: 600;
   border-radius: 20px;
+}
+
+/* Mudando cor da tag de lançamento de verde para azul */
+.imovel-meta-lancamento {
+  background: #e7f3ff;
+  color: #191970;
+}
+
+/* Adicionado estilo especial para tag de lançamento */
+.imovel-meta-lancamento {
+  background: #e7f3ff;
+  color: #191970;
+}
+
+/* Adicionado estilo para informação de entrega */
+.imovel-entrega-info {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #e7f3ff;
+  color: #191970;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 12px;
+  display: inline-block;
 }
 
 /* Info Cards */
@@ -675,6 +721,15 @@
   .imovel-id-inline {
     font-size: 0.75rem;
   }
+
+  /* Ajustes de tamanho para preços no mobile */
+  .imovel-price-original {
+    font-size: 1rem;
+  }
+
+  .imovel-price-discount {
+    font-size: 1.75rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -706,6 +761,15 @@
   .imovel-like-btn {
     width: 46px;
     height: 46px;
+  }
+
+  /* Ajustes adicionais para telas pequenas */
+  .imovel-price-original {
+    font-size: 0.9375rem;
+  }
+
+  .imovel-price-discount {
+    font-size: 1.5rem;
   }
 }
 

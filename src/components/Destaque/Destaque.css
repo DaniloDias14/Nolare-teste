@@ -159,10 +159,33 @@
   font-family: "Sanchez", serif;
 }
 
+/* Adicionados estilos para preço destaque */
+.destaque-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
 .destaque-price {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--primary-blue);
+  font-family: "Sanchez", serif;
+}
+
+.destaque-price-original {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+  text-decoration: line-through;
+  font-family: "Sanchez", serif;
+}
+
+.destaque-price-discount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #dc3545;
   font-family: "Sanchez", serif;
 }
 
@@ -178,6 +201,17 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* Adicionados estilos para lançamento e entrega */
+.destaque-lancamento {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.destaque-entrega {
+  color: var(--primary-blue);
+  font-weight: 500;
 }
 
 .destaque-features {
