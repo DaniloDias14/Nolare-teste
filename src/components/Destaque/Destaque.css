@@ -205,13 +205,13 @@
 
 /* Adicionados estilos para lançamento e entrega */
 .destaque-lancamento {
-  color: #28a745;
-  font-weight: 600;
+  color: #191970;
+  font-weight: 700;
 }
 
 .destaque-entrega {
   color: var(--primary-blue);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .destaque-features {

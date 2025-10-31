@@ -21,6 +21,9 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     tipo: "",
     finalidade: "",
     localizacao: "",
+    oferta: false,
+    lancamento: false,
+    data_entrega: "",
     precoMin: "",
     precoMax: "",
     areaTotalMin: "",
@@ -212,6 +215,9 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
       tipo: "",
       finalidade: "",
       localizacao: "",
+      oferta: false,
+      lancamento: false,
+      data_entrega: "",
       precoMin: "",
       precoMax: "",
       areaTotalMin: "",
@@ -603,6 +609,24 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
             <div className="filtro-amenidades">
               <h4>Características</h4>
               <div className="filtro-checkbox-grid">
+                <label className="filtro-checkbox">
+                  <input
+                    type="checkbox"
+                    name="oferta"
+                    checked={filtros.oferta}
+                    onChange={handleInputChange}
+                  />
+                  <span>Oferta</span>
+                </label>
+                <label className="filtro-checkbox">
+                  <input
+                    type="checkbox"
+                    name="lancamento"
+                    checked={filtros.lancamento}
+                    onChange={handleInputChange}
+                  />
+                  <span>Lançamento</span>
+                </label>
                 {caracteristicasOrdenadas.map((caracteristica) => (
                   <label key={caracteristica.key} className="filtro-checkbox">
                     <input
@@ -615,6 +639,18 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div className="filtro-group">
+              <label>Previsão de Entrega</label>
+              <input
+                type="month"
+                name="data_entrega"
+                placeholder="Mês de entrega"
+                value={filtros.data_entrega}
+                onChange={handleInputChange}
+                className="filtro-input-compact"
+              />
             </div>
 
             <button className="filtro-limpar-btn" onClick={handleLimpar}>

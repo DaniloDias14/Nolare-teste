@@ -639,7 +639,7 @@ const ImovelModal = ({
                   )}
                   {caracteristicas?.lancamento && (
                     <span className="imovel-meta-tag imovel-meta-lancamento">
-                      🏗️ Lançamento
+                      Lançamento
                     </span>
                   )}
                 </div>

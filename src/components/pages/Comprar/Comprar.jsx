@@ -273,6 +273,28 @@ const Comprar = ({ usuario }) => {
         match = false;
       }
 
+      if (
+        filtros.oferta &&
+        (!imovel.preco_destaque || imovel.preco_destaque === 0)
+      ) {
+        match = false;
+      }
+
+      if (filtros.lancamento && !imovel.caracteristicas?.lancamento) {
+        match = false;
+      }
+
+      if (filtros.data_entrega) {
+        const dataEntregaFiltro = new Date(filtros.data_entrega + "-01");
+        const dataEntregaImovel = imovel.caracteristicas?.data_entrega
+          ? new Date(imovel.caracteristicas.data_entrega)
+          : null;
+
+        if (!dataEntregaImovel || dataEntregaImovel > dataEntregaFiltro) {
+          match = false;
+        }
+      }
+
       const caracteristicasBooleanas = [
         "acessibilidade_pcd",
         "aceita_animais",

@@ -16,7 +16,7 @@
 
 .popup {
   background-color: #fff;
-  padding: 30px;
+  padding: 50px 30px 30px 30px; /* aumentar padding-top de 30px para 50px para dar mais espaço antes do campo de fotos */
   border-radius: 10px;
   width: 90%;
   max-width: 900px;

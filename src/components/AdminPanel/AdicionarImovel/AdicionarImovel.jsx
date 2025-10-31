@@ -1055,16 +1055,12 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                         </option>
                       ))}
                     </select>
-                  </div>
-                  <h4>Entrega</h4>
-                  <div className="form-row">
                     <input
                       type="month"
                       name="data_entrega"
-                      placeholder="Data de Entrega"
+                      placeholder="Previsão de Entrega"
                       value={formData.data_entrega}
                       onChange={handleInputChange}
-                      className="full-width"
                     />
                   </div>
                   <h4>Características</h4>
