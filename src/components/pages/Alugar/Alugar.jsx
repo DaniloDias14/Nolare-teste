@@ -1,19 +1,19 @@
 import "./Alugar.css";
+import { IoHomeOutline } from "react-icons/io5";
 
 const Alugar = () => {
   return (
     <main className="alugar-container">
       <div className="alugar-content">
         <div className="alugar-illustration">
-          <div className="house-icon">
-            <div className="house-roof"></div>
-            <div className="house-body">
-              <div className="house-door"></div>
-              <div className="house-window"></div>
-              <div className="house-window"></div>
-            </div>
+          <div className="floating-home">
+            <IoHomeOutline
+              size={200}
+              color="#191970"
+              style={{ transform: "scaleX(-1)" }}
+            />
           </div>
-          <div className="coming-soon-badge">Em breve</div>
+          <div className="coming-soon-badge">Em Breve</div>
         </div>
 
         <h1 className="alugar-title">Aluguel em Desenvolvimento</h1>

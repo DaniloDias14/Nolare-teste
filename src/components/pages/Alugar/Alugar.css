@@ -17,184 +17,57 @@
   position: relative;
   margin-bottom: 40px;
   display: inline-block;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.house-icon {
-  width: 200px;
-  height: 200px;
-  position: relative;
-  animation: float 3s ease-in-out infinite;
-}
-
+/* Animação flutuante para o ícone da casa */
 @keyframes float {
   0%,
   100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-20px);
+    transform: translateY(-30px);
   }
 }
 
-.house-roof {
-  width: 0;
-  height: 0;
-  border-left: 100px solid transparent;
-  border-right: 100px solid transparent;
-  border-bottom: 80px solid transparent;
-  border-bottom-color: #191970;
-  position: absolute;
-  top: 0;
-  left: 0;
-  /* Torna o telhado não preenchido */
-  border-bottom-width: 5px;
-  border-bottom-style: solid;
+/* Animação de expansão e diminuição para o texto "Em Breve" */
+@keyframes pulse-scale {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
 }
 
-.house-roof::before {
-  content: "";
-  position: absolute;
-  bottom: -80px;
-  left: -100px;
-  width: 0;
-  height: 0;
-  border-left: 100px solid transparent;
-  border-right: 100px solid transparent;
-  border-bottom: 75px solid #f0efe2;
-}
-
-.house-body {
-  width: 160px;
-  height: 120px;
-  background-color: transparent;
-  border: 5px solid #191970;
-  position: absolute;
-  bottom: 0;
-  left: 20px;
-  border-radius: 0 0 10px 10px;
+/* Estilo do ícone da casa com animação flutuante */
+.floating-home {
+  animation: float 3s ease-in-out infinite;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
   align-items: center;
-  padding: 10px;
+  justify-content: center;
 }
 
-.house-door {
-  width: 40px;
-  height: 60px;
-  background-color: transparent;
-  border: 4px solid #191970;
-  border-radius: 5px 5px 0 0;
-  position: absolute;
-  bottom: 0;
-  left: 60px;
-}
-
-.house-window {
-  width: 30px;
-  height: 30px;
-  background-color: transparent;
-  border: 3px solid #191970;
-  border-radius: 5px;
-  margin: 5px;
-}
-
+/* Estilo do badge "Em Breve" com posicionamento e animações */
 .coming-soon-badge {
   position: absolute;
-  /* Reposicionado mais para cima e direita */
-  top: -25px;
-  right: -35px;
+  top: 20px;
+  right: -40px;
   background-color: #191970;
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
-  font-family: "Sanchez", serif;
+  font-weight: bold;
   font-size: 14px;
-  font-weight: bold;
-  box-shadow: 0 4px 15px rgba(25, 25, 112, 0.3);
-  animation: pulse 2s ease-in-out infinite;
+  white-space: nowrap;
+  animation: float 3s ease-in-out infinite, pulse-scale 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.alugar-title {
-  font-family: "Sanchez", serif;
-  color: #191970;
-  font-size: 32px;
-  margin-bottom: 20px;
-  font-weight: bold;
-}
-
-.alugar-text {
-  font-family: "Sanchez", serif;
-  color: #191970;
-  font-size: 18px;
-  line-height: 1.6;
-  margin-bottom: 15px;
-}
-
-.alugar-subtext {
-  font-family: "Sanchez", serif;
-  color: #191970;
-  font-size: 16px;
-  opacity: 0.8;
-}
-
-@media (max-width: 768px) {
-  .house-icon {
-    width: 150px;
-    height: 150px;
-  }
-
-  .house-roof {
-    border-left: 75px solid transparent;
-    border-right: 75px solid transparent;
-    border-bottom: 60px solid transparent;
-  }
-
-  .house-roof::before {
-    bottom: -60px;
-    left: -75px;
-    border-left: 75px solid transparent;
-    border-right: 75px solid transparent;
-    border-bottom: 55px solid #f0efe2;
-  }
-
-  .house-body {
-    width: 120px;
-    height: 90px;
-    left: 15px;
-  }
-
-  .house-door {
-    width: 30px;
-    height: 45px;
-    left: 45px;
-  }
-
-  .house-window {
-    width: 25px;
-    height: 25px;
-  }
-
-  .coming-soon-badge {
-    top: -20px;
-    right: -25px;
-  }
-
-  .alugar-title {
-    font-size: 24px;
-  }
-
-  .alugar-text {
-    font-size: 16px;
-  }
-}
+/* remover estilos da casa em CSS já que agora usa ícone IoHomeOutline */

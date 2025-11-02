@@ -3,6 +3,7 @@
 // LoginModal.jsx
 import { useState } from "react";
 import axios from "axios";
+import { IoClose } from "react-icons/io5";
 import "./LoginModal.css";
 
 const LoginModal = ({ onClose, setAdmLogged, setUser }) => {
@@ -85,7 +86,7 @@ const LoginModal = ({ onClose, setAdmLogged, setUser }) => {
     <div className="modal-overlay">
       <div className="modal">
         <button className="close-btn" onClick={onClose}>
-          ×
+          <IoClose size={28} color="#ffffff" />
         </button>
 
         <div className="tabs">

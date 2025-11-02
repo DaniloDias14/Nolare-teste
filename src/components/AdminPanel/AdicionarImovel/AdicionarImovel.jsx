@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { IoClose } from "react-icons/io5";
 import "./AdicionarImovel.css";
 
 const booleanFields = [
@@ -629,7 +630,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
         <div className="popup-overlay">
           <div className="popup">
             <button className="close-popup-btn" onClick={handleClosePopup}>
-              ×
+              <IoClose size={28} color="#191970" />
             </button>
             {errorMsg && <p className="error-msg">{errorMsg}</p>}
             <div className="tabs-container">
@@ -1109,7 +1110,7 @@ const AdicionarImovel = ({ showPopup, setShowPopup }) => {
                               className="remove-foto-btn"
                               onClick={() => handleRemoveFoto(idx)}
                             >
-                              ×
+                              <IoClose size={20} color="#191970" />
                             </button>
                           </>
                         ) : (
