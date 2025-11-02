@@ -125,6 +125,7 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     { key: "lavanderia", label: "Lavanderia" },
     { key: "mobiliado", label: "Mobiliado" },
     { key: "na_planta", label: "Na Planta" },
+    { key: "oferta", label: "Oferta" },
     { key: "piscina", label: "Piscina" },
     { key: "playground", label: "Playground" },
     { key: "pomar", label: "Pomar" },
@@ -325,7 +326,7 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
         {buscaAvancada && (
           <div className="filtro-avancada">
             <div className="filtro-avancada-grid">
-              <div className="filtro-group filtro-group-narrow">
+              <div className="filtro-group">
                 <label>Identificador (ID)</label>
                 <input
                   type="text"
@@ -338,21 +339,34 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
                 />
               </div>
 
-              <div className="filtro-group filtro-group-narrow">
-                <label>Construtora</label>
-                <select
-                  name="construtora"
-                  value={filtros.construtora}
-                  onChange={handleInputChange}
-                  className="filtro-select-compact"
-                >
-                  <option value="">Todas</option>
-                  {construtoras.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+              <div className="filtro-group-half-wrapper">
+                <div className="filtro-group filtro-group-narrow">
+                  <label>Construtora</label>
+                  <select
+                    name="construtora"
+                    value={filtros.construtora}
+                    onChange={handleInputChange}
+                    className="filtro-select-compact"
+                  >
+                    <option value="">Todas</option>
+                    {construtoras.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filtro-group filtro-group-narrow">
+                  <label>Previsão de Entrega</label>
+                  <input
+                    type="date"
+                    name="data_entrega"
+                    value={filtros.data_entrega}
+                    onChange={handleInputChange}
+                    className="filtro-input-compact"
+                  />
+                </div>
               </div>
 
               <div className="filtro-group">
@@ -609,24 +623,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
             <div className="filtro-amenidades">
               <h4>Características</h4>
               <div className="filtro-checkbox-grid">
-                <label className="filtro-checkbox">
-                  <input
-                    type="checkbox"
-                    name="oferta"
-                    checked={filtros.oferta}
-                    onChange={handleInputChange}
-                  />
-                  <span>Oferta</span>
-                </label>
-                <label className="filtro-checkbox">
-                  <input
-                    type="checkbox"
-                    name="lancamento"
-                    checked={filtros.lancamento}
-                    onChange={handleInputChange}
-                  />
-                  <span>Lançamento</span>
-                </label>
                 {caracteristicasOrdenadas.map((caracteristica) => (
                   <label key={caracteristica.key} className="filtro-checkbox">
                     <input
@@ -639,18 +635,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
                   </label>
                 ))}
               </div>
-            </div>
-
-            <div className="filtro-group">
-              <label>Previsão de Entrega</label>
-              <input
-                type="month"
-                name="data_entrega"
-                placeholder="Mês de entrega"
-                value={filtros.data_entrega}
-                onChange={handleInputChange}
-                className="filtro-input-compact"
-              />
             </div>
 
             <button className="filtro-limpar-btn" onClick={handleLimpar}>

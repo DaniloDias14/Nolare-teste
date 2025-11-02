@@ -189,8 +189,9 @@
 
 /* Adicionados estilos para lançamento e entrega */
 .property-lancamento {
-  color: #28a745;
-  font-weight: 600;
+  color: var(--primary-blue);
+  font-weight: 700;
+  order: -1;
 }
 
 .property-entrega {

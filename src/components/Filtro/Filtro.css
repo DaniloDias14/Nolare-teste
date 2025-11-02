@@ -356,9 +356,27 @@
   border-color: #2a2a8f;
 }
 
+/* Melhorado estilo para input tipo date */
+.filtro-input-compact[type="date"] {
+  cursor: pointer;
+}
+
+.filtro-input-compact[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  color: var(--primary-blue);
+}
+
 /* Increased max-width for ID and Construtora fields */
 .filtro-group-narrow {
-  max-width: 100%;
+  max-width: 50%;
+}
+
+/* Adicionar novo wrapper para Construtora e Previsão de Entrega lado a lado */
+.filtro-group-half-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 1024px) {
@@ -462,7 +480,7 @@
     font-size: 0.9rem;
   }
 
-  /* Removida regra específica para ID e Construtora no mobile */
+  /* No mobile, Construtora e Previsão de Entrega voltam ao tamanho normal */
   .filtro-group-narrow {
     max-width: 100%;
   }

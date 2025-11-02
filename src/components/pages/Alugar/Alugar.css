@@ -55,19 +55,6 @@
   justify-content: center;
 }
 
-/* Estilo do badge "Em Breve" com posicionamento e animações */
-.coming-soon-badge {
-  position: absolute;
-  top: 20px;
-  right: -40px;
-  background-color: #191970;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 14px;
-  white-space: nowrap;
-  animation: float 3s ease-in-out infinite, pulse-scale 2s ease-in-out infinite;
-}
+/* Removido .coming-soon-badge e suas animações */
 
 /* remover estilos da casa em CSS já que agora usa ícone IoHomeOutline */

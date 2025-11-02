@@ -13,7 +13,6 @@ const Alugar = () => {
               style={{ transform: "scaleX(-1)" }}
             />
           </div>
-          <div className="coming-soon-badge">Em Breve</div>
         </div>
 
         <h1 className="alugar-title">Aluguel em Desenvolvimento</h1>

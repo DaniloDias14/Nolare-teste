@@ -426,7 +426,16 @@ const Comprar = ({ usuario }) => {
 
   const gerarNumerosPaginas = () => {
     const paginas = [];
-    for (let i = 1; i <= totalPaginas; i++) {
+    const maxPaginasVisiveis = 5;
+    let inicio = Math.max(1, paginaAtual - Math.floor(maxPaginasVisiveis / 2));
+    const fim = Math.min(totalPaginas, inicio + maxPaginasVisiveis - 1);
+
+    // Ajustar início se fim ultrapassar totalPaginas
+    if (fim - inicio + 1 < maxPaginasVisiveis) {
+      inicio = Math.max(1, fim - maxPaginasVisiveis + 1);
+    }
+
+    for (let i = inicio; i <= fim; i++) {
       paginas.push(i);
     }
     return paginas;
@@ -462,14 +471,9 @@ const Comprar = ({ usuario }) => {
 
     const areaTotal = imovel.area_total;
     const areaConstruida = imovel.area_construida;
-    const quarto = imovel.caracteristicas?.quarto ?? imovel.quarto ?? null;
     const banheiro =
       imovel.caracteristicas?.banheiro ?? imovel.banheiro ?? null;
     const andar = imovel.caracteristicas?.andar ?? imovel.andar ?? null;
-    const mobiliado =
-      imovel.caracteristicas?.mobiliado ?? imovel.mobiliado ?? false;
-
-    const mobiliadoTexto = mobiliado ? "Mobiliado" : "Não mobiliado";
 
     switch (tipo) {
       case "casa":
@@ -479,8 +483,6 @@ const Comprar = ({ usuario }) => {
             {areaConstruida != null && (
               <div>Área construída: {areaConstruida} m²</div>
             )}
-            {quarto != null && <div>🛏 {quarto} quartos</div>}
-            <div>{mobiliadoTexto}</div>
           </>
         );
       case "apartamento":
@@ -491,9 +493,7 @@ const Comprar = ({ usuario }) => {
             {areaConstruida != null && (
               <div>Área construída: {areaConstruida} m²</div>
             )}
-            {quarto != null && <div>🛏 {quarto} quartos</div>}
             {andar != null && <div>Andar: {andar}</div>}
-            <div>{mobiliadoTexto}</div>
           </>
         );
       case "terreno":
@@ -511,7 +511,6 @@ const Comprar = ({ usuario }) => {
               <div>Área construída: {areaConstruida} m²</div>
             )}
             {banheiro != null && <div>🛁 {banheiro} banheiros</div>}
-            <div>{mobiliadoTexto}</div>
           </>
         );
       case "galpao":
@@ -661,13 +660,13 @@ const Comprar = ({ usuario }) => {
                   </div>
 
                   <div className="property-details">
+                    {imovel.caracteristicas?.lancamento && (
+                      <div className="property-lancamento">🏗️ Lançamento</div>
+                    )}
                     <div>
                       📍 {imovel.cidade || "Cidade não informada"} -{" "}
                       {imovel.bairro || "Bairro não informado"}
                     </div>
-                    {imovel.caracteristicas?.lancamento && (
-                      <div className="property-lancamento">🏗️ Lançamento</div>
-                    )}
                     {imovel.caracteristicas?.data_entrega && (
                       <div className="property-entrega">
                         📅 Entrega:{" "}
