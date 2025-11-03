@@ -232,13 +232,13 @@ const Curtidas = ({ usuario }) => {
                 </div>
 
                 <div className="property-details">
+                  {imovel.caracteristicas?.lancamento && (
+                    <div className="property-lancamento">🚀 Lançamento</div>
+                  )}
                   <div>
                     📍 {imovel.cidade || "Cidade não informada"} -{" "}
                     {imovel.bairro || "Bairro não informado"}
                   </div>
-                  {imovel.caracteristicas?.lancamento && (
-                    <div className="property-lancamento">🏗️ Lançamento</div>
-                  )}
                   {imovel.caracteristicas?.data_entrega && (
                     <div className="property-entrega">
                       📅 Entrega:{" "}

@@ -266,7 +266,7 @@ const Destaque = ({ usuario, curtidas, setCurtidas, onImovelClick }) => {
                     {imovel.bairro || "Bairro não informada"}
                   </div>
                   {imovel.caracteristicas?.lancamento && (
-                    <div className="destaque-lancamento">🏗️ Lançamento</div>
+                    <div className="destaque-lancamento">🚀 Lançamento</div>
                   )}
                   {imovel.caracteristicas?.data_entrega && (
                     <div className="destaque-entrega">
