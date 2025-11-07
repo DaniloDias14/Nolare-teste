@@ -62,6 +62,26 @@
   background: rgba(128, 128, 128, 0.15);
 }
 
+/* Botão de editar com mesmo estilo dos outros botões do header */
+.imovel-modal-edit-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #191970;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.imovel-modal-edit-btn:hover {
+  transform: scale(1.15);
+  background: rgba(128, 128, 128, 0.15);
+}
+
 /* Mensagem "Link copiado!" com cantos mais arredondados (50px) */
 .imovel-copy-notification {
   position: absolute;
@@ -672,7 +692,8 @@
 
   /* Botões no mobile sem fundo branco, mantendo transparente */
   .imovel-modal-close-btn,
-  .imovel-modal-share-btn {
+  .imovel-modal-share-btn,
+  .imovel-modal-edit-btn /* Added edit button to mobile styles */ {
     background: transparent; /* Botões no mobile sem fundo branco, mantendo transparente */
     color: #191970;
     backdrop-filter: none;

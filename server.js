@@ -392,43 +392,6 @@ app.get("/api/estatisticas/imoveis", async (req, res) => {
 
 // =========================
 
-// CONFIGURAÇÃO MULTER (Upload de arquivos)
-
-// =========================
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "public/fotos_imoveis";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(
-        file.originalname
-      )}`
-    );
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
-  },
-  fileFilter: (req, file, cb) => {
-    // Aceita apenas imagens
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Apenas arquivos de imagem são permitidos"));
-    }
-  },
-});
-
-// =========================
-
 // ROTAS DE IMÓVEIS
 
 // =========================
@@ -708,6 +671,87 @@ app.post("/api/imoveis", async (req, res) => {
   }
 });
 
+// ROTA: Atualiza imóvel (cria nova linha de informações no BD)
+app.put("/api/imoveis/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    titulo,
+    descricao,
+    preco,
+    preco_destaque,
+    destaque,
+    status,
+    finalidade,
+    cep,
+    area_total,
+    area_construida,
+    visivel,
+    atualizado_por,
+    estado,
+    cidade,
+    bairro,
+    tipo,
+    coordenadas,
+  } = req.body;
+
+  // VALIDAÇÃO: Campos obrigatórios
+  if (!titulo || !preco) {
+    return res.status(400).json({ error: "Campos obrigatórios ausentes" });
+  }
+
+  // VALIDAÇÃO: Verifica se imóvel existe
+  try {
+    const imovelExiste = await pool.query(
+      "SELECT id FROM imoveis WHERE id = $1",
+      [id]
+    );
+    if (imovelExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Imóvel não encontrado" });
+    }
+  } catch (err) {
+    console.error("Erro ao validar imóvel:", err);
+    return res.status(500).json({ error: "Erro ao validar imóvel" });
+  }
+
+  try {
+    // DB QUERY: Atualiza imóvel
+    await pool.query(
+      `UPDATE imoveis
+       SET titulo = $1, descricao = $2, preco = $3, preco_destaque = $4, 
+           destaque = $5, status = $6, finalidade = $7, cep = $8, 
+           area_total = $9, area_construida = $10, visivel = $11, 
+           atualizado_por = $12, estado = $13, cidade = $14, 
+           bairro = $15, tipo = $16, coordenadas = $17, data_atualizacao = CURRENT_TIMESTAMP
+       WHERE id = $18`,
+      [
+        titulo,
+        descricao || "",
+        preco,
+        preco_destaque || null,
+        destaque || false,
+        status || null,
+        finalidade || null,
+        cep || null,
+        area_total || null,
+        area_construida || null,
+        visivel !== undefined ? visivel : true,
+        atualizado_por || null,
+        estado || null,
+        cidade || null,
+        bairro || null,
+        tipo || null,
+        coordenadas || null,
+        id,
+      ]
+    );
+
+    res.json({ message: "Imóvel atualizado com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao atualizar imóvel:", err);
+    res.status(500).json({ error: "Erro ao atualizar imóvel" });
+  }
+});
+
 // ROTA: Cria características do imóvel
 app.post("/api/imoveis_caracteristicas", async (req, res) => {
   const campos = [
@@ -815,7 +859,6 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
   const values = campos.map((c) => {
     if (c === "condominio" || c === "iptu") {
       const valor = req.body[c];
-      // Se for zero, undefined ou null, salva como NULL
       if (
         valor === undefined ||
         valor === null ||
@@ -851,52 +894,273 @@ app.post("/api/imoveis_caracteristicas", async (req, res) => {
   }
 });
 
-// ROTA: Upload de fotos do imóvel
-app.post(
-  "/api/imoveis/:id/upload",
-  upload.array("fotos", 10),
-  async (req, res) => {
-    const { id } = req.params;
+// ROTA: Atualiza características do imóvel (cria nova linha)
+app.put("/api/imoveis_caracteristicas/:imovel_id", async (req, res) => {
+  const { imovel_id } = req.params;
+  const campos = [
+    "condominio",
+    "iptu",
+    "quarto",
+    "suite",
+    "banheiro",
+    "vaga",
+    "andar",
+    "andar_total",
+    "piscina",
+    "churrasqueira",
+    "salao_de_festa",
+    "academia",
+    "playground",
+    "jardim",
+    "varanda",
+    "interfone",
+    "acessibilidade_pcd",
+    "mobiliado",
+    "ar_condicionado",
+    "energia_solar",
+    "quadra",
+    "lavanderia",
+    "closet",
+    "escritorio",
+    "lareira",
+    "alarme",
+    "camera_vigilancia",
+    "bicicletario",
+    "sala_jogos",
+    "brinquedoteca",
+    "elevador",
+    "pomar",
+    "lago",
+    "aceita_animais",
+    "na_planta",
+    "portaria_24h",
+    "carregador_carro_eletrico",
+    "gerador_energia",
+    "estudio",
+    "construtora",
+    "lancamento",
+    "data_entrega",
+  ];
 
-    // VALIDAÇÃO: Verifica se arquivos foram enviados
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "Arquivos não enviados" });
-    }
-
-    // VALIDAÇÃO: Verifica se imóvel existe
-    try {
-      const imovelExiste = await pool.query(
-        "SELECT id FROM imoveis WHERE id = $1",
-        [id]
-      );
-      if (imovelExiste.rows.length === 0) {
-        return res.status(404).json({ error: "Imóvel não encontrado" });
-      }
-    } catch (err) {
-      console.error("Erro ao validar imóvel:", err);
-      return res.status(500).json({ error: "Erro ao validar imóvel" });
-    }
-
-    try {
-      const fotosInseridas = [];
-
-      // Processa fotos
-      for (const file of req.files) {
-        const caminho = `/fotos_imoveis/${file.filename}`;
-        const result = await pool.query(
-          "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
-          [id, caminho]
-        );
-        fotosInseridas.push(result.rows[0]);
-      }
-
-      res.status(201).json(fotosInseridas);
-    } catch (err) {
-      console.error("Erro ao salvar fotos no banco:", err);
-      res.status(500).json({ error: "Erro ao salvar fotos no banco" });
-    }
+  // VALIDAÇÃO: Campo obrigatório
+  if (!imovel_id) {
+    return res.status(400).json({ error: "imovel_id é obrigatório" });
   }
-);
+
+  // VALIDAÇÃO: Verifica se imóvel existe
+  try {
+    const imovelExiste = await pool.query(
+      "SELECT id FROM imoveis WHERE id = $1",
+      [imovel_id]
+    );
+    if (imovelExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Imóvel não encontrado" });
+    }
+  } catch (err) {
+    console.error("Erro ao validar imóvel:", err);
+    return res.status(500).json({ error: "Erro ao validar imóvel" });
+  }
+
+  // Define valores padrão para campos booleanos
+  const camposBooleanos = [
+    "suite",
+    "piscina",
+    "churrasqueira",
+    "salao_de_festa",
+    "academia",
+    "playground",
+    "jardim",
+    "varanda",
+    "interfone",
+    "acessibilidade_pcd",
+    "mobiliado",
+    "ar_condicionado",
+    "energia_solar",
+    "quadra",
+    "lavanderia",
+    "closet",
+    "escritorio",
+    "lareira",
+    "alarme",
+    "camera_vigilancia",
+    "bicicletario",
+    "sala_jogos",
+    "brinquedoteca",
+    "elevador",
+    "pomar",
+    "lago",
+    "aceita_animais",
+    "na_planta",
+    "portaria_24h",
+    "carregador_carro_eletrico",
+    "gerador_energia",
+    "estudio",
+    "lancamento",
+  ];
+
+  const values = campos.map((c) => {
+    if (c === "condominio" || c === "iptu") {
+      const valor = req.body[c];
+      if (
+        valor === undefined ||
+        valor === null ||
+        valor === 0 ||
+        valor === "0"
+      ) {
+        return null;
+      }
+      return valor;
+    }
+    return req.body[c] !== undefined
+      ? req.body[c]
+      : camposBooleanos.includes(c)
+      ? false
+      : null;
+  });
+
+  try {
+    // DB QUERY: Insere nova linha de características (histórico)
+    const placeholders = campos.map((_, idx) => `$${idx + 1}`).join(",");
+    await pool.query(
+      `INSERT INTO imoveis_caracteristicas (imovel_id, ${campos.join(
+        ","
+      )}) VALUES ($${campos.length + 1}, ${placeholders})`,
+      [...values, imovel_id]
+    );
+    res
+      .status(201)
+      .json({ message: "Características atualizadas com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao atualizar características:", err);
+    res.status(500).json({ error: "Erro ao atualizar características" });
+  }
+});
+
+// =========================
+
+// CONFIGURAÇÃO MULTER (Upload de arquivos)
+
+// =========================
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "public/fotos_imoveis";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(
+        file.originalname
+      )}`
+    );
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
+  fileFilter: (req, file, cb) => {
+    // Aceita apenas imagens
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Apenas arquivos de imagem são permitidos"));
+    }
+  },
+});
+
+// =========================
+
+// ROTAS DE UPLOAD DE FOTOS
+
+// =========================
+
+// ROTA: Upload de fotos do imóvel
+const uploadFotos = upload.array("fotos", 10);
+
+app.post("/api/imoveis/:id/upload", uploadFotos, async (req, res) => {
+  const { id } = req.params;
+
+  // VALIDAÇÃO: Verifica se arquivos foram enviados
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "Arquivos não enviados" });
+  }
+
+  // VALIDAÇÃO: Verifica se imóvel existe
+  try {
+    const imovelExiste = await pool.query(
+      "SELECT id FROM imoveis WHERE id = $1",
+      [id]
+    );
+    if (imovelExiste.rows.length === 0) {
+      return res.status(404).json({ error: "Imóvel não encontrado" });
+    }
+  } catch (err) {
+    console.error("Erro ao validar imóvel:", err);
+    return res.status(500).json({ error: "Erro ao validar imóvel" });
+  }
+
+  try {
+    const fotosInseridas = [];
+
+    // Processa fotos
+    for (const file of req.files) {
+      const caminho = `/fotos_imoveis/${file.filename}`;
+      const result = await pool.query(
+        "INSERT INTO fotos_imoveis (imovel_id, caminho_foto) VALUES ($1, $2) RETURNING *",
+        [id, caminho]
+      );
+      fotosInseridas.push(result.rows[0]);
+    }
+
+    res.status(201).json(fotosInseridas);
+  } catch (err) {
+    console.error("Erro ao salvar fotos no banco:", err);
+    res.status(500).json({ error: "Erro ao salvar fotos no banco" });
+  }
+});
+
+// ROTA: Deleta foto do imóvel
+app.delete("/api/fotos/:id", async (req, res) => {
+  const { id } = req.params;
+
+  // VALIDAÇÃO: Campo obrigatório
+  if (!id) {
+    return res.status(400).json({ error: "id da foto é obrigatório" });
+  }
+
+  try {
+    // DB QUERY: Busca foto para obter o caminho
+    const fotoResult = await pool.query(
+      "SELECT * FROM fotos_imoveis WHERE id = $1",
+      [id]
+    );
+
+    if (fotoResult.rows.length === 0) {
+      return res.status(404).json({ error: "Foto não encontrada" });
+    }
+
+    const foto = fotoResult.rows[0];
+
+    // DB QUERY: Deleta foto do banco de dados
+    await pool.query("DELETE FROM fotos_imoveis WHERE id = $1", [id]);
+
+    // Deleta arquivo físico se existir
+    const filePath = `public${foto.caminho_foto}`;
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({ message: "Foto deletada com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao deletar foto:", err);
+    res.status(500).json({ error: "Erro ao deletar foto" });
+  }
+});
 
 // =========================
 

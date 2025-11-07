@@ -8,7 +8,9 @@ import {
   IoShareSocialOutline,
   IoLocationOutline,
   IoHomeOutline,
+  IoPencil,
 } from "react-icons/io5";
+import EditarImovel from "../AdminPanel/EditarImovel/EditarImovel";
 
 const ImovelModal = ({
   imovel,
@@ -29,6 +31,7 @@ const ImovelModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const galleryRef = useRef(null);
   const thumbnailsRef = useRef(null);
 
@@ -333,6 +336,17 @@ const ImovelModal = ({
     }
   };
 
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  const handleImovelUpdated = () => {
+    setShowEditModal(false);
+    onClose();
+    // Recarregar dados após edição
+    window.location.reload();
+  };
+
   const formatLabel = (key) => {
     if (key === "id" || key === "imovel_id") return null;
 
@@ -459,6 +473,15 @@ const ImovelModal = ({
       <div className="imovel-modal-container">
         {/* Header with close and share buttons */}
         <div className="imovel-modal-header">
+          {usuario && usuario.tipo_usuario === "adm" && (
+            <button
+              className="imovel-modal-edit-btn"
+              onClick={handleEditClick}
+              title="Editar imóvel"
+            >
+              <IoPencil size={22} />
+            </button>
+          )}
           <button
             className="imovel-modal-share-btn"
             onClick={handleShare}
@@ -829,6 +852,13 @@ const ImovelModal = ({
           </div>
         </div>
       </div>
+
+      <EditarImovel
+        showPopup={showEditModal}
+        setShowPopup={setShowEditModal}
+        imovelId={imovelId}
+        onImovelUpdated={handleImovelUpdated}
+      />
     </div>
   );
 };

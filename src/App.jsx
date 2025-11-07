@@ -21,6 +21,7 @@ import ImovelPage from "./components/Pages/ImovelPage/ImovelPage";
 // Painel administrativo
 import Dashboard from "./components/AdminPanel/Dashboard/Dashboard";
 import AdicionarImovel from "./components/AdminPanel/AdicionarImovel/AdicionarImovel";
+import EditarImovel from "./components/AdminPanel/EditarImovel/EditarImovel";
 
 // Botões flutuantes e painel do usuário
 import AdminFloatingButton from "./components/AdminPanel/FloatingButtonAdmin/FloatingButtonAdmin";
@@ -37,6 +38,8 @@ const App = () => {
   const [showConfigOptions, setShowConfigOptions] = useState(false); // Controla menu de opções do admin
   const [showAdicionarImovelPopup, setShowAdicionarImovelPopup] =
     useState(false); // Controla popup de adicionar imóvel
+  const [showEditarImovelPopup, setShowEditarImovelPopup] = useState(false);
+  const [imovelIdToEdit, setImovelIdToEdit] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,6 +75,13 @@ const App = () => {
     setUser(userData);
     setIsLoggedIn(true);
     setAdmLogged(userData.tipo_usuario === "adm");
+  };
+
+  // Abre popup de editar imóvel com imóvel data (apenas para admin)
+  const handleEditarImovelClick = (imovelId) => {
+    setImovelIdToEdit(imovelId);
+    setShowEditarImovelPopup(true);
+    setShowConfigOptions(false);
   };
 
   return (
@@ -134,6 +144,12 @@ const App = () => {
           <AdicionarImovel
             showPopup={showAdicionarImovelPopup}
             setShowPopup={setShowAdicionarImovelPopup}
+          />
+          {/* Popup de editar imóvel */}
+          <EditarImovel
+            showPopup={showEditarImovelPopup}
+            setShowPopup={setShowEditarImovelPopup}
+            imovelId={imovelIdToEdit}
           />
         </>
       )}
