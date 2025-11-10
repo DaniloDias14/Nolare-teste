@@ -150,6 +150,9 @@ const App = () => {
             showPopup={showEditarImovelPopup}
             setShowPopup={setShowEditarImovelPopup}
             imovelId={imovelIdToEdit}
+            onImovelUpdated={() => {
+              window.location.reload();
+            }}
           />
         </>
       )}

@@ -998,6 +998,24 @@ app.put("/api/imoveis_caracteristicas/:imovel_id", async (req, res) => {
     "lancamento",
   ];
 
+  const setClauses = campos
+    .map((campo, idx) => {
+      if (campo === "condominio" || campo === "iptu") {
+        const valor = req.body[campo];
+        if (
+          valor === undefined ||
+          valor === null ||
+          valor === 0 ||
+          valor === "0"
+        ) {
+          return `${campo} = NULL`;
+        }
+        return `${campo} = $${idx + 1}`;
+      }
+      return `${campo} = $${idx + 1}`;
+    })
+    .join(", ");
+
   const values = campos.map((c) => {
     if (c === "condominio" || c === "iptu") {
       const valor = req.body[c];
@@ -1019,16 +1037,14 @@ app.put("/api/imoveis_caracteristicas/:imovel_id", async (req, res) => {
   });
 
   try {
-    // DB QUERY: Insere nova linha de características (histórico)
-    const placeholders = campos.map((_, idx) => `$${idx + 1}`).join(",");
     await pool.query(
-      `INSERT INTO imoveis_caracteristicas (imovel_id, ${campos.join(
-        ","
-      )}) VALUES ($${campos.length + 1}, ${placeholders})`,
+      `UPDATE imoveis_caracteristicas 
+       SET ${setClauses}
+       WHERE imovel_id = $${campos.length + 1}`,
       [...values, imovel_id]
     );
     res
-      .status(201)
+      .status(200)
       .json({ message: "Características atualizadas com sucesso!" });
   } catch (err) {
     console.error("Erro ao atualizar características:", err);
@@ -1038,10 +1054,11 @@ app.put("/api/imoveis_caracteristicas/:imovel_id", async (req, res) => {
 
 // =========================
 
-// CONFIGURAÇÃO MULTER (Upload de arquivos)
+// ROTAS DE UPLOAD DE FOTOS
 
 // =========================
 
+// ROTA: Upload de fotos do imóvel
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = "public/fotos_imoveis";
@@ -1073,13 +1090,6 @@ const upload = multer({
   },
 });
 
-// =========================
-
-// ROTAS DE UPLOAD DE FOTOS
-
-// =========================
-
-// ROTA: Upload de fotos do imóvel
 const uploadFotos = upload.array("fotos", 10);
 
 app.post("/api/imoveis/:id/upload", uploadFotos, async (req, res) => {

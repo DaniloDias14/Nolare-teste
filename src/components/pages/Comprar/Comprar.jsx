@@ -35,6 +35,23 @@ const Comprar = ({ usuario }) => {
   }, []);
 
   useEffect(() => {
+    const handleImovelUpdated = () => {
+      fetch("http://localhost:5000/api/imoveis")
+        .then((res) => res.json())
+        .then((data) => {
+          setImoveis(data);
+          setImoveisFiltrados(data);
+        })
+        .catch((err) => console.error("Erro ao buscar imóveis:", err));
+    };
+
+    window.addEventListener("imovelUpdated", handleImovelUpdated);
+    return () => {
+      window.removeEventListener("imovelUpdated", handleImovelUpdated);
+    };
+  }, []);
+
+  useEffect(() => {
     if (id && imoveis.length > 0) {
       const imovelId = Number.parseInt(id);
       const imovel = imoveis.find((i) => (i.id ?? i.imovel_id) === imovelId);
