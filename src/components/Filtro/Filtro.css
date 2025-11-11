@@ -407,23 +407,23 @@
     gap: 1rem;
   }
 
-  /* Mobile: 2 colunas com ID em linha completa, mantendo Construtora e Previsão de Entrega lado a lado com tamanho igual */
+  /* Mobile: 2 colunas, mas Construtora e Previsão de Entrega ocupam linha completa individualmente */
   .filtro-avancada-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
 
-  /* Construtora e Previsão de Entrega lado a lado com tamanho igual */
+  /* Construtora e Previsão de Entrega cada um ocupa linha completa */
   .filtro-group-half {
     display: contents;
   }
 
   .filtro-group-half .filtro-group {
-    grid-column: span 1;
+    grid-column: span 2; /* Ocupa ambas as colunas = linha completa */
   }
 
-  /* Tornar Construtora e Previsão de Entrega visualmente do mesmo tamanho ajustando padding e font-size */
+  /* Ajustar tamanho visual dos campos para consistência */
   .filtro-group-half .filtro-group .filtro-select-compact,
   .filtro-group-half .filtro-group .filtro-input-compact[type="month"] {
     padding: 0.65rem 0.85rem;
@@ -475,12 +475,13 @@
     grid-column: span 2;
   }
 
+  /* Construtora e Previsão de Entrega ocupam linha completa em telas pequenas */
   .filtro-group-half {
     display: contents;
   }
 
   .filtro-group-half .filtro-group {
-    grid-column: span 1;
+    grid-column: span 2; /* Linha completa */
   }
 }
 

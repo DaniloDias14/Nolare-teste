@@ -386,7 +386,7 @@ const Comprar = ({ usuario }) => {
         );
       } else {
         setMensagemSemResultados(
-          "Ainda não temos esse tipo de imóvel disponível, mas em breve poderemos ter!"
+          "No momento, não encontramos imóveis com essas características, mas estamos trabalhando para trazer novas opções em breve!"
         );
       }
     } else {
