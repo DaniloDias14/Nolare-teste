@@ -78,6 +78,7 @@ const EditarImovel = ({
   const [isLoading, setIsLoading] = useState(true);
   const [existingFotos, setExistingFotos] = useState([]);
   const [fotosToRemove, setFotosToRemove] = useState([]);
+  const [updatedImovelId, setUpdatedImovelId] = useState(null);
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -433,6 +434,7 @@ const EditarImovel = ({
     setFieldErrors({});
     setExistingFotos([]);
     setFotosToRemove([]);
+    setUpdatedImovelId(null); // Reset updatedImovelId
   };
 
   const parseNumberOrNull = (value) => {
@@ -589,6 +591,7 @@ const EditarImovel = ({
         }
       }
 
+      setUpdatedImovelId(imovelId); // Store the updated imovel ID
       setShowSuccessPopup(true);
       if (onImovelUpdated) {
         onImovelUpdated();
@@ -619,6 +622,14 @@ const EditarImovel = ({
   const handleCloseSuccess = () => {
     setShowSuccessPopup(false);
     handleClosePopup();
+  };
+
+  const handleGoToImovel = () => {
+    setShowSuccessPopup(false);
+    handleClosePopup();
+    if (updatedImovelId) {
+      navigate(`/imovel/${updatedImovelId}`);
+    }
   };
 
   const formatFieldLabel = (field) => {
@@ -1149,74 +1160,87 @@ const EditarImovel = ({
               {activeTab === 3 && (
                 <div className="tab-content">
                   <h4>Fotos do Imóvel</h4>
-                  {existingFotos.length > 0 && (
-                    <div className="fotos-grid">
-                      {existingFotos.map((foto) => (
-                        <div
-                          key={foto.id}
-                          className="foto-item has-photo existing-photo"
-                        >
-                          <img
-                            src={`http://localhost:5000${foto.caminho_foto}`}
-                            alt={`foto-${foto.id}`}
-                          />
-                          <button
-                            type="button"
-                            className="remove-foto-btn"
-                            onClick={() => handleRemoveExistingFoto(foto.id)}
-                          >
-                            <IoClose size={20} color="#191970" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <h4>Adicionar Novas Fotos</h4>
                   <div className="fotos-grid">
-                    {formData.fotos.map((foto, idx) => (
-                      <div
-                        key={idx}
-                        className={`foto-item ${foto ? "has-photo" : ""} ${
-                          dragOverIndex === idx ? "drag-over" : ""
-                        }`}
-                        draggable={!!foto}
-                        onDragStart={(e) => handleDragStart(e, idx)}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, idx)}
-                        onDragEnter={(e) => handleFileDragEnter(e, idx)}
-                        onDragLeave={(e) => handleFileDragLeave(e, idx)}
-                      >
-                        {foto ? (
-                          <>
-                            <img
-                              src={
-                                URL.createObjectURL(foto) || "/placeholder.svg"
-                              }
-                              alt={`foto-${idx}`}
-                            />
-                            <button
-                              type="button"
-                              className="remove-foto-btn"
-                              onClick={() => handleRemoveFoto(idx)}
-                            >
-                              <IoClose size={20} color="#191970" />
-                            </button>
-                          </>
-                        ) : (
-                          <label className="foto-upload-label">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) =>
-                                handleFotoChange(idx, e.target.files[0])
-                              }
-                              style={{ display: "none" }}
-                            />
-                            <span>+</span>
-                          </label>
-                        )}
-                      </div>
-                    ))}
+                    {Array.from({ length: 10 }).map((_, idx) => {
+                      const isExisting = idx < existingFotos.length;
+                      const foto = isExisting
+                        ? existingFotos[idx]
+                        : formData.fotos[idx - existingFotos.length];
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`foto-item ${foto ? "has-photo" : ""} ${
+                            dragOverIndex === idx ? "drag-over" : ""
+                          }`}
+                          draggable={!!foto}
+                          onDragStart={(e) => {
+                            if (!foto) {
+                              e.preventDefault();
+                              return;
+                            }
+                            e.dataTransfer.effectAllowed = "move";
+                            e.dataTransfer.setData(
+                              "text/plain",
+                              idx.toString()
+                            );
+                            setDraggedIndex(idx);
+                          }}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx)}
+                          onDragEnter={(e) => handleFileDragEnter(e, idx)}
+                          onDragLeave={(e) => handleFileDragLeave(e, idx)}
+                        >
+                          {foto ? (
+                            <>
+                              <img
+                                src={
+                                  isExisting
+                                    ? `http://localhost:5000${foto.caminho_foto}`
+                                    : URL.createObjectURL(foto) ||
+                                      "/placeholder.svg"
+                                }
+                                alt={`foto-${idx}`}
+                              />
+                              <button
+                                type="button"
+                                className="remove-foto-btn"
+                                onClick={() => {
+                                  if (isExisting) {
+                                    handleRemoveExistingFoto(foto.id);
+                                  } else {
+                                    // Adjust index for new photos array
+                                    handleRemoveFoto(
+                                      idx - existingFotos.length
+                                    );
+                                  }
+                                }}
+                              >
+                                <IoClose size={20} color="#191970" />
+                              </button>
+                            </>
+                          ) : (
+                            <label className="foto-upload-label">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  if (!isExisting) {
+                                    // Adjust index for new photos array
+                                    handleFotoChange(
+                                      idx - existingFotos.length,
+                                      e.target.files[0]
+                                    );
+                                  }
+                                }}
+                                style={{ display: "none" }}
+                              />
+                              <span>+</span>
+                            </label>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1262,8 +1286,8 @@ const EditarImovel = ({
             </button>
             <h3>Imóvel Atualizado com Sucesso!</h3>
             <div className="success-buttons">
-              <button className="go-to-imovel-btn" onClick={handleCloseSuccess}>
-                Fechar
+              <button className="go-to-imovel-btn" onClick={handleGoToImovel}>
+                Ver Imóvel
               </button>
             </div>
           </div>
