@@ -12,7 +12,6 @@
   font-family: "Sanchez", serif;
 }
 
-/* Grid ajustado para 3 colunas iguais + botão, garantindo que os 3 campos tenham mesmo tamanho */
 .filtro-principal {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr auto;
@@ -21,7 +20,6 @@
   width: 100%;
 }
 
-/* Adicionado max-width e box-sizing para evitar overflow */
 .filtro-select,
 .filtro-input {
   padding: 0.9rem 1.2rem;
@@ -38,7 +36,6 @@
   box-sizing: border-box;
 }
 
-/* Estilo específico para selects com seta dropdown */
 .filtro-select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23191970' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
@@ -48,7 +45,6 @@
   cursor: pointer;
 }
 
-/* Input de texto sem seta dropdown */
 .filtro-input {
   padding-right: 1.2rem;
 }
@@ -79,7 +75,6 @@
   border-color: #2a2a8f;
 }
 
-/* Reduzida largura dos inputs pequenos para evitar overflow */
 .filtro-input-small {
   padding: 0.75rem 1rem;
   border: 2px solid var(--primary-blue);
@@ -102,14 +97,12 @@
   border-color: #2a2a8f;
 }
 
-/* Garantir que o wrapper de localização não cause overflow */
 .filtro-localizacao-wrapper {
   position: relative;
   width: 100%;
   max-width: 100%;
 }
 
-/* Estilização do dropdown de sugestões para combinar exatamente com os selects */
 .sugestoes-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -161,7 +154,6 @@
   padding-left: 1.5rem;
 }
 
-/* Adicionado estilo para sugestão selecionada via teclado */
 .sugestao-item.selected {
   background: rgba(25, 25, 112, 0.12);
   padding-left: 1.5rem;
@@ -225,9 +217,10 @@
   }
 }
 
+/* Reorganizar grid desktop com 5 colunas mantendo linhas sempre completas, responsivo com breakpoints para evitar espaços em branco */
 .filtro-avancada-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -276,7 +269,6 @@
   gap: 1rem;
 }
 
-/* Uniformizado tamanho das caixas de características */
 .filtro-checkbox {
   display: flex;
   align-items: center;
@@ -324,13 +316,13 @@
   box-shadow: 0 2px 12px rgba(25, 25, 112, 0.35);
 }
 
-/* Novos estilos para campos compactos (ID, Quartos, Banheiros, Vagas, Ar-Condicionado, Construtora) */
+/* Campos compactos reduzidos para ID, Construtora e Previsão de Entrega */
 .filtro-input-compact,
 .filtro-select-compact {
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.9rem;
   border: 2px solid var(--primary-blue);
   border-radius: 50px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-family: "Sanchez", serif;
   color: var(--primary-blue);
   background: var(--white);
@@ -356,7 +348,6 @@
   border-color: #2a2a8f;
 }
 
-/* Melhorado estilo para input tipo date */
 .filtro-input-compact[type="date"] {
   cursor: pointer;
 }
@@ -366,21 +357,16 @@
   color: var(--primary-blue);
 }
 
-/* Increased max-width for ID and Construtora fields */
-.filtro-group-narrow {
-  max-width: 50%;
+/* Wrapper para Construtora e Previsão de Entrega lado a lado */
+.filtro-group-half {
+  display: contents;
 }
 
-/* Adicionar novo wrapper para Construtora e Previsão de Entrega lado a lado */
-.filtro-group-half-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  grid-column: 1 / -1;
+.filtro-group-full {
+  grid-column: span 1;
 }
 
 @media (max-width: 1024px) {
-  /* Ajustado para 2 colunas em tablets */
   .filtro-principal {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
@@ -390,12 +376,20 @@
     grid-column: 1 / -1;
   }
 
+  /* Tablet: 4 colunas para Linha 1 (5 campos com ID, Construtor, Previsão, Preço, Vagas) se encaixa bem, Linha 2 (4 campos) completa, Linha 3 (4 campos) completa */
   .filtro-avancada-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .filtro-checkbox-grid {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  /* Em telas menores (900px), ajustar para 4 colunas garantindo que todas as linhas fiquem completas sem espaços em branco */
+  .filtro-avancada-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -413,34 +407,30 @@
     gap: 1rem;
   }
 
-  /* Layout mobile reorganizado: sempre 2 campos por linha quando possível */
+  /* Mobile: 2 colunas com ID em linha completa, mantendo Construtora e Previsão de Entrega lado a lado com tamanho igual */
   .filtro-avancada-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
 
-  /* Campos de range ocupam linha inteira */
-  .filtro-group:has(.filtro-range) {
-    grid-column: span 2;
+  /* Construtora e Previsão de Entrega lado a lado com tamanho igual */
+  .filtro-group-half {
+    display: contents;
   }
 
-  /* ID e Construtora lado a lado */
-  .filtro-group:nth-child(1),
-  .filtro-group:nth-child(2) {
+  .filtro-group-half .filtro-group {
     grid-column: span 1;
   }
 
-  /* Quartos e Banheiros lado a lado */
-  .filtro-group:nth-child(10),
-  .filtro-group:nth-child(11) {
-    grid-column: span 1;
-  }
-
-  /* Vagas e Ar-Condicionado lado a lado */
-  .filtro-group:nth-child(12),
-  .filtro-group:nth-child(13) {
-    grid-column: span 1;
+  /* Tornar Construtora e Previsão de Entrega visualmente do mesmo tamanho ajustando padding e font-size */
+  .filtro-group-half .filtro-group .filtro-select-compact,
+  .filtro-group-half .filtro-group .filtro-input-compact[type="month"] {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.88rem;
+    height: 42px;
+    display: flex;
+    align-items: center;
   }
 
   .filtro-checkbox-grid {
@@ -473,27 +463,27 @@
     padding: 0.65rem 0.85rem;
     font-size: 0.9rem;
   }
-
-  .filtro-input-compact,
-  .filtro-select-compact {
-    padding: 0.65rem 0.85rem;
-    font-size: 0.9rem;
-  }
-
-  /* No mobile, Construtora e Previsão de Entrega voltam ao tamanho normal */
-  .filtro-group-narrow {
-    max-width: 100%;
-  }
 }
 
 @media (max-width: 480px) {
-  /* Em telas muito pequenas, manter pares lado a lado */
+  /* Manter 2 colunas em telas muito pequenas para garantir linhas sempre completas */
   .filtro-avancada-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  /* Campos de range continuam ocupando linha inteira */
   .filtro-group:has(.filtro-range) {
     grid-column: span 2;
   }
+
+  .filtro-group-half {
+    display: contents;
+  }
+
+  .filtro-group-half .filtro-group {
+    grid-column: span 1;
+  }
+}
+
+.filtro-group-full {
+  display: none;
 }

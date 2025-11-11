@@ -17,7 +17,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
   }, [buscaAvancadaAtiva]);
 
   const [filtros, setFiltros] = useState({
-    identificador: "",
     tipo: "",
     finalidade: "",
     localizacao: "",
@@ -141,7 +140,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     const { name, value, type, checked } = e.target;
 
     const camposNumericos = [
-      "identificador",
       "precoMin",
       "precoMax",
       "areaTotalMin",
@@ -212,7 +210,6 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
     const estadoBuscaAvancada = buscaAvancada;
 
     const filtrosLimpos = {
-      identificador: "",
       tipo: "",
       finalidade: "",
       localizacao: "",
@@ -326,21 +323,8 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
         {buscaAvancada && (
           <div className="filtro-avancada">
             <div className="filtro-avancada-grid">
-              <div className="filtro-group">
-                <label>Identificador (ID)</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  name="identificador"
-                  placeholder="Digite o ID"
-                  value={filtros.identificador}
-                  onChange={handleInputChange}
-                  className="filtro-input-compact"
-                />
-              </div>
-
-              <div className="filtro-group-half-wrapper">
-                <div className="filtro-group filtro-group-narrow">
+              <div className="filtro-group-half">
+                <div className="filtro-group">
                   <label>Construtora</label>
                   <select
                     name="construtora"
@@ -357,10 +341,10 @@ const Filtro = ({ onFiltrar, buscaAvancadaAtiva, setBuscaAvancadaAtiva }) => {
                   </select>
                 </div>
 
-                <div className="filtro-group filtro-group-narrow">
-                  <label>Previsão de Entrega</label>
+                <div className="filtro-group">
+                  <label>{"   "}Previsão de Entrega</label>
                   <input
-                    type="date"
+                    type="month"
                     name="data_entrega"
                     value={filtros.data_entrega}
                     onChange={handleInputChange}
