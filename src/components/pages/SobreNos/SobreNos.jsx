@@ -237,7 +237,7 @@ const SobreNos = ({ usuario }) => {
             <p className="sobrenos-trabalhe-text">
               Valorizamos quem busca aprender, compartilhar e crescer junto.
               Mais do que um time, somos uma rede de pessoas que acreditam no
-              poder de transformar caminhos.
+              poder de transformar lugares em lares.
             </p>
             <button
               className="sobrenos-btn-curriculo"
