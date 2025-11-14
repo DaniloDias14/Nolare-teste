@@ -9,22 +9,30 @@ import {
 } from "react-icons/fa";
 
 const SobreNos = ({ usuario }) => {
-  const equipa = [
+  const equipaRedesSociais = [
     {
       id: 1,
-      nome: "Danilo Dias",
-      cargo: "Fundador",
-      descricao:
-        "Lidera a evolução da Nolare, com foco em inovação e coragem para transformar.",
-      foto: "/src/assets/img/logo_1.jpg",
+      icon: <FaEnvelope />,
+      link: "https://youtube.com",
+      nome: "E-mail",
     },
     {
       id: 2,
-      nome: "Marco Dias",
-      cargo: "Corretor de Imóveis",
-      descricao:
-        "Auxilia compradores e vendedores com cuidado e dedicação em cada negociação.",
-      foto: "/src/assets/img/logo_1.jpg",
+      icon: <FaFacebook />,
+      link: "https://youtube.com",
+      nome: "Facebook",
+    },
+    {
+      id: 3,
+      icon: <FaInstagram />,
+      link: "https://youtube.com",
+      nome: "Instagram",
+    },
+    {
+      id: 4,
+      icon: <FaLinkedin />,
+      link: "https://youtube.com",
+      nome: "LinkedIn",
     },
   ];
 
@@ -52,6 +60,21 @@ const SobreNos = ({ usuario }) => {
       valor: "(85) 99999-2222",
       link: "https://youtube.com",
       tipo: "whatsapp",
+    },
+  ];
+
+  const equipa = [
+    {
+      id: 1,
+      nome: "Danilo Dias",
+      cargo: "Fundador",
+      foto: "/src/assets/img/equipe/danilo_dias.jpg",
+    },
+    {
+      id: 2,
+      nome: "Marco Dias",
+      cargo: "Corretor de Imóveis - CRECI: 53498",
+      foto: "/src/assets/img/equipe/marco_dias.jpg",
     },
   ];
 
@@ -86,6 +109,13 @@ const SobreNos = ({ usuario }) => {
         {/* ==================== SEÇÃO 1: INTRODUÇÃO ==================== */}
         <section className="sobrenos-introducao">
           <div className="sobrenos-introducao-content">
+            <div className="sobrenos-logo-container">
+              <img
+                src="/src/assets/img/logo_1.jpg"
+                alt="Nolare Logo"
+                className="sobrenos-logo"
+              />
+            </div>
             <h1 className="sobrenos-introducao-title">Nolare</h1>
             <p className="sobrenos-introducao-subtitle">
               Transformando lugares em lares
@@ -173,9 +203,20 @@ const SobreNos = ({ usuario }) => {
                 <div className="sobrenos-equipa-content">
                   <h3 className="sobrenos-equipa-nome">{membro.nome}</h3>
                   <p className="sobrenos-equipa-cargo">{membro.cargo}</p>
-                  <p className="sobrenos-equipa-descricao">
-                    {membro.descricao}
-                  </p>
+                  <div className="sobrenos-equipa-redes">
+                    {equipaRedesSociais.map((rede) => (
+                      <a
+                        key={rede.id}
+                        href={rede.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="sobrenos-equipa-rede-link"
+                        title={rede.nome}
+                      >
+                        {rede.icon}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}

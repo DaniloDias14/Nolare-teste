@@ -25,6 +25,19 @@
   text-align: center;
 }
 
+.sobrenos-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.sobrenos-logo {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .sobrenos-introducao-content {
   max-width: 800px;
   margin: 0 auto;
@@ -254,7 +267,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -277,13 +290,15 @@
   transform: scale(1.04);
 }
 
+/* Wrapper para manter foto quadrada 850x850 responsiva */
 .sobrenos-equipa-image-wrapper {
   width: 100%;
-  height: 240px;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: #f5f5f5;
 }
 
+/* Imagem com zoom de 1.08 ao hover (igual Destaque) */
 .sobrenos-equipa-image {
   width: 100%;
   height: 100%;
@@ -292,14 +307,17 @@
 }
 
 .sobrenos-equipa-card:hover .sobrenos-equipa-image {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
+/* Conteúdo centralizado horizontalmente */
 .sobrenos-equipa-content {
   padding: 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .sobrenos-equipa-nome {
@@ -314,16 +332,41 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: #666;
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.2rem 0;
   font-family: "Sanchez", serif;
 }
 
-.sobrenos-equipa-descricao {
-  font-size: 0.9rem;
-  color: var(--text-gray);
-  line-height: 1.6;
-  margin: 0;
+/* Container para botões de redes sociais */
+.sobrenos-equipa-redes {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Botões de redes sociais com mesma animação da seção "Siga-nos" */
+.sobrenos-equipa-rede-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.3rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: "Sanchez", serif;
+  border: 2px solid var(--primary-blue);
+}
+
+.sobrenos-equipa-rede-link:hover {
+  background: var(--primary-blue);
+  color: var(--white);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(25, 25, 112, 0.2);
 }
 
 /* ==================== SEÇÃO 4: TRABALHE CONOSCO ==================== */
@@ -381,12 +424,6 @@
 
 /* ==================== RESPONSIVIDADE ==================== */
 @media (max-width: 1024px) {
-  .sobrenos-contato-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
   .sobrenos-wrapper {
     padding: 2.5rem 1rem;
   }
@@ -433,9 +470,7 @@
   }
 
   .sobrenos-contato-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 
   .sobrenos-contato-card {
@@ -501,7 +536,7 @@
   }
 
   .sobrenos-equipa-image-wrapper {
-    height: 200px;
+    aspect-ratio: 1 / 1;
   }
 
   .sobrenos-equipa-nome {
@@ -514,6 +549,16 @@
 
   .sobrenos-equipa-descricao {
     font-size: 0.85rem;
+  }
+
+  .sobrenos-equipa-redes {
+    gap: 0.8rem;
+  }
+
+  .sobrenos-equipa-rede-link {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
 
   .sobrenos-trabalhe {
@@ -534,6 +579,135 @@
   .sobrenos-btn-curriculo {
     padding: 0.8rem 1.8rem;
     font-size: 0.95rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sobrenos-wrapper {
+    padding: 2rem 1rem;
+  }
+
+  .sobrenos-introducao {
+    padding: 2rem 1rem;
+  }
+
+  .sobrenos-introducao-title {
+    font-size: 1.5rem;
+  }
+
+  .sobrenos-introducao-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .sobrenos-introducao-text {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .sobrenos-contato {
+    padding: 2rem 1rem;
+  }
+
+  .sobrenos-contato-title {
+    font-size: 1.5rem;
+  }
+
+  .sobrenos-contato-intro {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sobrenos-contato-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sobrenos-contato-card {
+    padding: 1.2rem;
+  }
+
+  .sobrenos-contato-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .sobrenos-redes-section {
+    padding: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .sobrenos-redes-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .sobrenos-redes-container {
+    gap: 0.8rem;
+  }
+
+  .sobrenos-rede-link {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .sobrenos-equipa {
+    padding: 2rem 1rem;
+  }
+
+  .sobrenos-equipa-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    max-width: 100%;
+  }
+
+  .sobrenos-equipa-image-wrapper {
+    aspect-ratio: 1 / 1;
+  }
+
+  .sobrenos-equipa-nome {
+    font-size: 1.1rem;
+  }
+
+  .sobrenos-equipa-cargo {
+    font-size: 0.9rem;
+  }
+
+  .sobrenos-equipa-descricao {
+    font-size: 0.85rem;
+  }
+
+  .sobrenos-equipa-redes {
+    gap: 0.6rem;
+  }
+
+  .sobrenos-equipa-rede-link {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .sobrenos-trabalhe {
+    padding: 2rem 1rem;
+  }
+
+  .sobrenos-trabalhe-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .sobrenos-trabalhe-text {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .sobrenos-btn-curriculo {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
     width: 100%;
   }
 }
@@ -621,7 +795,29 @@
   }
 
   .sobrenos-equipa-image-wrapper {
-    height: 180px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .sobrenos-equipa-nome {
+    font-size: 1.1rem;
+  }
+
+  .sobrenos-equipa-cargo {
+    font-size: 0.9rem;
+  }
+
+  .sobrenos-equipa-descricao {
+    font-size: 0.85rem;
+  }
+
+  .sobrenos-equipa-redes {
+    gap: 0.6rem;
+  }
+
+  .sobrenos-equipa-rede-link {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
 
   .sobrenos-trabalhe {
